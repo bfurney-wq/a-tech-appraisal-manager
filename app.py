@@ -1393,7 +1393,7 @@ with tab3:
                                   file_name=f"{order_data['order_id']}_UAD.xml",
                                   mime="application/xml")
 
-                with ecol2:
+        with ecol2:
             if st.button("Copy Narrative to Clipboard"):
                 if order_data.get("ai_narrative"):
                     st.code(order_data["ai_narrative"], language=None)
@@ -1402,49 +1402,3 @@ with tab3:
                     st.warning("No narrative saved yet. Generate one first.")
     else:
         st.info("No orders found. Create an order first.")
-
-# ====================== TAB 4: ACTIVITY LOG ======================
-with tab4:
-    st.subheader("Activity Log")
-
-    conn = get_db()
-    log_df = pd.read_sql_query(
-        "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 100", conn
-    )
-    conn.close()
-
-    if not log_df.empty:
-        st.dataframe(log_df[["order_id", "action", "details", "timestamp"]],
-                     use_container_width=True, hide_index=True)
-    else:
-        st.info("No activity recorded yet.")
-
-# ====================== TAB 5: SETTINGS ======================
-with tab5:
-    st.subheader("Settings")
-
-    settings = get_settings()
-
-    st.markdown("**Email Configuration (Gmail)**")
-    st.caption("Use a Gmail App Password â not your regular password. Google Account > Security > App Passwords.")
-
-    gmail_user = st.text_input("Gmail Address", value=settings.get("gmail_user", ""), key="gmail_user_input")
-    gmail_pass = st.text_input("Gmail App Password", value=settings.get("gmail_app_password", ""),
-                               type="password", key="gmail_pass_input")
-
-    st.markdown("**OpenAI API Key**")
-    st.caption("Get your key at platform.openai.com/api-keys")
-    openai_key = st.text_input("API Key", value=settings.get("openai_api_key", ""),
-                                type="password", key="openai_key_input")
-
-    st.markdown("**Company Info**")
-    company_name = st.text_input("Company Name", value=settings.get("company_name", "A-Tech Appraisal Co., LLC"))
-    company_phone = st.text_input("Company Phone", value=settings.get("company_phone", ""))
-
-    if st.button("Save Settings", type="primary"):
-        save_setting("gmail_user", gmail_user)
-        save_setting("gmail_app_password", gmail_pass)
-        save_setting("openai_api_key", openai_key)
-        save_setting("company_name", company_name)
-        save_setting("company_phone", company_phone)
-        st.success("Settings saved!")
