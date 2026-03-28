@@ -1078,7 +1078,50 @@ with tab3:
                 prior_sales = rd.get("prior_sales", {})
                 val_summary = rd.get("valuation_summary", {})
                 addendum_text = comments.get("addendum", "")
-                narrative_text = order_data.get("ai_narrative", "")="" _City="" _State="" _PostalCode="">')
+                narrative_text = order_data.get("ai_narrative", "")
+
+                # Minimal valid PDF base64 string (empty PDF)
+                minimal_pdf_base64 = "JVBERi0xLjENCiXi48/TDQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXM/LS9Db3VudCAwPj4NCmVuZG9iag0Kend0cmFpbGVyPDwvU2l6ZSAxL1Jvb3QgMSAwIFI+Pg0Kc3RhcnR4cmVmDQowDQolJUVPRg0K"
+
+                xml_lines = []
+                xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
+                xml_lines.append(f'<VALUATION_RESPONSE MISMOVersionID="2.6GSE">')
+
+                # REPORT section with FORM and EMBEDDED_FILE
+                xml_lines.append(f'  <REPORT USPAPReportDescription="{xesc(addr)} - Appraisal" AppraiserFileIdentifier="{xesc(order_data.get("order_id", ""))}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="a la mode - TOTAL" AppraisalSoftwareProductVersionIdentifier="6.321" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{form_type}" _TitleDescription="{title_desc}" AppraisalFormVersionIdentifier="2005" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
+
+                # FORM element (primary appraisal form)
+                xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="1" AppraisalReportContentType="AppraisalForm" AppraisalReportContentName="URAR [UAD Version]" AppraisalReportContentIdentifier="UAD Version 9/2011" AppraisalReportContentIsPrimaryFormIndicator="Y" />')
+
+                # EMBEDDED_FILE with minimal valid base64 PDF
+                xml_lines.append(f'    <EMBEDDED_FILE _Name="AppraisalReport" _EncodingType="Base64" MIMEType="application/pdf" _Type="PDF">')
+                xml_lines.append(f'      <DOCUMENT>{minimal_pdf_base64}</DOCUMENT>')
+                xml_lines.append(f'    </EMBEDDED_FILE>')
+
+                # Add addendum text if available
+                combined_addendum = ""
+                if addendum_text:
+                    combined_addendum += addendum_text
+                if narrative_text:
+                    if combined_addendum:
+                        combined_addendum += "\n\n"
+                    combined_addendum += narrative_text
+                if combined_addendum:
+                    xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="2" AppraisalReportContentType="Addendum" AppraisalReportContentName="Supplemental Addendum" AppraisalReportContentIdentifier="" AppraisalReportContentIsPrimaryFormIndicator="N" _TextDescription="{xesc(combined_addendum)}" />')
+
+                xml_lines.append(f'  </REPORT>')
+
+                # PARTIES section
+                xml_lines.append(f'  <PARTIES>')
+                xml_lines.append(f'    <APPRAISER _Name="{xesc(appraiser_name)}" _CompanyName="A-Tech Appraisal Co., LLC" _StreetAddress="" _City="Warwick" _State="RI" _PostalCode="02886">')
+                xml_lines.append(f'      <CONTACT_DETAIL>')
+                xml_lines.append(f'        <CONTACT_POINT _Type="Phone" _Value="" />')
+                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
+                xml_lines.append(f'      </CONTACT_DETAIL>')
+                xml_lines.append(f'      <APPRAISER_LICENSE _ExpirationDate="" _State="RI" />')
+                xml_lines.append(f'      <INSPECTION AppraisalInspectionPropertyType="Subject" InspectionDate="{xesc(insp_date)}" />')
+                xml_lines.append(f'    </APPRAISER>')
+                xml_lines.append(f'    <SUPERVISOR _Name="" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
                 xml_lines.append(f'      <CONTACT_DETAIL>')
                 xml_lines.append(f'        <CONTACT_POINT _Type="Phone" _Value="" />')
                 xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
