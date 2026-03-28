@@ -494,26 +494,85 @@ with tab3:
         ecol1, ecol2 = st.columns(2)
         with ecol1:
             if st.button("Export XML for TOTAL"):
-                root = ET.Element("UADExport")
-                ET.SubElement(root, "OrderID").text = order_data.get("order_id", "")
-                ET.SubElement(root, "SubjectAddress").text = order_data.get("subject_address", "")
-                ET.SubElement(root, "City").text = order_data.get("city", "")
-                ET.SubElement(root, "State").text = order_data.get("state", "RI")
-                ET.SubElement(root, "ZipCode").text = order_data.get("zip_code", "")
-                ET.SubElement(root, "PropertyType").text = order_data.get("property_type", "")
-                ET.SubElement(root, "AppraisalType").text = order_data.get("appraisal_type", "")
-                ET.SubElement(root, "ClientName").text = order_data.get("client_name", "")
-                ET.SubElement(root, "LenderName").text = order_data.get("lender_name", "")
-                ET.SubElement(root, "LoanNumber").text = order_data.get("loan_number", "")
-                ET.SubElement(root, "ValueOpinion").text = order_data.get("value_opinion", "")
-                ET.SubElement(root, "AppraiserName").text = order_data.get("assigned_appraiser", "")
+                mismo_ns = "http://www.mismo.org/residential/2009/schemas"
+                gse_ns = "http://www.mismo.org/residential/2009/schemas/gse"
+                xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
 
+                ET.register_namespace('', mismo_ns)
+                ET.register_namespace('gse', gse_ns)
+                ET.register_namespace('xsi', xsi_ns)
+
+                root = ET.Element(f"{{{mismo_ns}}}VALUATION_RESPONSE")
+                root.set("MISMOVersionID", "2.6")
+
+                # SUBJECT section
+                subject = ET.SubElement(root, f"{{{mismo_ns}}}SUBJECT")
+                subject_detail = ET.SubElement(subject, f"{{{mismo_ns}}}SUBJECT_DETAIL")
+                subject_detail.set("_StreetAddress", order_data.get("subject_address", ""))
+                subject_detail.set("_City", order_data.get("city", ""))
+                subject_detail.set("_State", order_data.get("state", "RI"))
+                subject_detail.set("_PostalCode", order_data.get("zip_code", ""))
+                subject_detail.set("_County", "")
+
+                # PROPERTY section
+                prop = ET.SubElement(root, f"{{{mismo_ns}}}PROPERTY")
+                prop_detail = ET.SubElement(prop, f"{{{mismo_ns}}}PROPERTY_DETAIL")
+                ptype = order_data.get("property_type", "Single Family")
+                ptype_map = {"Single Family": "SFR", "Condo": "Condominium", "Multi-Family": "2-4 Family", "Townhouse": "Townhouse", "Co-op": "Cooperative"}
+                prop_detail.set("PropertyTypeDescription", ptype_map.get(ptype, ptype))
+
+                site = ET.SubElement(prop, f"{{{mismo_ns}}}SITE")
+                site_detail = ET.SubElement(site, f"{{{mismo_ns}}}_SITE_DETAIL")
+
+                struct = ET.SubElement(prop, f"{{{mismo_ns}}}STRUCTURE")
+                struct_detail = ET.SubElement(struct, f"{{{mismo_ns}}}STRUCTURE_DETAIL")
+
+                # SALES_COMPARISON / VALUATION
+                valuation = ET.SubElement(root, f"{{{mismo_ns}}}VALUATION")
+                valuation_detail = ET.SubElement(valuation, f"{{{mismo_ns}}}VALUATION_DETAIL")
+                val_opinion = order_data.get("value_opinion", "")
+                if val_opinion:
+                    valuation_detail.set("AppraisedValueAmount", str(val_opinion))
+
+                # APPRAISER section
+                appraiser = ET.SubElement(root, f"{{{mismo_ns}}}APPRAISER")
+                appraiser_detail = ET.SubElement(appraiser, f"{{{mismo_ns}}}APPRAISER_DETAIL")
+                appraiser_detail.set("_Name", order_data.get("assigned_appraiser", ""))
+                appraiser_detail.set("_CompanyName", "A-Tech Appraisal Co., LLC")
+
+                # LENDER / CLIENT section
+                lender = ET.SubElement(root, f"{{{mismo_ns}}}LENDER")
+                lender_detail = ET.SubElement(lender, f"{{{mismo_ns}}}LENDER_DETAIL")
+                lender_detail.set("_Name", order_data.get("lender_name", ""))
+
+                client = ET.SubElement(root, f"{{{mismo_ns}}}CLIENT")
+                client_detail = ET.SubElement(client, f"{{{mismo_ns}}}CLIENT_DETAIL")
+                client_detail.set("_Name", order_data.get("client_name", ""))
+
+                # LOAN section
+                loan = ET.SubElement(root, f"{{{mismo_ns}}}LOAN")
+                loan_detail = ET.SubElement(loan, f"{{{mismo_ns}}}LOAN_DETAIL")
+                loan_detail.set("_LoanNumber", order_data.get("loan_number", ""))
+
+                # FORM section
+                form = ET.SubElement(root, f"{{{mismo_ns}}}FORM")
+                form_detail = ET.SubElement(form, f"{{{mismo_ns}}}FORM_DETAIL")
+                form_type = order_data.get("form_type", "URAR")
+                atype = order_data.get("appraisal_type", "1004")
+                form_detail.set("_Type", form_type)
+                form_detail.set("FormVersionIdentifier", atype)
+
+                # NARRATIVE / ADDENDUM section
                 if order_data.get("ai_narrative"):
-                    ET.SubElement(root, "Narrative").text = order_data["ai_narrative"]
+                    addendum = ET.SubElement(root, f"{{{mismo_ns}}}ADDENDUM")
+                    addendum_detail = ET.SubElement(addendum, f"{{{mismo_ns}}}ADDENDUM_DETAIL")
+                    addendum_detail.set("_Type", "Narrative")
+                    narrative_text = ET.SubElement(addendum_detail, f"{{{mismo_ns}}}NARRATIVE")
+                    narrative_text.text = order_data["ai_narrative"]
 
-                xml_str = ET.tostring(root, encoding="unicode", xml_declaration=True)
-                st.download_button("Download XML", data=xml_str,
-                                  file_name=f"{order_data['order_id']}_TOTAL.xml",
+                xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding="unicode")
+                st.download_button("Download MISMO XML", data=xml_str,
+                                  file_name=f"{order_data['order_id']}_MISMO.xml",
                                   mime="application/xml")
 
         with ecol2:
