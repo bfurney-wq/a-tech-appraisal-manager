@@ -1081,11 +1081,11 @@ with tab3:
                     except:
                         rd = {}
 
-                comps = rd.get("comparables", []) or []
+                comps = rd.get("comps", []) or []
                 nb = rd.get("neighborhood", {}) or {}
                 comments = rd.get("comments", {}) or {}
                 cost = rd.get("cost_approach", {}) or {}
-                site_data = rd.get("site_data", {}) or {}
+                site_data = rd.get("site", {}) or {}
                 subj_imp = rd.get("subject_improvements", {}) or {}
                 prior_sales = rd.get("prior_sales", {}) or {}
                 val_summary = rd.get("valuation_summary", {}) or {}
@@ -1484,8 +1484,8 @@ with tab3:
                         xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(comp.get("age", ""))}" _Amount="" />')
                         xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(comp.get("condition", ""))}" _Amount="" />')
                         xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(comp.get("gla", ""))}" _Amount="{comp.get("gla_adj", "")}" />')
-                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(comp.get("basement_area", ""))}" _Amount="{comp.get("basement_adj", "")}" />')
-                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(comp.get("basement_finish", ""))}" _Amount="{comp.get("basement_finish_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(comp.get("basement_total_sqft", ""))}" _Amount="{comp.get("basement_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(comp.get("basement_finished_sqft", ""))}" _Amount="{comp.get("basement_adj", "")}" />')
                         xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(comp.get("functional_utility", ""))}" _Amount="{comp.get("functional_adj", "")}" />')
                         xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(comp.get("heating_cooling", ""))}" _Amount="{comp.get("heating_adj", "")}" />')
                         xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(comp.get("energy_efficiency", ""))}" _Amount="{comp.get("energy_adj", "")}" />')
