@@ -1001,6 +1001,26 @@ with tab3:
                     p = json.loads(pd_str)
                 except:
                     p = {}
+
+                # Load AI-generated report data if available
+                rd = {}
+                rd_str = settings.get(f"report_data_{order_data['order_id']}", "")
+                if rd_str:
+                    try:
+                        rd = json.loads(rd_str)
+                    except:
+                        rd = {}
+                comps = rd.get("comps", []) or []
+                nb = rd.get("neighborhood", {}) or {}
+                comments = rd.get("comments", {}) or {}
+                cost = rd.get("cost_approach", {}) or {}
+                sd = rd.get("site", {}) or {}
+                si = rd.get("subject_improvements", {}) or {}
+                prior_sales = rd.get("prior_sales", {}) or {}
+                val_summary = rd.get("valuation_summary", {}) or {}
+                addendum_text = comments.get("addendum", "")
+                narrative_text = order_data.get("ai_narrative", "")
+
                 yr = str(p.get("year_built", "") or si.get("year_built", "") or "")
                 stories = str(p.get("stories", "") or si.get("stories", "") or "")
                 design = str(p.get("design_style", "") or si.get("design_style", "") or "")
@@ -1053,25 +1073,6 @@ with tab3:
                 found_map = {"Full Basement": "Basement", "Partial Basement": "Basement", "Crawl Space": "CrawlSpace", "Slab": "Slab", "Other": "Other"}
                 found_xml = found_map.get(found_type, "Basement")
                 found_cond = "Full" if "Full" in found_type else ("Partial" if "Partial" in found_type else "")
-
-                # Load AI-generated report data if available
-                rd = {}
-                rd_str = settings.get(f"report_data_{order_data['order_id']}", "")
-                if rd_str:
-                    try:
-                        rd = json.loads(rd_str)
-                    except:
-                        rd = {}
-                comps = rd.get("comps", []) or []
-                nb = rd.get("neighborhood", {}) or {}
-                comments = rd.get("comments", {}) or {}
-                cost = rd.get("cost_approach", {}) or {}
-                sd = rd.get("site", {}) or {}
-                si = rd.get("subject_improvements", {}) or {}
-                prior_sales = rd.get("prior_sales", {}) or {}
-                val_summary = rd.get("valuation_summary", {}) or {}
-                addendum_text = comments.get("addendum", "")
-                narrative_text = order_data.get("ai_narrative", "")
 
                 # XML escape helper
                 import xml.sax.saxutils as saxutils
