@@ -157,11 +157,18 @@ def generate_narrative(order_data, api_key):
 - Condition: {p.get('condition_rating', 'Unknown')}, Quality: {p.get('quality_rating', 'Unknown')}
 - Neighborhood: {p.get('neighborhood_name', 'Unknown')}
 - County: {p.get('county', 'Unknown')}
-- Flood Zone: {p.get('flood_zone', 'Unknown')}
-- Taxes: ${p.get('tax_amount', 'Unknown')} ({p.get('tax_year', 'Unknown')})"""
+- Flood Zone: {p.get('flood_zone', 'Unknown')}, Flood Map #: {p.get('flood_map_number', 'Unknown')}
+- Taxes: ${p.get('tax_amount', 'Unknown')} ({p.get('tax_year', 'Unknown')})
+- Assessor Parcel #: {p.get('assessor_parcel', 'Unknown')}
+- Legal Description: {p.get('legal_description', 'Unknown')}"""
 
-        prompt = f"""You are an expert residential real estate appraiser writing a USPAP-compliant
-appraisal narrative for a {order_data['appraisal_type']} / {order_data.get('form_type', 'URAR')} report.
+        prompt = f"""You are a licensed residential real estate appraiser with 20+ years of experience
+in {order_data.get('state', 'RI')}, writing a USPAP-compliant appraisal narrative for a
+{order_data['appraisal_type']} / {order_data.get('form_type', 'URAR')} report.
+
+You MUST use your knowledge of the actual area to write realistic, detailed content. Use real street
+names that exist in the area. Reference actual landmarks, schools, shopping areas, and roads. Write
+as if you personally inspected this property and researched the local MLS.
 
 Property Details:
 - Address: {order_data['subject_address']}, {order_data.get('city', '')}, {order_data.get('state', 'RI')} {order_data.get('zip_code', '')}
@@ -170,27 +177,83 @@ Property Details:
 - Appraiser Field Notes: {order_data.get('field_notes', 'None provided')}
 - Preliminary Value Opinion: {order_data.get('value_opinion', 'TBD')}
 
-Write the following sections in professional UAD-compliant language:
-1. Subject Section - Property description, site, improvements
-2. Neighborhood Analysis - Market conditions, trends, boundaries
-3. Site Description - Lot size, shape, utilities, zoning
-4. Improvement Description - Structure, condition, rooms, features
-5. Sales Comparison Approach - Framework for comp analysis
-6. Reconciliation - Final value conclusion
+Write ALL of the following sections in full detail. Each section should be multiple paragraphs.
+Do NOT abbreviate or cut short. Write as a thorough appraiser would:
 
-Keep it factual, concise, and ready to paste into a TOTAL form. Use UAD abbreviations where appropriate
-(C3, C4, Q3, etc. for condition/quality ratings). Generate realistic comparable sales data for the area
-with addresses, sale prices, dates, and adjustments. Fill in ALL sections completely as an appraiser would.
-Include a full addendum with market analysis and scope of work."""
+1. SUBJECT SECTION (3+ paragraphs)
+   - Full property description with all physical characteristics
+   - Legal description, census tract, map reference
+   - Current owner, sale history (prior 3 years), current listing status
+   - HOA fees if applicable, special assessments
+
+2. NEIGHBORHOOD ANALYSIS (3+ paragraphs)
+   - Specific boundaries using real road names
+   - Built-up percentage, growth rate, property values trend
+   - Demand/supply, marketing time, present land use percentages
+   - Nearby amenities (schools by name, parks, shopping, employment centers)
+   - Any positive or negative factors (highway noise, views, water access)
+
+3. SITE DESCRIPTION (2+ paragraphs)
+   - Lot dimensions, area, shape, topography, drainage
+   - Utilities (public water, public sewer, gas, electric)
+   - Street type, curb/gutter, sidewalk, alley
+   - FEMA flood zone, flood map panel, flood insurance requirement
+   - Easements, encroachments, environmental conditions
+   - Zoning classification and compliance
+
+4. IMPROVEMENT DESCRIPTION (3+ paragraphs)
+   - Foundation type, exterior walls, roof surface and condition
+   - Room-by-room breakdown (kitchen, living room, dining, bedrooms, baths)
+   - Kitchen details (counters, appliances, cabinets, flooring)
+   - Bathroom details (fixtures, tile, condition)
+   - Basement description (finished/unfinished, ceiling height, egress, sump pump)
+   - Mechanical systems (HVAC age, water heater, electrical panel)
+   - Interior finishes (flooring types, paint, trim)
+   - Exterior features (deck, patio, porch, pool, fencing, landscaping)
+   - Garage/carport details
+   - Overall condition and quality ratings with justification
+
+5. SALES COMPARISON APPROACH (4+ paragraphs)
+   - Search parameters used (radius, date range, property type)
+   - 3 comparable sales with FULL details: address, sale price, sale date, GLA, lot size,
+     rooms, beds, baths, year built, condition, quality, garage, basement
+   - Line-by-line adjustment explanation for each comp
+   - Adjustment rates used and market support for those rates
+   - Net and gross adjustment percentages
+   - Indicated value range and reconciled value from this approach
+
+6. COST APPROACH (2+ paragraphs)
+   - Site value estimate with support
+   - Cost new estimate (cost per sq ft, source: Marshall & Swift or similar)
+   - Physical depreciation (effective age / total economic life)
+   - Functional and external depreciation if any
+   - Indicated value by cost approach
+
+7. RECONCILIATION (2+ paragraphs)
+   - Weight given to each approach and why
+   - Final opinion of value with effective date
+   - Exposure time, marketing time estimates
+   - Confidence level in the value conclusion
+
+8. ADDENDUM / SCOPE OF WORK (2+ paragraphs)
+   - Scope of work performed (inspection type, data sources, analysis methods)
+   - Intended use and intended users
+   - Definition of market value used
+   - Assumptions and limiting conditions
+   - Certification statement reference
+   - Prior services disclosure
+
+Use UAD abbreviations where standard (C1-C6, Q1-Q6, N;Res;, etc.).
+Write in professional appraiser language. Be thorough - a reviewer should find no blanks or vague statements."""
 
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a licensed real estate appraiser assistant. Write professional, USPAP-compliant appraisal narratives with complete data."},
+                {"role": "system", "content": f"You are a licensed certified residential real estate appraiser with 20+ years of experience appraising properties in {order_data.get('city', 'Rhode Island')}, {order_data.get('state', 'RI')}. You have deep knowledge of the local real estate market, neighborhoods, street names, schools, and recent sales. Write thorough, professional, USPAP-compliant appraisal narratives. Use your knowledge of the actual geographic area to include realistic details. Every section must be substantive - never use placeholder text or vague one-liners."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=4000,
-            temperature=0.3
+            max_tokens=8000,
+            temperature=0.2
         )
         return response.choices[0].message.content, None
     except ImportError:
@@ -211,32 +274,60 @@ def generate_report_data(order_data, api_key):
         except:
             p = {}
 
-        prompt = f"""You are an expert residential appraiser. Generate COMPLETE structured appraisal data as JSON
-for a URAR form for this property. This data will be imported into TOTAL appraisal software.
+        city = order_data.get('city', '')
+        state = order_data.get('state', 'RI')
+        zipcode = order_data.get('zip_code', '')
+
+        prompt = f"""You are a licensed certified residential appraiser with 20+ years of experience
+in {city}, {state}. Generate COMPLETE structured appraisal data as JSON for a URAR form.
+This data will be imported into TOTAL appraisal software via UAD XML.
+
+USE YOUR KNOWLEDGE OF THE ACTUAL AREA. Use real street names that exist in {city}, {state}.
+Use realistic sale prices for the area. Reference actual neighborhoods, school districts, and landmarks.
 
 SUBJECT PROPERTY:
-- Address: {order_data['subject_address']}, {order_data.get('city', '')}, {order_data.get('state', 'RI')} {order_data.get('zip_code', '')}
+- Address: {order_data['subject_address']}, {city}, {state} {zipcode}
 - Type: {order_data['property_type']}
 - Year Built: {p.get('year_built', '')}, Stories: {p.get('stories', '')}, Style: {p.get('design_style', '')}
+- Exterior: {p.get('exterior_desc', '')}
 - GLA: {p.get('gla_sqft', '')} sqft, Rooms: {p.get('total_rooms', '')}, Beds: {p.get('bedrooms', '')}, Baths: {p.get('bathrooms', '')}
-- Foundation: {p.get('foundation_type', '')}, Basement: {p.get('basement_sqft', '')} sqft
+- Foundation: {p.get('foundation_type', '')}, Basement: {p.get('basement_sqft', '')} sqft, {p.get('basement_finished_pct', '')}% finished
 - Heating: {p.get('heating_type', '')}, Cooling: {p.get('cooling_type', '')}
-- Lot: {p.get('lot_area', '')}, Garage: {p.get('garage_type', '')}
+- Lot: {p.get('lot_dimensions', '')} / {p.get('lot_area', '')} sqft, Zoning: {p.get('zoning', '')}
+- Garage: {p.get('garage_type', '')}
 - Condition: {p.get('condition_rating', '')}, Quality: {p.get('quality_rating', '')}
 - Neighborhood: {p.get('neighborhood_name', '')}
+- County: {p.get('county', '')}
+- Flood Zone: {p.get('flood_zone', '')}, Map #: {p.get('flood_map_number', '')}
+- Tax: ${p.get('tax_amount', '')} ({p.get('tax_year', '')}), Parcel: {p.get('assessor_parcel', '')}
+- Legal Desc: {p.get('legal_description', '')}
 - Value Opinion: {order_data.get('value_opinion', '')}
 - Field Notes: {order_data.get('field_notes', '')}
 
-Return ONLY valid JSON (no markdown, no code fences) with this exact structure:
+CRITICAL RULES:
+1. Use REAL street names from {city}, {state} for comparable sales
+2. Sale prices must be realistic for this specific zip code and neighborhood
+3. Sale dates must be within the last 12 months
+4. Every adjustment must have a dollar amount that makes sense (e.g. $50/sqft for GLA, $5000-15000 for garage)
+5. Net adjustments should typically be under 15% of sale price, gross under 25%
+6. All comments must be 3-5 sentences minimum - NO one-liners
+7. The addendum must be a FULL scope of work (8+ sentences)
+8. All monetary values as strings without $ signs or commas
+
+Return ONLY valid JSON (no markdown, no code fences) with this EXACT structure:
 {{
   "comps": [
     {{
-      "address": "123 Example St",
-      "city": "{order_data.get('city', '')}",
-      "state": "{order_data.get('state', 'RI')}",
-      "zip": "{order_data.get('zip_code', '')}",
+      "address": "use a real street name from {city}",
+      "city": "{city}",
+      "state": "{state}",
+      "zip": "{zipcode}",
       "sale_price": "350000",
       "sale_date": "01/2026",
+      "financing_type": "FHA",
+      "financing_adj": "0",
+      "concessions": "0",
+      "concessions_adj": "0",
       "gla": "1800",
       "total_rooms": "7",
       "bedrooms": "3",
@@ -244,31 +335,63 @@ Return ONLY valid JSON (no markdown, no code fences) with this exact structure:
       "year_built": "1985",
       "lot_size": "10000",
       "design_style": "Colonial",
+      "exterior_walls": "Vinyl Siding",
+      "roof_surface": "Asphalt Shingle",
       "condition": "C3",
       "quality": "Q3",
+      "view": "N;Res;",
+      "foundation": "Full Basement",
+      "basement_total_sqft": "900",
+      "basement_finished_sqft": "400",
+      "heating_cooling": "FWA/Central",
+      "garage_parking": "2gbi",
+      "porch_patio_deck": "Deck, Patio",
+      "fireplace": "1fp1wbfp",
+      "pool": "None",
+      "fence": "Wood Privacy",
+      "functional_utility": "Average",
+      "energy_efficiency": "Typical",
       "location_adj": "0",
+      "lease_fee_adj": "0",
       "site_adj": "0",
       "view_adj": "0",
       "design_adj": "0",
       "quality_adj": "0",
       "age_adj": "0",
       "condition_adj": "0",
-      "gla_adj": "0",
+      "gla_adj": "-5000",
+      "room_adj": "0",
       "basement_adj": "0",
+      "functional_adj": "0",
       "heating_adj": "0",
+      "energy_adj": "0",
       "garage_adj": "0",
       "porch_adj": "0",
-      "net_adj": "0",
-      "adj_sale_price": "350000",
-      "data_source": "MLS/Public Records",
-      "proximity": "0.5 miles"
+      "fireplace_adj": "0",
+      "pool_adj": "0",
+      "fence_adj": "0",
+      "net_adj": "-5000",
+      "gross_adj": "5000",
+      "net_adj_pct": "1.4",
+      "gross_adj_pct": "1.4",
+      "adj_sale_price": "345000",
+      "data_source": "RIMLS#12345678;DOM 30",
+      "verification_source": "Public Records/MLS",
+      "proximity": "0.3 miles",
+      "prior_sale_date": "N/A",
+      "prior_sale_price": "N/A"
     }}
   ],
   "neighborhood": {{
-    "name": "",
-    "boundaries": "North: ..., South: ..., East: ..., West: ...",
-    "description": "Established residential neighborhood...",
-    "market_conditions": "Stable with slight appreciation",
+    "name": "use actual neighborhood name for this area",
+    "boundaries": "North: real road, South: real road, East: real road, West: real road",
+    "description": "3+ sentences describing the actual neighborhood character, housing stock, and appeal",
+    "built_up": "Over 75%",
+    "growth_rate": "Stable",
+    "property_values": "Increasing",
+    "demand_supply": "Shortage",
+    "marketing_time": "Under 3 Months",
+    "market_conditions": "3+ sentences about the current local real estate market conditions and trends",
     "price_low": "250000",
     "price_high": "500000",
     "price_predominant": "375000",
@@ -279,53 +402,137 @@ Return ONLY valid JSON (no markdown, no code fences) with this exact structure:
     "land_use_24_pct": "5",
     "land_use_apt_pct": "5",
     "land_use_comm_pct": "3",
-    "land_use_other_pct": "2"
+    "land_use_other_pct": "2",
+    "neighborhood_factors": "2+ sentences about any positive or negative neighborhood factors"
+  }},
+  "site": {{
+    "dimensions": "{p.get('lot_dimensions', '')}",
+    "area": "{p.get('lot_area', '')}",
+    "shape": "Rectangular",
+    "view": "N;Res;",
+    "topography": "Level",
+    "drainage": "Adequate",
+    "utilities_electric": "Public",
+    "utilities_gas": "Public",
+    "utilities_water": "Public",
+    "utilities_sewer": "Public",
+    "street": "Asphalt",
+    "curb_gutter": "Yes",
+    "sidewalk": "Yes",
+    "street_lights": "Yes",
+    "alley": "None",
+    "fema_flood_zone": "{p.get('flood_zone', 'X')}",
+    "fema_map_number": "{p.get('flood_map_number', '')}",
+    "fema_map_date": "",
+    "flood_insurance_required": "No",
+    "easements": "Typical utility easements noted",
+    "encroachments": "None observed",
+    "special_assessments": "None",
+    "environmental_conditions": "None observed",
+    "zoning_class": "{p.get('zoning', '')}",
+    "zoning_description": "Single Family Residential",
+    "zoning_compliance": "Legal conforming",
+    "highest_best_use": "Present use as improved - single family residential"
+  }},
+  "subject_improvements": {{
+    "general_description": "3+ sentences describing the overall structure and its characteristics",
+    "foundation_walls": "{p.get('foundation_type', '')}",
+    "exterior_walls": "{p.get('exterior_desc', '')}",
+    "roof_surface": "Asphalt Shingle",
+    "roof_condition": "Average - no visible defects",
+    "gutters_downspouts": "Aluminum",
+    "window_type": "Double Hung/Insulated",
+    "storm_screens": "Yes",
+    "insulation": "Adequate",
+    "flooring": "Hardwood, Carpet, Tile",
+    "walls_trim": "Drywall, Painted, Wood Trim",
+    "bath_floor": "Ceramic Tile",
+    "bath_wainscot": "Ceramic Tile",
+    "kitchen_counters": "Granite",
+    "kitchen_cabinets": "Wood",
+    "kitchen_appliances": "Refrigerator, Range/Oven, Dishwasher, Microwave",
+    "attic": "Scuttle",
+    "amenities": "Fireplace, Deck, Patio",
+    "car_storage": "{p.get('garage_type', '')}",
+    "physical_depreciation": "Normal for age",
+    "functional_depreciation": "None noted",
+    "external_depreciation": "None noted",
+    "effective_age": "",
+    "remaining_economic_life": "50",
+    "overall_condition_comment": "3+ sentences about the overall condition of improvements"
   }},
   "comments": {{
-    "additional_features": "The subject has typical features for the area...",
-    "condition_comment": "The subject is in overall good condition...",
-    "quality_comment": "Quality of construction is typical for the area...",
-    "adverse_conditions": "No adverse conditions noted...",
-    "conforms_to_neighborhood": "The subject conforms to the neighborhood...",
-    "reconciliation": "The Sales Comparison Approach was given most weight...",
-    "conditions_comment": "This appraisal is made subject to...",
-    "sales_comparison_comment": "The comparable sales used are the most similar...",
-    "cost_comment": "The cost approach provides support...",
-    "addendum": "ADDENDUM: This appraisal was performed in accordance with USPAP..."
+    "additional_features": "3-5 sentences describing additional features, upgrades, renovations, and amenities. Mention specific items like updated kitchen, new roof, deck/patio size, landscaping quality, storage, and any other value-adding features.",
+    "condition_comment": "3-5 sentences about the overall condition. Reference specific systems (roof age, HVAC age, water heater), recent updates, deferred maintenance if any, and effective age vs actual age.",
+    "quality_comment": "3-5 sentences about construction quality. Mention materials used, workmanship, quality tier (Q1-Q6 with description), how it compares to neighborhood standards.",
+    "adverse_conditions": "2-3 sentences about any adverse environmental conditions, external factors, or special assessments observed. If none, explain what was checked and that none were found.",
+    "conforms_to_neighborhood": "2-3 sentences about how the subject conforms or does not conform to the neighborhood in terms of size, style, condition, and price range. Note any over-improvements or under-improvements.",
+    "reconciliation": "4-6 sentences. State the indicated value from each approach (Sales Comparison, Cost, Income if applicable). Explain the weight given to each approach and why. State the final opinion of market value and the effective date. Mention the exposure time and marketing time estimates.",
+    "conditions_comment": "3-4 sentences about any conditions of the appraisal. Is it subject to completion of repairs? Subject to inspection? As-is? Hypothetical conditions? Extraordinary assumptions?",
+    "sales_comparison_comment": "4-6 sentences. Describe the comparable selection process, search parameters used, why these comps were chosen, the adjustment methodology, and the reliability of the indicated value from this approach. Mention the MLS searched, date range, and any limiting factors in comp availability.",
+    "cost_comment": "3-4 sentences about the cost approach. Source of cost data (Marshall & Swift, local builders, etc.), how site value was estimated, depreciation methodology, and reliability of this approach for this property type and age.",
+    "addendum": "ADDENDUM / SCOPE OF WORK: 8-12 sentences minimum. Include: (1) Scope of work performed - type of inspection (interior/exterior), data sources consulted (MLS, public records, assessor), analysis performed. (2) Intended use: mortgage lending. Intended user: lender/client. (3) Market value definition per USPAP/OCC/FIRREA. (4) Three-year sale/listing history of the subject. (5) Three-year sale/listing history of each comparable. (6) Market trend analysis with data support (median prices, days on market, inventory levels). (7) Any extraordinary assumptions or hypothetical conditions. (8) Appraiser competency statement. (9) Prior services statement."
   }},
   "cost_approach": {{
     "site_value": "",
-    "dwelling_sqft": "",
+    "site_value_source": "Comparable land sales and assessor allocation",
+    "dwelling_sqft": "{p.get('gla_sqft', '')}",
     "dwelling_cost_per_sqft": "",
+    "dwelling_cost_source": "Marshall & Swift Residential Cost Handbook",
     "dwelling_cost": "",
     "garage_sqft": "",
     "garage_cost_per_sqft": "",
     "garage_cost": "",
+    "other_improvements": "",
+    "other_improvements_cost": "0",
     "total_new_cost": "",
     "physical_depreciation_pct": "",
     "physical_depreciation_amt": "",
-    "functional_depreciation_amt": "",
-    "external_depreciation_amt": "",
+    "functional_depreciation_amt": "0",
+    "functional_depreciation_desc": "None observed",
+    "external_depreciation_amt": "0",
+    "external_depreciation_desc": "None observed",
     "total_depreciation": "",
     "depreciated_cost": "",
     "site_improvements": "",
+    "site_improvements_desc": "Driveway, walkways, landscaping, fencing",
     "indicated_value": "",
-    "remaining_economic_life": ""
+    "effective_age": "",
+    "remaining_economic_life": "50",
+    "total_economic_life": ""
+  }},
+  "prior_sales": {{
+    "subject_prior_sale_date": "N/A or date",
+    "subject_prior_sale_price": "N/A or price",
+    "subject_current_listing": "N/A or listing price",
+    "subject_current_listing_dom": "N/A or days"
+  }},
+  "valuation_summary": {{
+    "sales_comparison_value": "",
+    "cost_approach_value": "",
+    "income_approach_value": "N/A",
+    "final_opinion_value": "",
+    "effective_date": "",
+    "exposure_time": "30-90 days",
+    "marketing_time": "30-90 days"
   }}
 }}
 
-Generate 3 realistic comparable sales from the same area with realistic adjustments.
-All monetary values as strings without $ signs or commas. Make the comps support the value opinion.
-Fill in ALL fields - do not leave any blank. Be thorough and realistic."""
+IMPORTANT: Generate 3 realistic comparable sales from {city}, {state} {zipcode}.
+Use REAL street names from this area. Make adjustments that are mathematically correct
+(net_adj = sum of all individual adjustments, adj_sale_price = sale_price + net_adj).
+Net adjustment percentage = abs(net_adj) / sale_price * 100.
+Gross adjustment percentage = sum of abs values of all adjustments / sale_price * 100.
+All comps should bracket the subject value opinion. Fill in EVERY field. No blanks."""
 
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a licensed real estate appraiser. Return ONLY valid JSON, no markdown formatting."},
+                {"role": "system", "content": f"You are a licensed certified residential real estate appraiser with 20+ years experience in {city}, {state}. You have deep knowledge of local street names, neighborhoods, recent sales, and market conditions. Return ONLY valid JSON - no markdown formatting, no code fences, no commentary. Every field must be filled in with realistic, specific data appropriate for this market area."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=4000,
-            temperature=0.3
+            max_tokens=8000,
+            temperature=0.2
         )
         result_text = response.choices[0].message.content.strip()
         # Strip markdown code fences if present
@@ -359,7 +566,7 @@ def save_setting(key, value):
 
 # ====================== HEADER ======================
 st.title("A-Tech Appraisal Manager")
-st.caption("A-Tech Appraisal Co., LLC â¢ Warwick, RI")
+st.caption("A-Tech Appraisal Co., LLC - Warwick, RI")
 
 # ====================== NAVIGATION ======================
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Dashboard", "New Order", "AI Reports", "Activity Log", "Settings"])
@@ -410,8 +617,8 @@ with tab1:
 
     if not filtered.empty:
         # Status indicators
-        status_icons = {"Pending": "ð´", "In Progress": "ð¡", "Completed": "ð¢", "On Hold": "ð ", "Cancelled": "â«"}
-        filtered["Status Display"] = filtered["status"].apply(lambda s: f"{status_icons.get(s, 'âª')} {s}")
+        status_icons = {"Pending": "🔴", "In Progress": "🟡", "Completed": "🟢", "On Hold": "🟠", "Cancelled": "⚫"}
+        filtered["Status Display"] = filtered["status"].apply(lambda s: f"{status_icons.get(s, '⚪')} {s}")
 
         display_cols = ["order_id", "client_name", "subject_address", "assigned_appraiser",
                        "Status Display", "due_date", "fee", "created_at"]
@@ -853,6 +1060,10 @@ with tab3:
                 nb = rd.get("neighborhood", {})
                 comments = rd.get("comments", {})
                 cost = rd.get("cost_approach", {})
+                site_data = rd.get("site", {})
+                subj_imp = rd.get("subject_improvements", {})
+                prior_sales = rd.get("prior_sales", {})
+                val_summary = rd.get("valuation_summary", {})
                 addendum_text = comments.get("addendum", "")
                 narrative_text = order_data.get("ai_narrative", "")
 
@@ -938,33 +1149,38 @@ with tab3:
                 xml_lines.append(f'        <_CONDITION _Type="Infestation" _Comment="" />')
                 xml_lines.append(f'      </FOUNDATION>')
                 xml_lines.append(f'      <BASEMENT SquareFeetCount="{bsmt_sqft}" _FinishedPercent="{bsmt_fin}" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Floors" _ConditionDescription="" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Walls" _ConditionDescription="" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="TrimAndFinish" _ConditionDescription="" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomFloors" _ConditionDescription="" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomWainscot" _ConditionDescription="" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Floors" _ConditionDescription="{subj_imp.get("flooring", "")}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Walls" _ConditionDescription="{subj_imp.get("walls_trim", "")}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="TrimAndFinish" _ConditionDescription="{subj_imp.get("walls_trim", "")}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomFloors" _ConditionDescription="{subj_imp.get("bath_floor", "")}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomWainscot" _ConditionDescription="{subj_imp.get("bath_wainscot", "")}" />')
                 xml_lines.append(f'      <HEATING _FuelDescription="{heat}" />')
                 xml_lines.append(f'      <COOLING _Description="{cool}" />')
-                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Other" _TypeOtherDescription="" />')
-                xml_lines.append(f'      <ATTIC />')
+                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Other" _TypeOtherDescription="{subj_imp.get("kitchen_appliances", "")}" />')
+                xml_lines.append(f'      <ATTIC _Description="{subj_imp.get("attic", "")}" />')
+                amenities_str = subj_imp.get("amenities", "")
+                has_fp = "Y" if "fireplace" in amenities_str.lower() or "fp" in amenities_str.lower() else "N"
+                has_pool = "Y" if "pool" in amenities_str.lower() else "N"
                 xml_lines.append(f'      <AMENITY _Type="WoodStove" _Count="" />')
-                xml_lines.append(f'      <AMENITY _Type="Fireplace" _ExistsIndicator="N" _Count="" />')
+                xml_lines.append(f'      <AMENITY _Type="Fireplace" _ExistsIndicator="{has_fp}" _Count="" />')
                 xml_lines.append(f'      <AMENITY _Type="Fence" _DetailedDescription="" />')
                 xml_lines.append(f'      <AMENITY _Type="Patio" _DetailedDescription="" />')
                 xml_lines.append(f'      <AMENITY _Type="Porch" _DetailedDescription="" />')
-                xml_lines.append(f'      <AMENITY _Type="Pool" _ExistsIndicator="N" _DetailedDescription="" />')
-                xml_lines.append(f'      <AMENITY _Type="Other" _TypeOtherDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="Pool" _ExistsIndicator="{has_pool}" _DetailedDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="Other" _TypeOtherDescription="{amenities_str}" />')
                 xml_lines.append(f'      <CAR_STORAGE>')
                 xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Driveway" ParkingSpacesCount="" />')
                 xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Garage" ParkingSpacesCount="{garage_spaces}" _AttachmentType="{garage_xml_type}" />')
                 xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Carport" ParkingSpacesCount="" />')
                 xml_lines.append(f'      </CAR_STORAGE>')
-                xml_lines.append(f'      <STRUCTURE_ANALYSIS EffectiveAgeYearsCount="">')
+                eff_age = subj_imp.get("effective_age", cost.get("effective_age", ""))
+                rem_life = subj_imp.get("remaining_economic_life", cost.get("remaining_economic_life", ""))
+                xml_lines.append(f'      <STRUCTURE_ANALYSIS EffectiveAgeYearsCount="{eff_age}">')
                 xml_lines.append(f'        <STRUCTURE_ANALYSIS_RATING />')
                 xml_lines.append(f'        <STRUCTURE_ANALYSIS_EXTENSION>')
                 xml_lines.append(f'          <STRUCTURE_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
                 xml_lines.append(f'            <STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'              <EFFECTIVE_AGE GSEEffectiveAgeDescription="" />')
+                xml_lines.append(f'              <EFFECTIVE_AGE GSEEffectiveAgeDescription="{eff_age}" />')
                 xml_lines.append(f'            </STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
                 xml_lines.append(f'          </STRUCTURE_ANALYSIS_EXTENSION_SECTION>')
                 xml_lines.append(f'        </STRUCTURE_ANALYSIS_EXTENSION>')
@@ -998,11 +1214,24 @@ with tab3:
                 xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Alley" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
                 xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Alley" _Description="" _OwnershipType="Private" _ExistsIndicator="N" />')
                 # SITE
-                xml_lines.append(f'    <SITE _DimensionsDescription="{lot_dims}" _AreaDescription="{lot_area}" _ZoningClassificationIdentifier="{zoning}" _ZoningClassificationDescription="" _ZoningComplianceDescription="" HighestBestUseDescription="">')
-                xml_lines.append(f'      <SITE_FEATURE _Type="Shape" _Comment="" />')
-                xml_lines.append(f'      <SITE_FEATURE _Type="View" _Comment="" />')
+                s_zoning_desc = site_data.get("zoning_description", "Single Family Residential")
+                s_zoning_comply = site_data.get("zoning_compliance", "Legal conforming")
+                s_hbu = site_data.get("highest_best_use", "Present use as improved")
+                s_shape = site_data.get("shape", "")
+                s_view = site_data.get("view", "")
+                s_topo = site_data.get("topography", "Level")
+                s_elec = "Y" if site_data.get("utilities_electric", "").lower() == "public" else "N"
+                s_gas = "Y" if site_data.get("utilities_gas", "").lower() == "public" else "N"
+                s_water = "Y" if site_data.get("utilities_water", "").lower() == "public" else "N"
+                s_sewer = "Y" if site_data.get("utilities_sewer", "").lower() == "public" else "N"
+                s_fema_date = site_data.get("fema_map_date", "")
+                xml_lines.append(f'    <SITE _DimensionsDescription="{lot_dims}" _AreaDescription="{lot_area}" _ZoningClassificationIdentifier="{zoning}" _ZoningClassificationDescription="{s_zoning_desc}" _ZoningComplianceDescription="{s_zoning_comply}" HighestBestUseDescription="{s_hbu}">')
+                xml_lines.append(f'      <SITE_FEATURE _Type="Shape" _Comment="{s_shape}" />')
+                xml_lines.append(f'      <SITE_FEATURE _Type="View" _Comment="{s_view}" />')
                 xml_lines.append(f'      <SITE_FEATURE _Type="Driveway" _Comment="" />')
-                xml_lines.append(f'      <FLOOD_ZONE NFIPFloodZoneIdentifier="{flood_z}" NFIPMapIdentifier="{flood_map}" NFIPMapPanelDate="">')
+                xml_lines.append(f'      <SITE_FEATURE _Type="Topography" _Comment="{s_topo}" />')
+                xml_lines.append(f'      <SITE_FEATURE _Type="Drainage" _Comment="{site_data.get("drainage", "Adequate")}" />')
+                xml_lines.append(f'      <FLOOD_ZONE NFIPFloodZoneIdentifier="{flood_z}" NFIPMapIdentifier="{flood_map}" NFIPMapPanelDate="{s_fema_date}">')
                 xml_lines.append(f'        <FLOOD_ZONE_EXTENSION>')
                 xml_lines.append(f'          <FLOOD_ZONE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
                 xml_lines.append(f'            <FLOOD_ZONE_EXTENSION_SECTION_DATA>')
@@ -1011,10 +1240,10 @@ with tab3:
                 xml_lines.append(f'          </FLOOD_ZONE_EXTENSION_SECTION>')
                 xml_lines.append(f'        </FLOOD_ZONE_EXTENSION>')
                 xml_lines.append(f'      </FLOOD_ZONE>')
-                xml_lines.append(f'      <SITE_UTILITY _Type="Electricity" _PublicIndicator="N" _NonPublicIndicator="N" _NonPublicDescription="" />')
-                xml_lines.append(f'      <SITE_UTILITY _Type="Gas" _PublicIndicator="N" _NonPublicIndicator="N" _NonPublicDescription="" />')
-                xml_lines.append(f'      <SITE_UTILITY _Type="Water" _PublicIndicator="N" _NonPublicIndicator="N" _NonPublicDescription="" />')
-                xml_lines.append(f'      <SITE_UTILITY _Type="SanitarySewer" _PublicIndicator="N" _NonPublicIndicator="N" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="Electricity" _PublicIndicator="{s_elec}" _NonPublicIndicator="{"N" if s_elec == "Y" else "Y"}" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="Gas" _PublicIndicator="{s_gas}" _NonPublicIndicator="{"N" if s_gas == "Y" else "Y"}" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="Water" _PublicIndicator="{s_water}" _NonPublicIndicator="{"N" if s_water == "Y" else "Y"}" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="SanitarySewer" _PublicIndicator="{s_sewer}" _NonPublicIndicator="{"N" if s_sewer == "Y" else "Y"}" _NonPublicDescription="" />')
                 xml_lines.append(f'    </SITE>')
                 # PROJECT
                 xml_lines.append(f'    <PROJECT _Name="" _ConversionDate="" _ContainsMultipleDwellingUnitsDataSourceDescription="" _CommonElementsStatusDescription="" _CommonElementsLeaseTermsDescription="" _CommonElementsDescription="">')
@@ -1026,7 +1255,11 @@ with tab3:
                 nb_bounds = nb.get("boundaries", "")
                 nb_desc = nb.get("description", "")
                 nb_market = nb.get("market_conditions", "")
-                xml_lines.append(f'    <NEIGHBORHOOD _Name="{nb_name}" _BoundaryAndCharacteristicsDescription="{nb_bounds}" _Description="{nb_desc}" _MarketConditionsDescription="{nb_market}">')
+                nb_factors = nb.get("neighborhood_factors", "")
+                nb_full_desc = nb_desc
+                if nb_factors:
+                    nb_full_desc += " " + nb_factors
+                xml_lines.append(f'    <NEIGHBORHOOD _Name="{nb_name}" _BoundaryAndCharacteristicsDescription="{nb_bounds}" _Description="{nb_full_desc}" _MarketConditionsDescription="{nb_market}" _BuiltUpDescription="{nb.get("built_up", "Over 75%")}" _GrowthRateDescription="{nb.get("growth_rate", "Stable")}" _PropertyValuesDescription="{nb.get("property_values", "Stable")}" _DemandSupplyDescription="{nb.get("demand_supply", "In Balance")}" _MarketingTimeDescription="{nb.get("marketing_time", "3-6 Months")}">')
                 xml_lines.append(f'      <_HOUSING _Type="SingleFamily" _LowPriceAmount="{nb.get("price_low", "")}" _HighPriceAmount="{nb.get("price_high", "")}" _PredominantPriceAmount="{nb.get("price_predominant", "")}" _OldestYearsCount="{nb.get("age_high", "")}" _NewestYearsCount="{nb.get("age_low", "")}" _PredominantAgeYearsCount="{nb.get("age_predominant", "")}" />')
                 xml_lines.append(f'      <_PRESENT_LAND_USE _Type="SingleFamily" _Percent="{nb.get("land_use_sf_pct", "")}" />')
                 xml_lines.append(f'      <_PRESENT_LAND_USE _Type="TwoToFourFamily" _Percent="{nb.get("land_use_24_pct", "")}" />')
@@ -1169,30 +1402,34 @@ with tab3:
                     xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="{ci}" PropertySalesAmount="{c_price}" SalesPricePerGrossLivingAreaAmount="{c_price_gla}">')
                     xml_lines.append(f'        <LOCATION LatitudeNumber="" LongitudeNumber="" PropertyStreetAddress="{c_addr}" PropertyStreetAddress2="{c_city}, {c_state} {c_zip}" />')
                     xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{comp.get("total_rooms", "")}" TotalBedroomCount="{comp.get("bedrooms", "")}" TotalBathroomCount="{comp.get("bathrooms", "")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{comp.get("design_style", "")}" _Amount="{comp.get("location_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="Fee Simple" _Amount="0" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SaleOrFinancingConcessions" _Description="{comp.get("financing_type", "Conv;0")}" _Amount="{comp.get("financing_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Concessions" _Description="{comp.get("concessions", "0")}" _Amount="{comp.get("concessions_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="" _Amount="{comp.get("location_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="Fee Simple" _Amount="{comp.get("lease_fee_adj", "0")}" />')
                     xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{comp.get("lot_size", "")}" _Amount="{comp.get("site_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="" _Amount="{comp.get("view_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{comp.get("view", "")}" _Amount="{comp.get("view_adj", "0")}" />')
                     xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{comp.get("design_style", "")}" _Amount="{comp.get("design_adj", "0")}" />')
                     xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{comp.get("quality", "")}" _Amount="{comp.get("quality_adj", "0")}" />')
                     xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{comp.get("year_built", "")}" _Amount="{comp.get("age_adj", "0")}" />')
                     xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{comp.get("condition", "")}" _Amount="{comp.get("condition_adj", "0")}" />')
                     xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{c_gla}" _Amount="{comp.get("gla_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="" _Amount="{comp.get("basement_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="" _Amount="0" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="" _Amount="0" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="" _Amount="{comp.get("heating_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="" _Amount="0" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="" _Amount="{comp.get("garage_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="" _Amount="{comp.get("porch_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" _Amount="0" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" _Amount="0" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" _Amount="0" />')
-                    xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="" PropertySalesAmount="" DataSourceDescription="{comp.get("data_source", "")}" DataSourceEffectiveDate="">')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{comp.get("basement_total_sqft", "")}" _Amount="{comp.get("basement_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{comp.get("basement_finished_sqft", "")}" _Amount="0" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{comp.get("functional_utility", "")}" _Amount="{comp.get("functional_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{comp.get("heating_cooling", "")}" _Amount="{comp.get("heating_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{comp.get("energy_efficiency", "")}" _Amount="{comp.get("energy_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{comp.get("garage_parking", "")}" _Amount="{comp.get("garage_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{comp.get("porch_patio_deck", "")}" _Amount="{comp.get("porch_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{comp.get("fireplace", "")}" _Amount="{comp.get("fireplace_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Pool" _Description="{comp.get("pool", "")}" _Amount="{comp.get("pool_adj", "0")}" />')
+                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fence" _Description="{comp.get("fence", "")}" _Amount="{comp.get("fence_adj", "0")}" />')
+                    c_prior_date = comp.get("prior_sale_date", "")
+                    c_prior_price = comp.get("prior_sale_price", "")
+                    xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="{c_prior_date}" PropertySalesAmount="{c_prior_price}" DataSourceDescription="{comp.get("data_source", "")};{comp.get("verification_source", "")}" DataSourceEffectiveDate="">')
                     xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
                     xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
                     xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="" GSEPriorSaleComment="" />')
+                    xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="{c_prior_date}" GSEPriorSaleComment="" />')
                     xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
                     xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
                     xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
@@ -1210,7 +1447,9 @@ with tab3:
                 xml_lines.append(f'  </VALUATION_METHODS>')
 
                 # VALUATION section
-                xml_lines.append(f'  <VALUATION PropertyAppraisedValueAmount="{val_opinion}" AppraisalEffectiveDate="{insp_date}">')
+                final_val = val_summary.get("final_opinion_value", val_opinion) or val_opinion
+                eff_date = val_summary.get("effective_date", insp_date) or insp_date
+                xml_lines.append(f'  <VALUATION PropertyAppraisedValueAmount="{final_val}" AppraisalEffectiveDate="{eff_date}">')
                 xml_lines.append(f'    <_RECONCILIATION _SummaryComment="{comments.get("reconciliation", "")}" _ConditionsComment="{comments.get("conditions_comment", "")}" />')
                 xml_lines.append(f'  </VALUATION>')
 
@@ -1254,7 +1493,7 @@ with tab5:
     settings = get_settings()
 
     st.markdown("**Email Configuration (Gmail)**")
-    st.caption("Use a Gmail App Password â not your regular password. Google Account > Security > App Passwords.")
+    st.caption("Use a Gmail App Password — not your regular password. Google Account > Security > App Passwords.")
 
     gmail_user = st.text_input("Gmail Address", value=settings.get("gmail_user", ""), key="gmail_user_input")
     gmail_pass = st.text_input("Gmail App Password", value=settings.get("gmail_app_password", ""),
@@ -1276,4 +1515,3 @@ with tab5:
         save_setting("company_name", company_name)
         save_setting("company_phone", company_phone)
         st.success("Settings saved!")
-
