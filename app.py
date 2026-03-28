@@ -7,6 +7,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import xml.etree.ElementTree as ET
+from PIL import Image
+import json
 
 # ====================== CONFIG ======================
 st.set_page_config(page_title="A-Tech Appraisal Manager", layout="wide")
