@@ -975,587 +975,587 @@ with tab3:
 
         ecol1, ecol2 = st.columns(2)
         with ecol1:
-                            if st.button("Export XML for TOTAL"):
-                    # Build UAD XML matching exact TOTAL/a la mode format (MISMO 2.6GSE, no namespaces)
-                    addr = order_data.get("subject_address", "")
-                    city = order_data.get("city", "")
-                    state = order_data.get("state", "RI")
-                    zipcode = order_data.get("zip_code", "")
-                    county = order_data.get("county", "")
-                    appraiser_name = order_data.get("assigned_appraiser", "")
-                    borrower_name = order_data.get("borrower_name", order_data.get("client_name", ""))
-                    lender_name = order_data.get("lender_name", "")
-                    loan_num = order_data.get("loan_number", "")
-                    val_opinion = str(order_data.get("value_opinion", ""))
-                    ptype = order_data.get("property_type", "Single Family")
-                    form_type_map = {"Single Family": "FNM1004", "Condo": "FNM1073", "Multi-Family": "FNM1025", "Townhouse": "FNM1004", "Co-op": "FNM1004"}
-                    form_type = form_type_map.get(ptype, "FNM1004")
-                    title_map = {"FNM1004": "Uniform Residential Appraisal Report", "FNM1073": "Individual Condominium Unit Appraisal Report", "FNM1025": "Small Residential Income Property Appraisal Report"}
-                    title_desc = title_map.get(form_type, "Uniform Residential Appraisal Report")
-                    today_str = datetime.now().strftime("%m/%d/%Y")
-                    insp_date = order_data.get("inspection_date", "") or ""
+            if st.button("Export XML for TOTAL"):
+                # Build UAD XML matching exact TOTAL/a la mode format (MISMO 2.6GSE, no namespaces)
+                addr = order_data.get("subject_address", "")
+                city = order_data.get("city", "")
+                state = order_data.get("state", "RI")
+                zipcode = order_data.get("zip_code", "")
+                county = order_data.get("county", "")
+                appraiser_name = order_data.get("assigned_appraiser", "")
+                borrower_name = order_data.get("borrower_name", order_data.get("client_name", ""))
+                lender_name = order_data.get("lender_name", "")
+                loan_num = order_data.get("loan_number", "")
+                val_opinion = str(order_data.get("value_opinion", ""))
+                ptype = order_data.get("property_type", "Single Family")
+                form_type_map = {"Single Family": "FNM1004", "Condo": "FNM1073", "Multi-Family": "FNM1025", "Townhouse": "FNM1004", "Co-op": "FNM1004"}
+                form_type = form_type_map.get(ptype, "FNM1004")
+                title_map = {"FNM1004": "Uniform Residential Appraisal Report", "FNM1073": "Individual Condominium Unit Appraisal Report", "FNM1025": "Small Residential Income Property Appraisal Report"}
+                title_desc = title_map.get(form_type, "Uniform Residential Appraisal Report")
+                today_str = datetime.now().strftime("%m/%d/%Y")
+                insp_date = order_data.get("inspection_date", "") or ""
 
-                    # Determine AppraisalPurposeType
-                    appraisal_type = order_data.get("appraisal_type", "Refinance")
-                    purpose_map = {"Refinance": "Refinance", "Purchase": "Purchase", "Refi": "Refinance", "Refinancing": "Refinance"}
-                    appraisal_purpose = purpose_map.get(appraisal_type, "Refinance")
+                # Determine AppraisalPurposeType
+                appraisal_type = order_data.get("appraisal_type", "Refinance")
+                purpose_map = {"Refinance": "Refinance", "Purchase": "Purchase", "Refi": "Refinance", "Refinancing": "Refinance"}
+                appraisal_purpose = purpose_map.get(appraisal_type, "Refinance")
 
-                    # XML escaping function
-                    def xesc(s):
-                        """Escape XML special characters in string values"""
-                        if not s:
-                            return ""
-                        s = str(s)
-                        s = s.replace("&", "&amp;")
-                        s = s.replace("<", "&lt;")
-                        s = s.replace(">", "&gt;")
-                        s = s.replace('"', "&quot;")
-                        s = s.replace("'", "&apos;")
-                        return s
+                # XML escaping function
+                def xesc(s):
+                    """Escape XML special characters in string values"""
+                    if not s:
+                        return ""
+                    s = str(s)
+                    s = s.replace("&", "&amp;")
+                    s = s.replace("<", "&lt;")
+                    s = s.replace(">", "&gt;")
+                    s = s.replace('"', "&quot;")
+                    s = s.replace("'", "&apos;")
+                    return s
 
-                    # Extract property details from JSON
+                # Extract property details from JSON
+                p = {}
+                pd_str = order_data.get("property_details", "") or "{}"
+                try:
+                    p = json.loads(pd_str) if isinstance(pd_str, str) else (pd_str if pd_str else {})
+                except:
                     p = {}
-                    pd_str = order_data.get("property_details", "") or "{}"
+
+                yr = str(p.get("year_built", ""))
+                stories = str(p.get("stories", ""))
+                design = str(p.get("design_style", ""))
+                found_type = str(p.get("foundation_type", "Full Basement"))
+                bsmt_sqft = str(p.get("basement_sqft", ""))
+                bsmt_fin = str(p.get("basement_finished_pct", ""))
+                tot_rooms = str(p.get("total_rooms", ""))
+                beds = str(p.get("bedrooms", ""))
+                baths = str(p.get("bathrooms", ""))
+                gla = str(p.get("gla_sqft", ""))
+                heat = str(p.get("heating_type", ""))
+                cool = str(p.get("cooling_type", ""))
+                cond = str(p.get("condition_rating", ""))
+                qual = str(p.get("quality_rating", ""))
+                lot_dims = str(p.get("lot_dimensions", ""))
+                lot_area = str(p.get("lot_area", ""))
+                zoning = str(p.get("zoning", ""))
+                garage = str(p.get("garage_type", ""))
+                assessor = str(p.get("assessor_parcel", ""))
+                tax_yr = str(p.get("tax_year", ""))
+                tax_amt = str(p.get("tax_amount", ""))
+                flood_z = str(p.get("flood_zone", ""))
+                flood_map = str(p.get("flood_map_id", ""))
+                legal = str(p.get("legal_desc", ""))
+                occupancy = str(p.get("occupancy_type", "Owner"))
+                rights_type = str(p.get("rights_type", "FeeSimple"))
+                lat = str(p.get("latitude", ""))
+                lon = str(p.get("longitude", ""))
+
+                # Garage parsing
+                garage_spaces = ""
+                garage_xml_type = ""
+                if garage:
+                    if "1" in garage:
+                        garage_spaces = "1"
+                    elif "2" in garage:
+                        garage_spaces = "2"
+                    elif "3" in garage:
+                        garage_spaces = "3"
+                    if "Attached" in garage:
+                        garage_xml_type = "Attached"
+                    elif "Detached" in garage:
+                        garage_xml_type = "Detached"
+                    elif "Carport" in garage:
+                        garage_xml_type = "Carport"
+
+                # Foundation mapping
+                found_map = {"Full Basement": "Basement", "Partial Basement": "Basement", "Crawl Space": "CrawlSpace", "Crawlspace": "CrawlSpace", "Slab": "Slab", "Other": "Other"}
+                found_xml = found_map.get(found_type.strip(), "Basement")
+                found_cond = "Full" if "Full" in found_type else ("Partial" if "Partial" in found_type else "")
+
+                # Load AI-generated report data if available
+                rd = {}
+                rd_str = order_data.get("ai_report_data", "") or ""
+                if rd_str:
                     try:
-                        p = json.loads(pd_str) if isinstance(pd_str, str) else (pd_str if pd_str else {})
+                        rd = json.loads(rd_str) if isinstance(rd_str, str) else (rd_str if rd_str else {})
                     except:
-                        p = {}
+                        rd = {}
 
-                    yr = str(p.get("year_built", ""))
-                    stories = str(p.get("stories", ""))
-                    design = str(p.get("design_style", ""))
-                    found_type = str(p.get("foundation_type", "Full Basement"))
-                    bsmt_sqft = str(p.get("basement_sqft", ""))
-                    bsmt_fin = str(p.get("basement_finished_pct", ""))
-                    tot_rooms = str(p.get("total_rooms", ""))
-                    beds = str(p.get("bedrooms", ""))
-                    baths = str(p.get("bathrooms", ""))
-                    gla = str(p.get("gla_sqft", ""))
-                    heat = str(p.get("heating_type", ""))
-                    cool = str(p.get("cooling_type", ""))
-                    cond = str(p.get("condition_rating", ""))
-                    qual = str(p.get("quality_rating", ""))
-                    lot_dims = str(p.get("lot_dimensions", ""))
-                    lot_area = str(p.get("lot_area", ""))
-                    zoning = str(p.get("zoning", ""))
-                    garage = str(p.get("garage_type", ""))
-                    assessor = str(p.get("assessor_parcel", ""))
-                    tax_yr = str(p.get("tax_year", ""))
-                    tax_amt = str(p.get("tax_amount", ""))
-                    flood_z = str(p.get("flood_zone", ""))
-                    flood_map = str(p.get("flood_map_id", ""))
-                    legal = str(p.get("legal_desc", ""))
-                    occupancy = str(p.get("occupancy_type", "Owner"))
-                    rights_type = str(p.get("rights_type", "FeeSimple"))
-                    lat = str(p.get("latitude", ""))
-                    lon = str(p.get("longitude", ""))
+                comps = rd.get("comparables", []) or []
+                nb = rd.get("neighborhood", {}) or {}
+                comments = rd.get("comments", {}) or {}
+                cost = rd.get("cost_approach", {}) or {}
+                site_data = rd.get("site_data", {}) or {}
+                subj_imp = rd.get("subject_improvements", {}) or {}
+                prior_sales = rd.get("prior_sales", {}) or {}
+                val_summary = rd.get("valuation_summary", {}) or {}
 
-                    # Garage parsing
-                    garage_spaces = ""
-                    garage_xml_type = ""
-                    if garage:
-                        if "1" in garage:
-                            garage_spaces = "1"
-                        elif "2" in garage:
-                            garage_spaces = "2"
-                        elif "3" in garage:
-                            garage_spaces = "3"
-                        if "Attached" in garage:
-                            garage_xml_type = "Attached"
-                        elif "Detached" in garage:
-                            garage_xml_type = "Detached"
-                        elif "Carport" in garage:
-                            garage_xml_type = "Carport"
+                addendum_text = comments.get("addendum", "")
+                narrative_text = order_data.get("ai_narrative", "")
 
-                    # Foundation mapping
-                    found_map = {"Full Basement": "Basement", "Partial Basement": "Basement", "Crawl Space": "CrawlSpace", "Crawlspace": "CrawlSpace", "Slab": "Slab", "Other": "Other"}
-                    found_xml = found_map.get(found_type.strip(), "Basement")
-                    found_cond = "Full" if "Full" in found_type else ("Partial" if "Partial" in found_type else "")
+                # Minimal valid PDF base64 string (empty PDF)
+                minimal_pdf_base64 = "JVBERi0xLjENCiXi48/TDQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXM/LS9Db3VudCAwPj4NCmVuZG9iag0Kend0cmFpbGVyPDwvU2l6ZSAxL1Jvb3QgMSAwIFI+Pg0Kc3RhcnR4cmVmDQowDQolJUVPRg0K"
 
-                    # Load AI-generated report data if available
-                    rd = {}
-                    rd_str = order_data.get("ai_report_data", "") or ""
-                    if rd_str:
-                        try:
-                            rd = json.loads(rd_str) if isinstance(rd_str, str) else (rd_str if rd_str else {})
-                        except:
-                            rd = {}
+                xml_lines = []
+                xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
+                xml_lines.append(f'<VALUATION_RESPONSE MISMOVersionID="2.6GSE">')
 
-                    comps = rd.get("comparables", []) or []
-                    nb = rd.get("neighborhood", {}) or {}
-                    comments = rd.get("comments", {}) or {}
-                    cost = rd.get("cost_approach", {}) or {}
-                    site_data = rd.get("site_data", {}) or {}
-                    subj_imp = rd.get("subject_improvements", {}) or {}
-                    prior_sales = rd.get("prior_sales", {}) or {}
-                    val_summary = rd.get("valuation_summary", {}) or {}
+                # REPORT section
+                xml_lines.append(f'  <REPORT USPAPReportDescription="{xesc(addr)}" AppraiserFileIdentifier="{xesc(order_data.get("order_id", ""))}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="a la mode - TOTAL" AppraisalSoftwareProductVersionIdentifier="6.321" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{form_type}" _TitleDescription="{title_desc}" AppraisalFormVersionIdentifier="2005" AppraisalPurposeType="{appraisal_purpose}" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
 
-                    addendum_text = comments.get("addendum", "")
-                    narrative_text = order_data.get("ai_narrative", "")
+                # FORM element (primary appraisal form)
+                xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="1" AppraisalReportContentType="AppraisalForm" AppraisalReportContentName="URAR [UAD Version]" AppraisalReportContentIdentifier="UAD Version 9/2011" AppraisalReportContentIsPrimaryFormIndicator="Y" />')
 
-                    # Minimal valid PDF base64 string (empty PDF)
-                    minimal_pdf_base64 = "JVBERi0xLjENCiXi48/TDQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXM/LS9Db3VudCAwPj4NCmVuZG9iag0Kend0cmFpbGVyPDwvU2l6ZSAxL1Jvb3QgMSAwIFI+Pg0Kc3RhcnR4cmVmDQowDQolJUVPRg0K"
+                # EMBEDDED_FILE with minimal valid base64 PDF
+                xml_lines.append(f'    <EMBEDDED_FILE _Name="AppraisalReport" _EncodingType="Base64" MIMEType="application/pdf" _Type="PDF">')
+                xml_lines.append(f'      <DOCUMENT>{minimal_pdf_base64}</DOCUMENT>')
+                xml_lines.append(f'    </EMBEDDED_FILE>')
 
-                    xml_lines = []
-                    xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
-                    xml_lines.append(f'<VALUATION_RESPONSE MISMOVersionID="2.6GSE">')
-
-                    # REPORT section
-                    xml_lines.append(f'  <REPORT USPAPReportDescription="{xesc(addr)}" AppraiserFileIdentifier="{xesc(order_data.get("order_id", ""))}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="a la mode - TOTAL" AppraisalSoftwareProductVersionIdentifier="6.321" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{form_type}" _TitleDescription="{title_desc}" AppraisalFormVersionIdentifier="2005" AppraisalPurposeType="{appraisal_purpose}" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
-
-                    # FORM element (primary appraisal form)
-                    xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="1" AppraisalReportContentType="AppraisalForm" AppraisalReportContentName="URAR [UAD Version]" AppraisalReportContentIdentifier="UAD Version 9/2011" AppraisalReportContentIsPrimaryFormIndicator="Y" />')
-
-                    # EMBEDDED_FILE with minimal valid base64 PDF
-                    xml_lines.append(f'    <EMBEDDED_FILE _Name="AppraisalReport" _EncodingType="Base64" MIMEType="application/pdf" _Type="PDF">')
-                    xml_lines.append(f'      <DOCUMENT>{minimal_pdf_base64}</DOCUMENT>')
-                    xml_lines.append(f'    </EMBEDDED_FILE>')
-
-                    # Add addendum form if narrative/addendum text available
-                    combined_addendum = ""
-                    if addendum_text:
-                        combined_addendum += addendum_text
-                    if narrative_text:
-                        if combined_addendum:
-                            combined_addendum += "\n\n"
-                        combined_addendum += narrative_text
+                # Add addendum form if narrative/addendum text available
+                combined_addendum = ""
+                if addendum_text:
+                    combined_addendum += addendum_text
+                if narrative_text:
                     if combined_addendum:
-                        xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="2" AppraisalReportContentType="Addendum" AppraisalReportContentName="Supplemental Addendum" AppraisalReportContentIdentifier="" AppraisalReportContentIsPrimaryFormIndicator="N" />')
+                        combined_addendum += "\n\n"
+                    combined_addendum += narrative_text
+                if combined_addendum:
+                    xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="2" AppraisalReportContentType="Addendum" AppraisalReportContentName="Supplemental Addendum" AppraisalReportContentIdentifier="" AppraisalReportContentIsPrimaryFormIndicator="N" />')
 
-                    # PARTIES section
-                    xml_lines.append(f'    <PARTIES>')
-                    xml_lines.append(f'      <APPRAISER _Name="{xesc(appraiser_name)}" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
-                    xml_lines.append(f'        <CONTACT_DETAIL>')
-                    xml_lines.append(f'          <CONTACT_POINT _Type="Phone" _Value="" />')
-                    xml_lines.append(f'          <CONTACT_POINT _Type="Email" _Value="" />')
-                    xml_lines.append(f'        </CONTACT_DETAIL>')
-                    xml_lines.append(f'        <APPRAISER_LICENSE _Type="" _Identifier="" _ExpirationDate="" _State="" />')
-                    xml_lines.append(f'        <INSPECTION AppraisalInspectionPropertyType="Subject" InspectionDate="{xesc(insp_date)}" />')
-                    xml_lines.append(f'      </APPRAISER>')
-                    xml_lines.append(f'      <SUPERVISOR _Name="" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
-                    xml_lines.append(f'        <CONTACT_DETAIL>')
-                    xml_lines.append(f'          <CONTACT_POINT _Type="Phone" _Value="" />')
-                    xml_lines.append(f'          <CONTACT_POINT _Type="Email" _Value="" />')
-                    xml_lines.append(f'        </CONTACT_DETAIL>')
-                    xml_lines.append(f'        <APPRAISER_LICENSE _ExpirationDate="" _State="" />')
-                    xml_lines.append(f'        <INSPECTION AppraisalInspectionPropertyType="Comparable" />')
-                    xml_lines.append(f'      </SUPERVISOR>')
-                    xml_lines.append(f'      <REVIEW_APPRAISER />')
-                    xml_lines.append(f'      <REAL_ESTATE_AGENT>')
-                    xml_lines.append(f'        <CONTACT_DETAIL />')
-                    xml_lines.append(f'      </REAL_ESTATE_AGENT>')
-                    xml_lines.append(f'      <LENDER _UnparsedName="{xesc(lender_name)}" AppraisalFormsUnparsedAddress="" _StreetAddress="">')
-                    xml_lines.append(f'        <CONTACT_DETAIL _Name="">')
-                    xml_lines.append(f'          <CONTACT_POINT _Type="Email" _Value="" />')
-                    xml_lines.append(f'        </CONTACT_DETAIL>')
-                    xml_lines.append(f'      </LENDER>')
-                    xml_lines.append(f'      <BORROWER _UnparsedName="{xesc(borrower_name)}">')
-                    xml_lines.append(f'        <BORROWER_EXTENSION>')
-                    xml_lines.append(f'          <BORROWER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'            <BORROWER_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'              <BORROWER_NAME GSEBorrowerName="{xesc(borrower_name)}" />')
-                    xml_lines.append(f'            </BORROWER_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'          </BORROWER_EXTENSION_SECTION>')
-                    xml_lines.append(f'        </BORROWER_EXTENSION>')
-                    xml_lines.append(f'      </BORROWER>')
-                    xml_lines.append(f'      <MANAGEMENT_COMPANY_EXTENSION>')
-                    xml_lines.append(f'        <MANAGEMENT_COMPANY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <MANAGEMENT_COMPANY GSEManagementCompanyName="" />')
-                    xml_lines.append(f'          </MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </MANAGEMENT_COMPANY_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </MANAGEMENT_COMPANY_EXTENSION>')
-                    xml_lines.append(f'    </PARTIES>')
+                # PARTIES section
+                xml_lines.append(f'    <PARTIES>')
+                xml_lines.append(f'      <APPRAISER _Name="{xesc(appraiser_name)}" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
+                xml_lines.append(f'        <CONTACT_DETAIL>')
+                xml_lines.append(f'          <CONTACT_POINT _Type="Phone" _Value="" />')
+                xml_lines.append(f'          <CONTACT_POINT _Type="Email" _Value="" />')
+                xml_lines.append(f'        </CONTACT_DETAIL>')
+                xml_lines.append(f'        <APPRAISER_LICENSE _Type="" _Identifier="" _ExpirationDate="" _State="" />')
+                xml_lines.append(f'        <INSPECTION AppraisalInspectionPropertyType="Subject" InspectionDate="{xesc(insp_date)}" />')
+                xml_lines.append(f'      </APPRAISER>')
+                xml_lines.append(f'      <SUPERVISOR _Name="" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
+                xml_lines.append(f'        <CONTACT_DETAIL>')
+                xml_lines.append(f'          <CONTACT_POINT _Type="Phone" _Value="" />')
+                xml_lines.append(f'          <CONTACT_POINT _Type="Email" _Value="" />')
+                xml_lines.append(f'        </CONTACT_DETAIL>')
+                xml_lines.append(f'        <APPRAISER_LICENSE _ExpirationDate="" _State="" />')
+                xml_lines.append(f'        <INSPECTION AppraisalInspectionPropertyType="Comparable" />')
+                xml_lines.append(f'      </SUPERVISOR>')
+                xml_lines.append(f'      <REVIEW_APPRAISER />')
+                xml_lines.append(f'      <REAL_ESTATE_AGENT>')
+                xml_lines.append(f'        <CONTACT_DETAIL />')
+                xml_lines.append(f'      </REAL_ESTATE_AGENT>')
+                xml_lines.append(f'      <LENDER _UnparsedName="{xesc(lender_name)}" AppraisalFormsUnparsedAddress="" _StreetAddress="">')
+                xml_lines.append(f'        <CONTACT_DETAIL _Name="">')
+                xml_lines.append(f'          <CONTACT_POINT _Type="Email" _Value="" />')
+                xml_lines.append(f'        </CONTACT_DETAIL>')
+                xml_lines.append(f'      </LENDER>')
+                xml_lines.append(f'      <BORROWER _UnparsedName="{xesc(borrower_name)}">')
+                xml_lines.append(f'        <BORROWER_EXTENSION>')
+                xml_lines.append(f'          <BORROWER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'            <BORROWER_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'              <BORROWER_NAME GSEBorrowerName="{xesc(borrower_name)}" />')
+                xml_lines.append(f'            </BORROWER_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'          </BORROWER_EXTENSION_SECTION>')
+                xml_lines.append(f'        </BORROWER_EXTENSION>')
+                xml_lines.append(f'      </BORROWER>')
+                xml_lines.append(f'      <MANAGEMENT_COMPANY_EXTENSION>')
+                xml_lines.append(f'        <MANAGEMENT_COMPANY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <MANAGEMENT_COMPANY GSEManagementCompanyName="" />')
+                xml_lines.append(f'          </MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </MANAGEMENT_COMPANY_EXTENSION_SECTION>')
+                xml_lines.append(f'      </MANAGEMENT_COMPANY_EXTENSION>')
+                xml_lines.append(f'    </PARTIES>')
 
-                    # PROPERTY section
-                    xml_lines.append(f'  <PROPERTY _StreetAddress="{xesc(addr)}" _City="{xesc(city)}" _State="{state}" _PostalCode="{zipcode}" _County="{xesc(county)}" _CurrentOccupancyType="{occupancy}" _RightsType="{rights_type}" _RightsTypeOtherDescription="">')
+                # PROPERTY section
+                xml_lines.append(f'  <PROPERTY _StreetAddress="{xesc(addr)}" _City="{xesc(city)}" _State="{state}" _PostalCode="{zipcode}" _County="{xesc(county)}" _CurrentOccupancyType="{occupancy}" _RightsType="{rights_type}" _RightsTypeOtherDescription="">')
 
-                    # Property Identification
-                    xml_lines.append(f'    <_IDENTIFICATION AssessorsParcelIdentifier="{xesc(assessor)}" MapReferenceIdentifier="" CensusTractIdentifier="">')
-                    xml_lines.append(f'      <PROPERTY_IDENTIFICATION_EXTENSION>')
-                    xml_lines.append(f'        <PROPERTY_IDENTIFICATION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <PARCEL_IDENTIFIER GSEAssessorsParcelIdentifier="{xesc(assessor)}" />')
-                    xml_lines.append(f'          </PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </PROPERTY_IDENTIFICATION_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </PROPERTY_IDENTIFICATION_EXTENSION>')
-                    xml_lines.append(f'    </_IDENTIFICATION>')
+                # Property Identification
+                xml_lines.append(f'    <_IDENTIFICATION AssessorsParcelIdentifier="{xesc(assessor)}" MapReferenceIdentifier="" CensusTractIdentifier="">')
+                xml_lines.append(f'      <PROPERTY_IDENTIFICATION_EXTENSION>')
+                xml_lines.append(f'        <PROPERTY_IDENTIFICATION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <PARCEL_IDENTIFIER GSEAssessorsParcelIdentifier="{xesc(assessor)}" />')
+                xml_lines.append(f'          </PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </PROPERTY_IDENTIFICATION_EXTENSION_SECTION>')
+                xml_lines.append(f'      </PROPERTY_IDENTIFICATION_EXTENSION>')
+                xml_lines.append(f'    </_IDENTIFICATION>')
 
-                    # Legal Description
-                    xml_lines.append(f'    <_LEGAL_DESCRIPTION _Type="Other" _TypeOtherDescription="" _TextDescription="{xesc(legal)}" />')
+                # Legal Description
+                xml_lines.append(f'    <_LEGAL_DESCRIPTION _Type="Other" _TypeOtherDescription="" _TextDescription="{xesc(legal)}" />')
 
-                    # STRUCTURE
-                    xml_lines.append(f'    <STRUCTURE LivingUnitCount="1" _AccessoryUnitExistsIndicator="N" StoriesCount="{stories}" AttachmentType="Detached" BuildingStatusType="Existing" _DesignDescription="{xesc(design)}" PropertyStructureBuiltYear="{yr}" TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" GrossLivingAreaSquareFeetCount="{gla}">')
+                # STRUCTURE
+                xml_lines.append(f'    <STRUCTURE LivingUnitCount="1" _AccessoryUnitExistsIndicator="N" StoriesCount="{stories}" AttachmentType="Detached" BuildingStatusType="Existing" _DesignDescription="{xesc(design)}" PropertyStructureBuiltYear="{yr}" TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" GrossLivingAreaSquareFeetCount="{gla}">')
 
-                    # Exterior Features
-                    xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Foundation" _Description="" _ExistsIndicator="Y" />')
-                    xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Walls" _Description="" _ExistsIndicator="Y" />')
-                    xml_lines.append(f'      <EXTERIOR_FEATURE _Type="RoofSurface" _Description="" _ExistsIndicator="Y" />')
+                # Exterior Features
+                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Foundation" _Description="" _ExistsIndicator="Y" />')
+                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Walls" _Description="" _ExistsIndicator="Y" />')
+                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="RoofSurface" _Description="" _ExistsIndicator="Y" />')
 
-                    # Foundation
-                    xml_lines.append(f'      <FOUNDATION _Type="{found_xml}" _ConditionDescription="{found_cond}" _ExistsIndicator="{"Y" if found_type.lower() != "slab" else "N"}">')
-                    xml_lines.append(f'        <_CONDITION _Type="Infestation" _Comment="" />')
-                    xml_lines.append(f'      </FOUNDATION>')
-                    xml_lines.append(f'      <BASEMENT SquareFeetCount="{bsmt_sqft}" _FinishedPercent="{bsmt_fin}" />')
+                # Foundation
+                xml_lines.append(f'      <FOUNDATION _Type="{found_xml}" _ConditionDescription="{found_cond}" _ExistsIndicator="{"Y" if found_type.lower() != "slab" else "N"}">')
+                xml_lines.append(f'        <_CONDITION _Type="Infestation" _Comment="" />')
+                xml_lines.append(f'      </FOUNDATION>')
+                xml_lines.append(f'      <BASEMENT SquareFeetCount="{bsmt_sqft}" _FinishedPercent="{bsmt_fin}" />')
 
-                    # Interior Features
-                    xml_lines.append(f'      <INTERIOR_FEATURE _Type="Floors" _ConditionDescription="{xesc(subj_imp.get("flooring", ""))}" />')
-                    xml_lines.append(f'      <INTERIOR_FEATURE _Type="Walls" _ConditionDescription="{xesc(subj_imp.get("walls_trim", ""))}" />')
-                    xml_lines.append(f'      <INTERIOR_FEATURE _Type="TrimAndFinish" _ConditionDescription="{xesc(subj_imp.get("walls_trim", ""))}" />')
-                    xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomFloors" _ConditionDescription="{xesc(subj_imp.get("bath_floor", ""))}" />')
-                    xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomWainscot" _ConditionDescription="{xesc(subj_imp.get("bath_wainscot", ""))}" />')
+                # Interior Features
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Floors" _ConditionDescription="{xesc(subj_imp.get("flooring", ""))}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Walls" _ConditionDescription="{xesc(subj_imp.get("walls_trim", ""))}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="TrimAndFinish" _ConditionDescription="{xesc(subj_imp.get("walls_trim", ""))}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomFloors" _ConditionDescription="{xesc(subj_imp.get("bath_floor", ""))}" />')
+                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomWainscot" _ConditionDescription="{xesc(subj_imp.get("bath_wainscot", ""))}" />')
 
-                    # Heating/Cooling
-                    xml_lines.append(f'      <HEATING _FuelDescription="{xesc(heat)}" />')
-                    xml_lines.append(f'      <COOLING _OtherIndicator="Y" _UnitDescription="{xesc(cool)}" />')
+                # Heating/Cooling
+                xml_lines.append(f'      <HEATING _FuelDescription="{xesc(heat)}" />')
+                xml_lines.append(f'      <COOLING _OtherIndicator="Y" _UnitDescription="{xesc(cool)}" />')
 
-                    # Kitchen Equipment
-                    xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Refrigerator" _ExistsIndicator="Y" />')
-                    xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="RangeOven" _ExistsIndicator="Y" />')
-                    xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Dishwasher" _ExistsIndicator="N" />')
-                    xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="WasherDryer" _ExistsIndicator="N" />')
-                    xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Other" _TypeOtherDescription="" />')
+                # Kitchen Equipment
+                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Refrigerator" _ExistsIndicator="Y" />')
+                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="RangeOven" _ExistsIndicator="Y" />')
+                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Dishwasher" _ExistsIndicator="N" />')
+                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="WasherDryer" _ExistsIndicator="N" />')
+                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Other" _TypeOtherDescription="" />')
 
-                    # Attic
-                    xml_lines.append(f'      <ATTIC>')
-                    xml_lines.append(f'        <ATTIC_FEATURE _Type="DropStair" _ExistsIndicator="N" />')
-                    xml_lines.append(f'      </ATTIC>')
+                # Attic
+                xml_lines.append(f'      <ATTIC>')
+                xml_lines.append(f'        <ATTIC_FEATURE _Type="DropStair" _ExistsIndicator="N" />')
+                xml_lines.append(f'      </ATTIC>')
 
-                    # Amenities
-                    amenities_str = subj_imp.get("amenities", "")
-                    has_fp = "Y" if "fireplace" in amenities_str.lower() or "fp" in amenities_str.lower() else "N"
-                    has_pool = "Y" if "pool" in amenities_str.lower() else "N"
+                # Amenities
+                amenities_str = subj_imp.get("amenities", "")
+                has_fp = "Y" if "fireplace" in amenities_str.lower() or "fp" in amenities_str.lower() else "N"
+                has_pool = "Y" if "pool" in amenities_str.lower() else "N"
 
-                    xml_lines.append(f'      <AMENITY _Type="WoodStove" _Count="" />')
-                    xml_lines.append(f'      <AMENITY _Type="Fireplace" _ExistsIndicator="{has_fp}" _Count="" />')
-                    xml_lines.append(f'      <AMENITY _Type="Fence" _DetailedDescription="" />')
-                    xml_lines.append(f'      <AMENITY _Type="Patio" _ExistsIndicator="N" _DetailedDescription="" />')
-                    xml_lines.append(f'      <AMENITY _Type="Porch" _ExistsIndicator="N" _DetailedDescription="" />')
-                    xml_lines.append(f'      <AMENITY _Type="Pool" _ExistsIndicator="{has_pool}" _DetailedDescription="" />')
-                    xml_lines.append(f'      <AMENITY _Type="Other" _ExistsIndicator="N" _TypeOtherDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="WoodStove" _Count="" />')
+                xml_lines.append(f'      <AMENITY _Type="Fireplace" _ExistsIndicator="{has_fp}" _Count="" />')
+                xml_lines.append(f'      <AMENITY _Type="Fence" _DetailedDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="Patio" _ExistsIndicator="N" _DetailedDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="Porch" _ExistsIndicator="N" _DetailedDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="Pool" _ExistsIndicator="{has_pool}" _DetailedDescription="" />')
+                xml_lines.append(f'      <AMENITY _Type="Other" _ExistsIndicator="N" _TypeOtherDescription="" />')
 
-                    # Car Storage
-                    xml_lines.append(f'      <CAR_STORAGE>')
-                    xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Driveway" _ExistsIndicator="Y" ParkingSpacesCount="" />')
-                    xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Garage" ParkingSpacesCount="{garage_spaces}" _AttachmentType="{garage_xml_type}" />')
-                    xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Carport" ParkingSpacesCount="" />')
-                    xml_lines.append(f'      </CAR_STORAGE>')
+                # Car Storage
+                xml_lines.append(f'      <CAR_STORAGE>')
+                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Driveway" _ExistsIndicator="Y" ParkingSpacesCount="" />')
+                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Garage" ParkingSpacesCount="{garage_spaces}" _AttachmentType="{garage_xml_type}" />')
+                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Carport" ParkingSpacesCount="" />')
+                xml_lines.append(f'      </CAR_STORAGE>')
 
-                    # Structure Analysis
-                    eff_age = subj_imp.get("effective_age", cost.get("effective_age", ""))
-                    rem_life = subj_imp.get("remaining_economic_life", cost.get("remaining_economic_life", ""))
+                # Structure Analysis
+                eff_age = subj_imp.get("effective_age", cost.get("effective_age", ""))
+                rem_life = subj_imp.get("remaining_economic_life", cost.get("remaining_economic_life", ""))
 
-                    xml_lines.append(f'      <STRUCTURE_ANALYSIS EffectiveAgeYearsCount="{eff_age}">')
-                    xml_lines.append(f'        <STRUCTURE_ANALYSIS_RATING />')
-                    xml_lines.append(f'        <STRUCTURE_ANALYSIS_EXTENSION>')
-                    xml_lines.append(f'          <STRUCTURE_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'            <STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'              <EFFECTIVE_AGE GSEEffectiveAgeDescription="{xesc(eff_age)}" />')
-                    xml_lines.append(f'            </STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'          </STRUCTURE_ANALYSIS_EXTENSION_SECTION>')
-                    xml_lines.append(f'        </STRUCTURE_ANALYSIS_EXTENSION>')
-                    xml_lines.append(f'      </STRUCTURE_ANALYSIS>')
+                xml_lines.append(f'      <STRUCTURE_ANALYSIS EffectiveAgeYearsCount="{eff_age}">')
+                xml_lines.append(f'        <STRUCTURE_ANALYSIS_RATING />')
+                xml_lines.append(f'        <STRUCTURE_ANALYSIS_EXTENSION>')
+                xml_lines.append(f'          <STRUCTURE_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'            <STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'              <EFFECTIVE_AGE GSEEffectiveAgeDescription="{xesc(eff_age)}" />')
+                xml_lines.append(f'            </STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'          </STRUCTURE_ANALYSIS_EXTENSION_SECTION>')
+                xml_lines.append(f'        </STRUCTURE_ANALYSIS_EXTENSION>')
+                xml_lines.append(f'      </STRUCTURE_ANALYSIS>')
 
-                    # Condition Details
-                    xml_lines.append(f'      <CONDITION_DETAIL_EXTENSION>')
-                    xml_lines.append(f'        <CONDITION_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <CONDITION_DETAIL _SequenceIdentifier="1" GSEImprovementAreaType="Kitchen" GSEImprovementDescriptionType="Updated" GSEEstimateYearOfImprovementType="Unknown" />')
-                    xml_lines.append(f'          </CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </CONDITION_DETAIL_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </CONDITION_DETAIL_EXTENSION>')
+                # Condition Details
+                xml_lines.append(f'      <CONDITION_DETAIL_EXTENSION>')
+                xml_lines.append(f'        <CONDITION_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <CONDITION_DETAIL _SequenceIdentifier="1" GSEImprovementAreaType="Kitchen" GSEImprovementDescriptionType="Updated" GSEEstimateYearOfImprovementType="Unknown" />')
+                xml_lines.append(f'          </CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </CONDITION_DETAIL_EXTENSION_SECTION>')
+                xml_lines.append(f'      </CONDITION_DETAIL_EXTENSION>')
 
-                    # Overall Condition Rating
-                    xml_lines.append(f'      <OVERALL_CONDITION_RATING_EXTENSION>')
-                    xml_lines.append(f'        <OVERALL_CONDITION_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <OVERALL_CONDITION_RATING GSEUpdateLastFifteenYearIndicator="N" />')
-                    xml_lines.append(f'          </OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </OVERALL_CONDITION_RATING_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </OVERALL_CONDITION_RATING_EXTENSION>')
+                # Overall Condition Rating
+                xml_lines.append(f'      <OVERALL_CONDITION_RATING_EXTENSION>')
+                xml_lines.append(f'        <OVERALL_CONDITION_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <OVERALL_CONDITION_RATING GSEUpdateLastFifteenYearIndicator="N" />')
+                xml_lines.append(f'          </OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </OVERALL_CONDITION_RATING_EXTENSION_SECTION>')
+                xml_lines.append(f'      </OVERALL_CONDITION_RATING_EXTENSION>')
 
-                    # Structure Extension
-                    xml_lines.append(f'      <STRUCTURE_EXTENSION>')
-                    xml_lines.append(f'        <STRUCTURE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <STRUCTURE_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <STRUCTURE_INFORMATION GSEYearBuiltEstimationIndicator="N" GSEStoriesCount="{stories}" />')
-                    xml_lines.append(f'          </STRUCTURE_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </STRUCTURE_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </STRUCTURE_EXTENSION>')
-                    xml_lines.append(f'    </STRUCTURE>')
+                # Structure Extension
+                xml_lines.append(f'      <STRUCTURE_EXTENSION>')
+                xml_lines.append(f'        <STRUCTURE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <STRUCTURE_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <STRUCTURE_INFORMATION GSEYearBuiltEstimationIndicator="N" GSEStoriesCount="{stories}" />')
+                xml_lines.append(f'          </STRUCTURE_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </STRUCTURE_EXTENSION_SECTION>')
+                xml_lines.append(f'      </STRUCTURE_EXTENSION>')
+                xml_lines.append(f'    </STRUCTURE>')
 
-                    # Off-Site Improvements
-                    xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
-                    xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Private" _ExistsIndicator="Y" />')
+                # Off-Site Improvements
+                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
+                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Private" _ExistsIndicator="Y" />')
 
-                    # SITE section
-                    xml_lines.append(f'    <SITE _DimensionsDescription="{xesc(lot_dims)}" _AreaDescription="{xesc(lot_area)}" _ZoningClassificationIdentifier="" _ZoningClassificationDescription="{xesc(zoning)}" _ZoningComplianceType="Legal" _ZoningComplianceDescription="" HighestBestUseIndicator="Y" HighestBestUseDescription="">')
-                    xml_lines.append(f'      <SITE_FEATURE _Type="Shape" _Comment="" />')
-                    xml_lines.append(f'      <SITE_FEATURE _Type="View" _Comment="" />')
-                    xml_lines.append(f'      <SITE_FEATURE _Type="Driveway" _Comment="" />')
+                # SITE section
+                xml_lines.append(f'    <SITE _DimensionsDescription="{xesc(lot_dims)}" _AreaDescription="{xesc(lot_area)}" _ZoningClassificationIdentifier="" _ZoningClassificationDescription="{xesc(zoning)}" _ZoningComplianceType="Legal" _ZoningComplianceDescription="" HighestBestUseIndicator="Y" HighestBestUseDescription="">')
+                xml_lines.append(f'      <SITE_FEATURE _Type="Shape" _Comment="" />')
+                xml_lines.append(f'      <SITE_FEATURE _Type="View" _Comment="" />')
+                xml_lines.append(f'      <SITE_FEATURE _Type="Driveway" _Comment="" />')
 
-                    # Flood Zone
-                    xml_lines.append(f'      <FLOOD_ZONE SpecialFloodHazardAreaIndicator="N" NFIPFloodZoneIdentifier="{xesc(flood_z)}" NFIPMapIdentifier="{xesc(flood_map)}" NFIPMapPanelDate="">')
-                    xml_lines.append(f'        <FLOOD_ZONE_EXTENSION>')
-                    xml_lines.append(f'          <FLOOD_ZONE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'            <FLOOD_ZONE_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'              <FLOOD_ZONE_INFORMATION GSEFEMASpecialFloodHazardAreaIndicator="N" GSENFIPFloodZoneIdentifier="{xesc(flood_z)}" GSEFEMAFloodMapIdentifier="{xesc(flood_map)}" />')
-                    xml_lines.append(f'            </FLOOD_ZONE_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'          </FLOOD_ZONE_EXTENSION_SECTION>')
-                    xml_lines.append(f'        </FLOOD_ZONE_EXTENSION>')
-                    xml_lines.append(f'      </FLOOD_ZONE>')
+                # Flood Zone
+                xml_lines.append(f'      <FLOOD_ZONE SpecialFloodHazardAreaIndicator="N" NFIPFloodZoneIdentifier="{xesc(flood_z)}" NFIPMapIdentifier="{xesc(flood_map)}" NFIPMapPanelDate="">')
+                xml_lines.append(f'        <FLOOD_ZONE_EXTENSION>')
+                xml_lines.append(f'          <FLOOD_ZONE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'            <FLOOD_ZONE_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'              <FLOOD_ZONE_INFORMATION GSEFEMASpecialFloodHazardAreaIndicator="N" GSENFIPFloodZoneIdentifier="{xesc(flood_z)}" GSEFEMAFloodMapIdentifier="{xesc(flood_map)}" />')
+                xml_lines.append(f'            </FLOOD_ZONE_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'          </FLOOD_ZONE_EXTENSION_SECTION>')
+                xml_lines.append(f'        </FLOOD_ZONE_EXTENSION>')
+                xml_lines.append(f'      </FLOOD_ZONE>')
 
-                    # Site Utilities
-                    xml_lines.append(f'      <SITE_UTILITY _Type="Electricity" _PublicIndicator="Y" _NonPublicIndicator="N" _NonPublicDescription="" />')
-                    xml_lines.append(f'      <SITE_UTILITY _Type="Gas" _PublicIndicator="N" _NonPublicIndicator="Y" _NonPublicDescription="" />')
-                    xml_lines.append(f'      <SITE_UTILITY _Type="Water" _PublicIndicator="Y" _NonPublicIndicator="N" _NonPublicDescription="" />')
-                    xml_lines.append(f'      <SITE_UTILITY _Type="SanitarySewer" _PublicIndicator="N" _NonPublicIndicator="Y" _NonPublicDescription="Septic" />')
-                    xml_lines.append(f'    </SITE>')
+                # Site Utilities
+                xml_lines.append(f'      <SITE_UTILITY _Type="Electricity" _PublicIndicator="Y" _NonPublicIndicator="N" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="Gas" _PublicIndicator="N" _NonPublicIndicator="Y" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="Water" _PublicIndicator="Y" _NonPublicIndicator="N" _NonPublicDescription="" />')
+                xml_lines.append(f'      <SITE_UTILITY _Type="SanitarySewer" _PublicIndicator="N" _NonPublicIndicator="Y" _NonPublicDescription="Septic" />')
+                xml_lines.append(f'    </SITE>')
 
-                    # PROJECT section
-                    xml_lines.append(f'    <PROJECT _Name="" _ConversionDate="" _ContainsMultipleDwellingUnitsDataSourceDescription="" _CommonElementsStatusDescription="" _CommonElementsLeaseTermsDescription="" _CommonElementsDescription="">')
-                    xml_lines.append(f'      <DEVELOPMENT_STAGE _TotalPhasesCount="" CompletedUnitsCount="" PlannedUnitsCount="" UnitsSoldCount="" UnitsRentedCount="" UnitsForSaleCount="" DataSourceDescription="" />')
-                    xml_lines.append(f'      <_PER_UNIT_FEE _Amount="" />')
-                    xml_lines.append(f'    </PROJECT>')
+                # PROJECT section
+                xml_lines.append(f'    <PROJECT _Name="" _ConversionDate="" _ContainsMultipleDwellingUnitsDataSourceDescription="" _CommonElementsStatusDescription="" _CommonElementsLeaseTermsDescription="" _CommonElementsDescription="">')
+                xml_lines.append(f'      <DEVELOPMENT_STAGE _TotalPhasesCount="" CompletedUnitsCount="" PlannedUnitsCount="" UnitsSoldCount="" UnitsRentedCount="" UnitsForSaleCount="" DataSourceDescription="" />')
+                xml_lines.append(f'      <_PER_UNIT_FEE _Amount="" />')
+                xml_lines.append(f'    </PROJECT>')
 
-                    # NEIGHBORHOOD section
-                    nb_name = nb.get("name", "")
-                    nb_desc = nb.get("description", "")
-                    xml_lines.append(f'    <NEIGHBORHOOD _Name="{xesc(nb_name)}" PropertyNeighborhoodLocationType="" _BuiltupRangeType="" _GrowthPaceType="" _PropertyValueTrendType="" _DemandSupplyType="" _TypicalMarketingTimeDurationType="" _BoundaryAndCharacteristicsDescription="" _Description="{xesc(nb_desc)}" _MarketConditionsDescription="">')
-                    xml_lines.append(f'      <_HOUSING _Type="SingleFamily" _LowPriceAmount="" _HighPriceAmount="" _PredominantPriceAmount="" _OldestYearsCount="" _NewestYearsCount="" _PredominantAgeYearsCount="" />')
-                    xml_lines.append(f'      <_PRESENT_LAND_USE _Type="SingleFamily" _Percent="" />')
-                    xml_lines.append(f'      <_PRESENT_LAND_USE _Type="TwoToFourFamily" _Percent="" />')
-                    xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Apartment" _Percent="" />')
-                    xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Commercial" _Percent="" />')
-                    xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Other" _TypeOtherDescription="" _Percent="" />')
-                    xml_lines.append(f'      <NEIGHBORHOOD_EXTENSION>')
-                    xml_lines.append(f'        <NEIGHBORHOOD_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <NEIGHBORHOOD_BOUNDARIES GSENeighborhoodBoundariesDescription="" />')
-                    xml_lines.append(f'          </NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </NEIGHBORHOOD_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </NEIGHBORHOOD_EXTENSION>')
-                    xml_lines.append(f'    </NEIGHBORHOOD>')
+                # NEIGHBORHOOD section
+                nb_name = nb.get("name", "")
+                nb_desc = nb.get("description", "")
+                xml_lines.append(f'    <NEIGHBORHOOD _Name="{xesc(nb_name)}" PropertyNeighborhoodLocationType="" _BuiltupRangeType="" _GrowthPaceType="" _PropertyValueTrendType="" _DemandSupplyType="" _TypicalMarketingTimeDurationType="" _BoundaryAndCharacteristicsDescription="" _Description="{xesc(nb_desc)}" _MarketConditionsDescription="">')
+                xml_lines.append(f'      <_HOUSING _Type="SingleFamily" _LowPriceAmount="" _HighPriceAmount="" _PredominantPriceAmount="" _OldestYearsCount="" _NewestYearsCount="" _PredominantAgeYearsCount="" />')
+                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="SingleFamily" _Percent="" />')
+                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="TwoToFourFamily" _Percent="" />')
+                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Apartment" _Percent="" />')
+                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Commercial" _Percent="" />')
+                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Other" _TypeOtherDescription="" _Percent="" />')
+                xml_lines.append(f'      <NEIGHBORHOOD_EXTENSION>')
+                xml_lines.append(f'        <NEIGHBORHOOD_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <NEIGHBORHOOD_BOUNDARIES GSENeighborhoodBoundariesDescription="" />')
+                xml_lines.append(f'          </NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </NEIGHBORHOOD_EXTENSION_SECTION>')
+                xml_lines.append(f'      </NEIGHBORHOOD_EXTENSION>')
+                xml_lines.append(f'    </NEIGHBORHOOD>')
 
-                    # TAX section
-                    xml_lines.append(f'    <_TAX _YearIdentifier="{xesc(tax_yr)}" _TotalTaxAmount="{xesc(tax_amt)}" _TotalSpecialTaxAmount="">')
-                    xml_lines.append(f'      <PROPERTY_TAX_EXTENSION>')
-                    xml_lines.append(f'        <PROPERTY_TAX_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <PROPERTY_TAX_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <PROPERTY_TAX_AMOUNT GSEPropertyTaxTotalTaxAmount="{xesc(tax_amt)}" />')
-                    xml_lines.append(f'          </PROPERTY_TAX_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </PROPERTY_TAX_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </PROPERTY_TAX_EXTENSION>')
-                    xml_lines.append(f'    </_TAX>')
+                # TAX section
+                xml_lines.append(f'    <_TAX _YearIdentifier="{xesc(tax_yr)}" _TotalTaxAmount="{xesc(tax_amt)}" _TotalSpecialTaxAmount="">')
+                xml_lines.append(f'      <PROPERTY_TAX_EXTENSION>')
+                xml_lines.append(f'        <PROPERTY_TAX_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <PROPERTY_TAX_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <PROPERTY_TAX_AMOUNT GSEPropertyTaxTotalTaxAmount="{xesc(tax_amt)}" />')
+                xml_lines.append(f'          </PROPERTY_TAX_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </PROPERTY_TAX_EXTENSION_SECTION>')
+                xml_lines.append(f'      </PROPERTY_TAX_EXTENSION>')
+                xml_lines.append(f'    </_TAX>')
 
-                    # Additional property analysis
-                    xml_lines.append(f'    <LISTING_HISTORY ListedWithinPreviousYearIndicator="N" ListedWithinPreviousYearDescription="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdditionalFeatures" _Comment="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="QualityAndAppearance" _Comment="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PhysicalDeficiency" _ExistsIndicator="N" _Comment="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="ConformsToNeighborhood" _ExistsIndicator="Y" _Comment="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="UtilitiesAndOffSiteImprovementsConformToNeighborhood" _ExistsIndicator="Y" _Comment="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdverseSiteConditions" _ExistsIndicator="N" _Comment="" />')
-                    xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PropertyCondition" _Comment="" />')
+                # Additional property analysis
+                xml_lines.append(f'    <LISTING_HISTORY ListedWithinPreviousYearIndicator="N" ListedWithinPreviousYearDescription="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdditionalFeatures" _Comment="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="QualityAndAppearance" _Comment="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PhysicalDeficiency" _ExistsIndicator="N" _Comment="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="ConformsToNeighborhood" _ExistsIndicator="Y" _Comment="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="UtilitiesAndOffSiteImprovementsConformToNeighborhood" _ExistsIndicator="Y" _Comment="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdverseSiteConditions" _ExistsIndicator="N" _Comment="" />')
+                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PropertyCondition" _Comment="" />')
 
-                    # Owner
-                    xml_lines.append(f'    <_OWNER _Name="">')
-                    xml_lines.append(f'      <CONTACT_DETAIL />')
-                    xml_lines.append(f'      <PROPERTY_OWNER_EXTENSION>')
-                    xml_lines.append(f'        <PROPERTY_OWNER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <PROPERTY_OWNER GSEPropertyOwnerName="" />')
-                    xml_lines.append(f'          </PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </PROPERTY_OWNER_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </PROPERTY_OWNER_EXTENSION>')
-                    xml_lines.append(f'    </_OWNER>')
+                # Owner
+                xml_lines.append(f'    <_OWNER _Name="">')
+                xml_lines.append(f'      <CONTACT_DETAIL />')
+                xml_lines.append(f'      <PROPERTY_OWNER_EXTENSION>')
+                xml_lines.append(f'        <PROPERTY_OWNER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <PROPERTY_OWNER GSEPropertyOwnerName="" />')
+                xml_lines.append(f'          </PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </PROPERTY_OWNER_EXTENSION_SECTION>')
+                xml_lines.append(f'      </PROPERTY_OWNER_EXTENSION>')
+                xml_lines.append(f'    </_OWNER>')
 
-                    # Sales Contract
-                    xml_lines.append(f'    <SALES_CONTRACT _ReviewComment="" _Amount="" _Date="" DataSourceDescription="" SalesConcessionAmount="" SalesConcessionDescription="">')
-                    xml_lines.append(f'      <SALES_CONCESSION_EXTENSION>')
-                    xml_lines.append(f'        <SALES_CONCESSION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <SALES_CONCESSION_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <SALES_CONCESSION GSEUndefinedConcessionAmountIndicator="N" />')
-                    xml_lines.append(f'          </SALES_CONCESSION_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </SALES_CONCESSION_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </SALES_CONCESSION_EXTENSION>')
-                    xml_lines.append(f'    </SALES_CONTRACT>')
+                # Sales Contract
+                xml_lines.append(f'    <SALES_CONTRACT _ReviewComment="" _Amount="" _Date="" DataSourceDescription="" SalesConcessionAmount="" SalesConcessionDescription="">')
+                xml_lines.append(f'      <SALES_CONCESSION_EXTENSION>')
+                xml_lines.append(f'        <SALES_CONCESSION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <SALES_CONCESSION_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <SALES_CONCESSION GSEUndefinedConcessionAmountIndicator="N" />')
+                xml_lines.append(f'          </SALES_CONCESSION_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </SALES_CONCESSION_EXTENSION_SECTION>')
+                xml_lines.append(f'      </SALES_CONCESSION_EXTENSION>')
+                xml_lines.append(f'    </SALES_CONTRACT>')
 
-                    # Property Extension
-                    xml_lines.append(f'    <PROPERTY_EXTENSION>')
-                    xml_lines.append(f'      <PROPERTY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'        <PROPERTY_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'          <PROPERTY_TYPE GSE_PUDIndicator="N" />')
-                    xml_lines.append(f'        </PROPERTY_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'      </PROPERTY_EXTENSION_SECTION>')
-                    xml_lines.append(f'    </PROPERTY_EXTENSION>')
-                    xml_lines.append(f'  </PROPERTY>')
+                # Property Extension
+                xml_lines.append(f'    <PROPERTY_EXTENSION>')
+                xml_lines.append(f'      <PROPERTY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'        <PROPERTY_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'          <PROPERTY_TYPE GSE_PUDIndicator="N" />')
+                xml_lines.append(f'        </PROPERTY_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'      </PROPERTY_EXTENSION_SECTION>')
+                xml_lines.append(f'    </PROPERTY_EXTENSION>')
+                xml_lines.append(f'  </PROPERTY>')
 
-                    # VALUATION_METHODS section
-                    methods_comment = comments.get("methods", "Extent of the Appraisal Process: Standard appraisal methods applied.")
-                    xml_lines.append(f'  <VALUATION_METHODS _AdditionalDescription="{xesc(methods_comment)}">')
+                # VALUATION_METHODS section
+                methods_comment = comments.get("methods", "Extent of the Appraisal Process: Standard appraisal methods applied.")
+                xml_lines.append(f'  <VALUATION_METHODS _AdditionalDescription="{xesc(methods_comment)}">')
 
-                    # COST_ANALYSIS
-                    cost_site_val = cost.get("site_value", "")
-                    cost_improvement = cost.get("cost_new_improvements", "")
-                    cost_depr = cost.get("depreciated_cost", "")
-                    cost_total = cost.get("total_value", "")
+                # COST_ANALYSIS
+                cost_site_val = cost.get("site_value", "")
+                cost_improvement = cost.get("cost_new_improvements", "")
+                cost_depr = cost.get("depreciated_cost", "")
+                cost_total = cost.get("total_value", "")
 
-                    xml_lines.append(f'    <COST_ANALYSIS SiteEstimatedValueComment="" DataSourceDescription="" CostServiceQualityRatingDescription="" DataSourceEffectiveDate="" _Comment="" EstimatedRemainingEconomicLifeYearsCount="{rem_life}" SiteEstimatedValueAmount="{cost_site_val}" NewImprovementTotalCostAmount="{cost_improvement}" NewImprovementDepreciatedCostAmount="{cost_depr}" SiteOtherImprovementsAsIsAmount="" ValueIndicatedByCostApproachAmount="{cost_total}">')
-                    xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Dwelling" SquareFeetCount="{gla}" PricePerSquareFootAmount="" _CostAmount="{cost_improvement}" _SequenceIdentifier="1" />')
-                    xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Other" _TypeOtherDescription="" SquareFeetCount="" PricePerSquareFootAmount="" _CostAmount="" _SequenceIdentifier="2" />')
-                    xml_lines.append(f'      <DEPRECIATION _PhysicalPercent="" _PhysicalAmount="" _FunctionalPercent="" _FunctionalAmount="" _ExteriorPercent="" _ExteriorAmount="" _TotalAmount="" />')
-                    xml_lines.append(f'      <COST_ANALYSIS_EXTENSION>')
-                    xml_lines.append(f'        <COST_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'          <COST_ANALYSIS_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            <COST_APPROACH_DATA_SOURCE GSECostDataSourceEffectiveDateDescription="" />')
-                    xml_lines.append(f'          </COST_ANALYSIS_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'        </COST_ANALYSIS_EXTENSION_SECTION>')
-                    xml_lines.append(f'      </COST_ANALYSIS_EXTENSION>')
-                    xml_lines.append(f'    </COST_ANALYSIS>')
+                xml_lines.append(f'    <COST_ANALYSIS SiteEstimatedValueComment="" DataSourceDescription="" CostServiceQualityRatingDescription="" DataSourceEffectiveDate="" _Comment="" EstimatedRemainingEconomicLifeYearsCount="{rem_life}" SiteEstimatedValueAmount="{cost_site_val}" NewImprovementTotalCostAmount="{cost_improvement}" NewImprovementDepreciatedCostAmount="{cost_depr}" SiteOtherImprovementsAsIsAmount="" ValueIndicatedByCostApproachAmount="{cost_total}">')
+                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Dwelling" SquareFeetCount="{gla}" PricePerSquareFootAmount="" _CostAmount="{cost_improvement}" _SequenceIdentifier="1" />')
+                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Other" _TypeOtherDescription="" SquareFeetCount="" PricePerSquareFootAmount="" _CostAmount="" _SequenceIdentifier="2" />')
+                xml_lines.append(f'      <DEPRECIATION _PhysicalPercent="" _PhysicalAmount="" _FunctionalPercent="" _FunctionalAmount="" _ExteriorPercent="" _ExteriorAmount="" _TotalAmount="" />')
+                xml_lines.append(f'      <COST_ANALYSIS_EXTENSION>')
+                xml_lines.append(f'        <COST_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'          <COST_ANALYSIS_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            <COST_APPROACH_DATA_SOURCE GSECostDataSourceEffectiveDateDescription="" />')
+                xml_lines.append(f'          </COST_ANALYSIS_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'        </COST_ANALYSIS_EXTENSION_SECTION>')
+                xml_lines.append(f'      </COST_ANALYSIS_EXTENSION>')
+                xml_lines.append(f'    </COST_ANALYSIS>')
 
-                    # SALES_COMPARISON
-                    sales_comp_val = val_summary.get("sales_comparison_value", val_summary.get("market_value", ""))
-                    xml_lines.append(f'    <SALES_COMPARISON _CurrentSalesAgreementAnalysisComment="" _Comment="" ValueIndicatedBySalesComparisonApproachAmount="{sales_comp_val}">')
-                    xml_lines.append(f'      <RESEARCH ComparableListingsResearchedCount="" ComparableListingsPriceRangeLowAmount="" ComparableListingsPriceRangeHighAmount="" ComparableSalesResearchedCount="" ComparableSalesPriceRangeLowAmount="" ComparableSalesPriceRangeHighAmount="" SalesHistoryNotResearchedComment="">')
-                    xml_lines.append(f'        <SUBJECT DataSourceDescription="" />')
-                    xml_lines.append(f'        <COMPARABLE DataSourceDescription="" />')
-                    xml_lines.append(f'      </RESEARCH>')
+                # SALES_COMPARISON
+                sales_comp_val = val_summary.get("sales_comparison_value", val_summary.get("market_value", ""))
+                xml_lines.append(f'    <SALES_COMPARISON _CurrentSalesAgreementAnalysisComment="" _Comment="" ValueIndicatedBySalesComparisonApproachAmount="{sales_comp_val}">')
+                xml_lines.append(f'      <RESEARCH ComparableListingsResearchedCount="" ComparableListingsPriceRangeLowAmount="" ComparableListingsPriceRangeHighAmount="" ComparableSalesResearchedCount="" ComparableSalesPriceRangeLowAmount="" ComparableSalesPriceRangeHighAmount="" SalesHistoryNotResearchedComment="">')
+                xml_lines.append(f'        <SUBJECT DataSourceDescription="" />')
+                xml_lines.append(f'        <COMPARABLE DataSourceDescription="" />')
+                xml_lines.append(f'      </RESEARCH>')
 
-                    # Add subject property as comparable with sequence 0 (empty PropertySalesAmount)
-                    xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="0" PropertySalesAmount="" SalesPricePerGrossLivingAreaAmount="">')
-                    xml_lines.append(f'        <LOCATION LatitudeNumber="{lat}" LongitudeNumber="{lon}" PropertyStreetAddress="{xesc(addr)}" PropertyStreetAddress2="{xesc(city)}, {state} {zipcode}" />')
-                    xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" />')
-                    xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="" PropertySalesAmount="" DataSourceDescription="" DataSourceEffectiveDate="">')
-                    xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
-                    xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="" GSEPriorSaleComment="" />')
-                    xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
-                    xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
-                    xml_lines.append(f'        </PRIOR_SALES>')
-                    xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
-                    xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" />')
-                    xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
-                    xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
-                    xml_lines.append(f'      </COMPARABLE_SALE>')
+                # Add subject property as comparable with sequence 0 (empty PropertySalesAmount)
+                xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="0" PropertySalesAmount="" SalesPricePerGrossLivingAreaAmount="">')
+                xml_lines.append(f'        <LOCATION LatitudeNumber="{lat}" LongitudeNumber="{lon}" PropertyStreetAddress="{xesc(addr)}" PropertyStreetAddress2="{xesc(city)}, {state} {zipcode}" />')
+                xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="" />')
+                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" />')
+                xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="" PropertySalesAmount="" DataSourceDescription="" DataSourceEffectiveDate="">')
+                xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
+                xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="" GSEPriorSaleComment="" />')
+                xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
+                xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
+                xml_lines.append(f'        </PRIOR_SALES>')
+                xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
+                xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" />')
+                xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
+                xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
+                xml_lines.append(f'      </COMPARABLE_SALE>')
 
-                    # Add comparable sales (sequences 1, 2, 3)
-                    if comps:
-                        for idx, comp in enumerate(comps[:3], start=1):
-                            comp_price = comp.get("sale_price", "")
-                            comp_price_sqft = comp.get("price_per_sqft", "")
-                            xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="{idx}" PropertySalesAmount="{comp_price}" SalesPricePerGrossLivingAreaAmount="{comp_price_sqft}" DataSourceDescription="{xesc(comp.get("data_source", ""))}" DataSourceVerificationDescription="{xesc(comp.get("verification_source", ""))}" SalesPriceTotalAdjustmentPositiveIndicator="" SalePriceTotalAdjustmentAmount="" AdjustedSalesPriceAmount="" SalesPriceTotalAdjustmentGrossPercent="" SalesPriceTotalAdjustmentNetPercent="">')
-                            xml_lines.append(f'        <LOCATION LatitudeNumber="{comp.get("latitude", "")}" LongitudeNumber="{comp.get("longitude", "")}" PropertyStreetAddress="{xesc(comp.get("address", ""))}" PropertyStreetAddress2="{xesc(comp.get("city", ""))}, {comp.get("state", "")} {comp.get("zip", "")}" ProximityToSubjectDescription="" />')
-                            xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{comp.get("total_rooms", "")}" TotalBedroomCount="{comp.get("bedrooms", "")}" TotalBathroomCount="{comp.get("bathrooms", "")}" RoomAdjustmentAmount="" />')
+                # Add comparable sales (sequences 1, 2, 3)
+                if comps:
+                    for idx, comp in enumerate(comps[:3], start=1):
+                        comp_price = comp.get("sale_price", "")
+                        comp_price_sqft = comp.get("price_per_sqft", "")
+                        xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="{idx}" PropertySalesAmount="{comp_price}" SalesPricePerGrossLivingAreaAmount="{comp_price_sqft}" DataSourceDescription="{xesc(comp.get("data_source", ""))}" DataSourceVerificationDescription="{xesc(comp.get("verification_source", ""))}" SalesPriceTotalAdjustmentPositiveIndicator="" SalePriceTotalAdjustmentAmount="" AdjustedSalesPriceAmount="" SalesPriceTotalAdjustmentGrossPercent="" SalesPriceTotalAdjustmentNetPercent="">')
+                        xml_lines.append(f'        <LOCATION LatitudeNumber="{comp.get("latitude", "")}" LongitudeNumber="{comp.get("longitude", "")}" PropertyStreetAddress="{xesc(comp.get("address", ""))}" PropertyStreetAddress2="{xesc(comp.get("city", ""))}, {comp.get("state", "")} {comp.get("zip", "")}" ProximityToSubjectDescription="" />')
+                        xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{comp.get("total_rooms", "")}" TotalBedroomCount="{comp.get("bedrooms", "")}" TotalBathroomCount="{comp.get("bathrooms", "")}" RoomAdjustmentAmount="" />')
 
-                            # Adjustments for comparable
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{xesc(comp.get("location", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="{xesc(comp.get("property_rights", "Fee Simple"))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{xesc(comp.get("site_area", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{xesc(comp.get("view", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{xesc(comp.get("design_style", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{xesc(comp.get("quality", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(comp.get("age", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(comp.get("condition", ""))}" _Amount="" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(comp.get("gla", ""))}" _Amount="{comp.get("gla_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(comp.get("basement_area", ""))}" _Amount="{comp.get("basement_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(comp.get("basement_finish", ""))}" _Amount="{comp.get("basement_finish_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(comp.get("functional_utility", ""))}" _Amount="{comp.get("functional_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(comp.get("heating_cooling", ""))}" _Amount="{comp.get("heating_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(comp.get("energy_efficiency", ""))}" _Amount="{comp.get("energy_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{xesc(comp.get("garage_parking", ""))}" _Amount="{comp.get("garage_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{xesc(comp.get("porch_patio_deck", ""))}" _Amount="{comp.get("porch_adj", "")}" />')
-                            xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{xesc(comp.get("fireplace", ""))}" _Amount="{comp.get("fireplace_adj", "")}" />')
+                        # Adjustments for comparable
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{xesc(comp.get("location", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="{xesc(comp.get("property_rights", "Fee Simple"))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{xesc(comp.get("site_area", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{xesc(comp.get("view", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{xesc(comp.get("design_style", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{xesc(comp.get("quality", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(comp.get("age", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(comp.get("condition", ""))}" _Amount="" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(comp.get("gla", ""))}" _Amount="{comp.get("gla_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(comp.get("basement_area", ""))}" _Amount="{comp.get("basement_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(comp.get("basement_finish", ""))}" _Amount="{comp.get("basement_finish_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(comp.get("functional_utility", ""))}" _Amount="{comp.get("functional_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(comp.get("heating_cooling", ""))}" _Amount="{comp.get("heating_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(comp.get("energy_efficiency", ""))}" _Amount="{comp.get("energy_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{xesc(comp.get("garage_parking", ""))}" _Amount="{comp.get("garage_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{xesc(comp.get("porch_patio_deck", ""))}" _Amount="{comp.get("porch_adj", "")}" />')
+                        xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{xesc(comp.get("fireplace", ""))}" _Amount="{comp.get("fireplace_adj", "")}" />')
 
-                            # Prior sales
-                            c_prior_date = comp.get("prior_sale_date", "")
-                            c_prior_price = comp.get("prior_sale_price", "")
-                            xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="{xesc(c_prior_date)}" PropertySalesAmount="{xesc(c_prior_price)}" DataSourceDescription="{xesc(comp.get("data_source", ""))}" DataSourceEffectiveDate="">')
-                            xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
-                            xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                            xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="{xesc(c_prior_date)}" GSEPriorSaleComment="" />')
-                            xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
-                            xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
-                            xml_lines.append(f'        </PRIOR_SALES>')
+                        # Prior sales
+                        c_prior_date = comp.get("prior_sale_date", "")
+                        c_prior_price = comp.get("prior_sale_price", "")
+                        xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="{xesc(c_prior_date)}" PropertySalesAmount="{xesc(c_prior_price)}" DataSourceDescription="{xesc(comp.get("data_source", ""))}" DataSourceEffectiveDate="">')
+                        xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
+                        xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                        xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="{xesc(c_prior_date)}" GSEPriorSaleComment="" />')
+                        xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
+                        xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
+                        xml_lines.append(f'        </PRIOR_SALES>')
 
-                            # Comparison Details
-                            xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
-                            xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                            xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="{comp.get("days_on_market", "")}" GSEOverallConditionType="" GSEQualityOfConstructionRatingType="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" GSEDataSourceDescription="" GSESaleType="" GSEFinancingType="" GSEFinancingTypeOtherDescription="" GSEConcessionAmount="" GSEListingStatusType="" GSEContractDateUnknownIndicator="N" GSEBelowGradeFinishSquareFeetNumber="" GSEBasementExitType="" />')
-                            xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
-                            xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
+                        # Comparison Details
+                        xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
+                        xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                        xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="{comp.get("days_on_market", "")}" GSEOverallConditionType="" GSEQualityOfConstructionRatingType="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" GSEDataSourceDescription="" GSESaleType="" GSEFinancingType="" GSEFinancingTypeOtherDescription="" GSEConcessionAmount="" GSEListingStatusType="" GSEContractDateUnknownIndicator="N" GSEBelowGradeFinishSquareFeetNumber="" GSEBasementExitType="" />')
+                        xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
+                        xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
 
-                            # View and Location Rating Extensions (only on actual comps, not subject)
-                            xml_lines.append(f'        <COMPARISON_VIEW_OVERALL_RATING_EXTENSION>')
-                            xml_lines.append(f'          <COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                            xml_lines.append(f'            <COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'              <COMPARISON_VIEW_OVERALL_RATING GSEViewOverallRatingType="" />')
-                            xml_lines.append(f'            </COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'          </COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION>')
-                            xml_lines.append(f'        </COMPARISON_VIEW_OVERALL_RATING_EXTENSION>')
+                        # View and Location Rating Extensions (only on actual comps, not subject)
+                        xml_lines.append(f'        <COMPARISON_VIEW_OVERALL_RATING_EXTENSION>')
+                        xml_lines.append(f'          <COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                        xml_lines.append(f'            <COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'              <COMPARISON_VIEW_OVERALL_RATING GSEViewOverallRatingType="" />')
+                        xml_lines.append(f'            </COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'          </COMPARISON_VIEW_OVERALL_RATING_EXTENSION_SECTION>')
+                        xml_lines.append(f'        </COMPARISON_VIEW_OVERALL_RATING_EXTENSION>')
 
-                            xml_lines.append(f'        <COMPARISON_LOCATION_OVERALL_RATING_EXTENSION>')
-                            xml_lines.append(f'          <COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                            xml_lines.append(f'            <COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'              <COMPARISON_LOCATION_OVERALL_RATING GSEOverallLocationRatingType="" />')
-                            xml_lines.append(f'            </COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION_DATA>')
-                            xml_lines.append(f'          </COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION>')
-                            xml_lines.append(f'        </COMPARISON_LOCATION_OVERALL_RATING_EXTENSION>')
+                        xml_lines.append(f'        <COMPARISON_LOCATION_OVERALL_RATING_EXTENSION>')
+                        xml_lines.append(f'          <COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                        xml_lines.append(f'            <COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'              <COMPARISON_LOCATION_OVERALL_RATING GSEOverallLocationRatingType="" />')
+                        xml_lines.append(f'            </COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION_DATA>')
+                        xml_lines.append(f'          </COMPARISON_LOCATION_OVERALL_RATING_EXTENSION_SECTION>')
+                        xml_lines.append(f'        </COMPARISON_LOCATION_OVERALL_RATING_EXTENSION>')
 
-                            xml_lines.append(f'      </COMPARABLE_SALE>')
+                        xml_lines.append(f'      </COMPARABLE_SALE>')
 
-                    xml_lines.append(f'    </SALES_COMPARISON>')
+                xml_lines.append(f'    </SALES_COMPARISON>')
 
-                    # INCOME_ANALYSIS
-                    xml_lines.append(f'    <INCOME_ANALYSIS ValueIndicatedByIncomeApproachAmount="" EstimatedMarketMonthlyRentAmount="" GrossRentMultiplierFactor="" _Comment="" />')
+                # INCOME_ANALYSIS
+                xml_lines.append(f'    <INCOME_ANALYSIS ValueIndicatedByIncomeApproachAmount="" EstimatedMarketMonthlyRentAmount="" GrossRentMultiplierFactor="" _Comment="" />')
 
-                    xml_lines.append(f'  </VALUATION_METHODS>')
+                xml_lines.append(f'  </VALUATION_METHODS>')
 
-                    # VALUATION section (final opinion of value)
-                    final_val = val_summary.get("final_opinion_value", val_opinion) or val_opinion
-                    eff_date = val_summary.get("effective_date", insp_date) or insp_date
-                    reconciliation_comment = comments.get("reconciliation", "")
-                    conditions_comment = comments.get("conditions_comment", "")
+                # VALUATION section (final opinion of value)
+                final_val = val_summary.get("final_opinion_value", val_opinion) or val_opinion
+                eff_date = val_summary.get("effective_date", insp_date) or insp_date
+                reconciliation_comment = comments.get("reconciliation", "")
+                conditions_comment = comments.get("conditions_comment", "")
 
-                    xml_lines.append(f'  <VALUATION PropertyAppraisedValueAmount="{final_val}" AppraisalEffectiveDate="{xesc(eff_date)}">')
-                    xml_lines.append(f'    <_RECONCILIATION _SummaryComment="{xesc(reconciliation_comment)}" _ConditionsComment="{xesc(conditions_comment)}">')
-                    xml_lines.append(f'      <_CONDITION_OF_APPRAISAL _Type="" />')
-                    xml_lines.append(f'    </_RECONCILIATION>')
-                    xml_lines.append(f'  </VALUATION>')
+                xml_lines.append(f'  <VALUATION PropertyAppraisedValueAmount="{final_val}" AppraisalEffectiveDate="{xesc(eff_date)}">')
+                xml_lines.append(f'    <_RECONCILIATION _SummaryComment="{xesc(reconciliation_comment)}" _ConditionsComment="{xesc(conditions_comment)}">')
+                xml_lines.append(f'      <_CONDITION_OF_APPRAISAL _Type="" />')
+                xml_lines.append(f'    </_RECONCILIATION>')
+                xml_lines.append(f'  </VALUATION>')
 
-                    # Close VALUATION_RESPONSE
-                    xml_lines.append(f'</VALUATION_RESPONSE>')
+                # Close VALUATION_RESPONSE
+                xml_lines.append(f'</VALUATION_RESPONSE>')
 
-                    xml_str = '\n'.join(xml_lines)
-                    st.download_button("Download UAD XML", data=xml_str,
-                                      file_name=f"{order_data['order_id']}_UAD.xml",
-                                      mime="application/xml")
+                xml_str = '\n'.join(xml_lines)
+                st.download_button("Download UAD XML", data=xml_str,
+                                  file_name=f"{order_data['order_id']}_UAD.xml",
+                                  mime="application/xml")
 
         with ecol2:
             if st.button("Copy Narrative to Clipboard"):
