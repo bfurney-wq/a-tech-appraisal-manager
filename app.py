@@ -7,6 +7,13 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import xml.etree.ElementTree as ET
+import xml.sax.saxutils as saxutils
+
+# XML escape helper
+def xesc(val):
+    if val is None:
+        return ""
+    return saxutils.escape(str(val), {'"': '&quot;', "'": '&apos;'})
 from PIL import Image
 import json
 
@@ -617,8 +624,8 @@ with tab1:
 
     if not filtered.empty:
         # Status indicators
-        status_icons = {"Pending": "🔴", "In Progress": "🟡", "Completed": "🟢", "On Hold": "🟠", "Cancelled": "⚫"}
-        filtered["Status Display"] = filtered["status"].apply(lambda s: f"{status_icons.get(s, '⚪')} {s}")
+        status_icons = {"Pending": "ð´", "In Progress": "ð¡", "Completed": "ð¢", "On Hold": "ð ", "Cancelled": "â«"}
+        filtered["Status Display"] = filtered["status"].apply(lambda s: f"{status_icons.get(s, 'âª')} {s}")
 
         display_cols = ["order_id", "client_name", "subject_address", "assigned_appraiser",
                        "Status Display", "due_date", "fee", "created_at"]
@@ -1069,10 +1076,17 @@ with tab3:
 
                 xml_lines = []
                 xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
-                xml_lines.append(f'<VALUATION_RESPONSE MISMOVersionID="2.6GSE">')
+                xml_lines.append(f'<VALUATION_RESPONSE MISMOVersionID="2.6">')
+
+                # DOCUMENT_CLASSIFICATION - required for TOTAL to recognize UAD format
+                xml_lines.append('  <DOCUMENT_CLASSIFICATION>')
+                xml_lines.append('    <DOCUMENT_CLASSES>')
+                xml_lines.append('      <DOCUMENT_CLASS _Name="VALUATION" />')
+                xml_lines.append('    </DOCUMENT_CLASSES>')
+                xml_lines.append('  </DOCUMENT_CLASSIFICATION>')
 
                 # REPORT section
-                xml_lines.append(f'  <REPORT USPAPReportDescription="{addr} - Appraisal" AppraiserFileIdentifier="{order_data.get("order_id", "")}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="A-Tech Appraisal Manager" AppraisalSoftwareProductVersionIdentifier="1.0" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{form_type}" _TitleDescription="{title_desc}" AppraisalFormVersionIdentifier="2005" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
+                xml_lines.append(f'  <REPORT USPAPReportDescription="{addr} - Appraisal" AppraiserFileIdentifier="{order_data.get("order_id", "")}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="A-Tech Appraisal Manager" AppraisalSoftwareProductVersionIdentifier="1.0" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{form_type}" _TitleDescription="{title_desc}" AppraisalFormVersionIdentifier="March 2005" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
                 xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="1" AppraisalReportContentType="AppraisalForm" AppraisalReportContentName="URAR [UAD Version]" AppraisalReportContentIdentifier="UAD Version 9/2011" AppraisalReportContentIsPrimaryFormIndicator="Y" />')
                 # Add addendum text if available
                 combined_addendum = ""
@@ -1493,7 +1507,7 @@ with tab5:
     settings = get_settings()
 
     st.markdown("**Email Configuration (Gmail)**")
-    st.caption("Use a Gmail App Password — not your regular password. Google Account > Security > App Passwords.")
+    st.caption("Use a Gmail App Password â not your regular password. Google Account > Security > App Passwords.")
 
     gmail_user = st.text_input("Gmail Address", value=settings.get("gmail_user", ""), key="gmail_user_input")
     gmail_pass = st.text_input("Gmail App Password", value=settings.get("gmail_app_password", ""),
