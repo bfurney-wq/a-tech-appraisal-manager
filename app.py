@@ -9,9 +9,35 @@ from email.mime.multipart import MIMEMultipart
 import xml.etree.ElementTree as ET
 from PIL import Image
 import json
+import base64
+import io
+import math
+import requests
 
 # ====================== CONFIG ======================
-st.set_page_config(page_title="A-Tech Appraisal Manager", layout="wide")
+st.set_page_config(page_title="A-Tech Appraisal Co.", layout="wide", page_icon="🏠")
+
+# ====================== CUSTOM CSS ======================
+st.markdown("""
+<style>
+#MainMenu {display: none;}
+footer {display: none;}
+.main {background-color: #f8f9fa;}
+.hero-banner {background: linear-gradient(135deg, #2D4A6F 0%, #1a2f4a 100%); padding: 2rem 2.5rem; border-radius: 10px; margin-bottom: 1.5rem; color: white;}
+.hero-banner h1 {color: white !important; font-size: 2.2rem; margin: 0; font-weight: 700;}
+.hero-banner p {color: rgba(255,255,255,0.85); margin: 0.3rem 0 0 0; font-size: 1rem;}
+.metric-card {background: white; border-radius: 8px; padding: 1.25rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 3px solid #2D4A6F;}
+.metric-value {font-size: 2rem; font-weight: 700; color: #2D4A6F; margin: 0.5rem 0;}
+.metric-label {font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;}
+.feature-card {background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #2D4A6F; margin-bottom: 0.75rem;}
+.feature-card h4 {color: #2D4A6F; margin: 0 0 0.5rem 0;}
+.feature-card p {color: #555; margin: 0; font-size: 0.9rem;}
+.stTabs [data-baseweb="tab-list"] {gap: 4px;}
+.stTabs [data-baseweb="tab"] {background-color: #f0f2f6; border-radius: 6px 6px 0 0; padding: 0.6rem 1.2rem; font-weight: 500;}
+.stTabs [aria-selected="true"] {background-color: #2D4A6F; color: white;}
+h1, h2, h3 {color: #2D4A6F;}
+</style>
+""", unsafe_allow_html=True)
 
 # ====================== SESSION STATE INIT ======================
 if "show_form" not in st.session_state:
@@ -20,6 +46,10 @@ if "edit_order_id" not in st.session_state:
     st.session_state.edit_order_id = None
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Dashboard"
+if "extracted_data" not in st.session_state:
+    st.session_state.extracted_data = {}
+if "extracted_ps_data" not in st.session_state:
+    st.session_state.extracted_ps_data = {}
 
 # ====================== DATABASE ======================
 DB_FILE = "a_tech_appraisals.db"
@@ -564,12 +594,100 @@ def save_setting(key, value):
     conn.commit()
     conn.close()
 
+# ====================== DOCUMENT EXTRACTION ======================
+def extract_document_data(uploaded_file, api_key, doc_type="engagement"):
+    """Extract data from engagement letters, order forms, or P&S agreements using GPT-4o vision."""
+    if not api_key:
+        return {}, "OpenAI API key not configured"
+    file_bytes = uploaded_file.read()
+    uploaded_file.seek(0)
+    b64_data = base64.b64encode(file_bytes).decode('utf-8')
+    ext = uploaded_file.name.lower().split('.')[-1]
+    media_map = {'pdf': 'application/pdf', 'png': 'image/png', 'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'webp': 'image/webp'}
+    media_type = media_map.get(ext, 'application/octet-stream')
+
+    if doc_type == "engagement":
+        prompt = """Extract ALL information from this engagement letter or order form. Return ONLY valid JSON:
+{"client_name":"","client_email":"","client_phone":"","lender_name":"","loan_number":"","borrower_name":"",
+"subject_address":"","city":"","state":"","zip_code":"","property_type":"","appraisal_type":"","fee":"","due_date":""}
+Include only fields you find. Omit empty fields."""
+    else:
+        prompt = """Extract ALL information from this Purchase & Sale Agreement. Return ONLY valid JSON:
+{"buyer_name":"","seller_name":"","purchase_price":"","sale_date":"","property_address":"","city":"","state":"",
+"zip_code":"","property_type":"","closing_date":"","loan_amount":"","lender_name":""}
+Include only fields you find. Omit empty fields."""
+
+    try:
+        headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
+        payload = {
+            'model': 'gpt-4o',
+            'messages': [{'role': 'user', 'content': [
+                {'type': 'image_url', 'image_url': {'url': f'data:{media_type};base64,{b64_data}', 'detail': 'high'}},
+                {'type': 'text', 'text': prompt}
+            ]}],
+            'max_tokens': 2000, 'temperature': 0.1
+        }
+        resp = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=payload, timeout=60)
+        if resp.status_code != 200:
+            return {}, f"API error: {resp.status_code}"
+        content = resp.json()['choices'][0]['message']['content']
+        json_start = content.find('{')
+        json_end = content.rfind('}') + 1
+        if json_start != -1 and json_end > json_start:
+            return json.loads(content[json_start:json_end]), None
+        return {}, "Could not parse response"
+    except Exception as e:
+        return {}, str(e)
+
 # ====================== HEADER ======================
-st.title("A-Tech Appraisal Manager")
-st.caption("A-Tech Appraisal Co., LLC - Warwick, RI")
+st.markdown("""
+<div class="hero-banner">
+    <h1>A-Tech Appraisal Co., LLC</h1>
+    <p>Professional Residential Appraisal Services &bull; Warwick, RI</p>
+</div>
+""", unsafe_allow_html=True)
 
 # ====================== NAVIGATION ======================
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Dashboard", "New Order", "AI Reports", "Activity Log", "Settings"])
+tab0, tab1, tab2, tab3, tab5_tools, tab6_str, tab4, tab5 = st.tabs([
+    "🏠 Home", "📊 Dashboard", "📝 New Order", "🤖 AI Reports",
+    "🔧 Tools", "📈 STR Reports", "📋 Activity Log", "⚙️ Settings"
+])
+
+# ====================== TAB 0: HOME ======================
+with tab0:
+    conn = get_db()
+    df_home = pd.read_sql_query("SELECT * FROM orders ORDER BY created_at DESC", conn)
+    conn.close()
+    total_h = len(df_home)
+    pending_h = len(df_home[df_home["status"] == "Pending"]) if not df_home.empty else 0
+    completed_h = len(df_home[df_home["status"] == "Completed"]) if not df_home.empty else 0
+    revenue_h = df_home["fee"].sum() if not df_home.empty else 0
+
+    c1, c2, c3, c4 = st.columns(4)
+    for col, val, lbl in [(c1, total_h, "Total Orders"), (c2, pending_h, "Pending"), (c3, completed_h, "Completed"), (c4, f"${revenue_h:,.0f}", "Revenue")]:
+        col.markdown(f'<div class="metric-card"><div class="metric-label">{lbl}</div><div class="metric-value">{val}</div></div>', unsafe_allow_html=True)
+
+    st.markdown("---")
+    fcol1, fcol2 = st.columns(2)
+    with fcol1:
+        st.subheader("Recent Orders")
+        if not df_home.empty:
+            recent = df_home.head(5)[["order_id", "subject_address", "client_name", "status", "fee"]].copy()
+            st.dataframe(recent, use_container_width=True, hide_index=True)
+        else:
+            st.info("No orders yet. Create your first order in the New Order tab.")
+    with fcol2:
+        st.subheader("Platform Features")
+        features = [
+            ("📝 Order Management", "Create, track, and manage appraisal orders with full URAR support"),
+            ("🤖 AI Report Writer", "GPT-4o generates narratives, comps, adjustments, and comments"),
+            ("📄 Document Extraction", "Upload engagement letters or P&S agreements — AI auto-fills order data"),
+            ("📦 TOTAL XML Export", "Export MISMO 2.6 GSE XML files that import directly into TOTAL"),
+            ("🔧 Appraiser Toolkit", "GLA calculator, adjustment tools, cost approach, GRM, and more"),
+            ("📈 STR Analysis", "Short-term rental income analysis with AirDNA integration"),
+        ]
+        for title, desc in features:
+            st.markdown(f'<div class="feature-card"><h4>{title}</h4><p>{desc}</p></div>', unsafe_allow_html=True)
 
 # ====================== TAB 1: DASHBOARD ======================
 with tab1:
@@ -714,6 +832,56 @@ with tab1:
 with tab2:
     st.subheader("Create / Edit Order")
 
+    # ---- Quick Import Section ----
+    settings_for_extract = get_settings()
+    extract_api_key = settings_for_extract.get("openai_api_key", "")
+
+    with st.expander("📄 Quick Import — Upload Documents to Auto-Fill", expanded=False):
+        ei_col1, ei_col2 = st.columns(2)
+        with ei_col1:
+            st.markdown("**Engagement Letter / Order Form**")
+            eng_file = st.file_uploader("Upload engagement letter or order form", type=["pdf", "jpg", "jpeg", "png"], key="eng_upload")
+            if eng_file and st.button("Extract & Auto-Fill", key="extract_eng"):
+                if not extract_api_key:
+                    st.error("Set your OpenAI API key in Settings first.")
+                else:
+                    with st.spinner("AI is reading your document..."):
+                        data, err = extract_document_data(eng_file, extract_api_key, "engagement")
+                        if err:
+                            st.error(f"Extraction error: {err}")
+                        elif data:
+                            st.session_state.extracted_data = data
+                            st.success(f"Extracted {len(data)} fields! Form below has been pre-filled.")
+                            with st.expander("Preview extracted data"):
+                                st.json(data)
+                        else:
+                            st.warning("No data could be extracted from this document.")
+
+        with ei_col2:
+            st.markdown("**Purchase & Sale Agreement**")
+            ps_file = st.file_uploader("Upload P&S agreement", type=["pdf", "jpg", "jpeg", "png"], key="ps_upload")
+            if ps_file and st.button("Extract P&S Data", key="extract_ps"):
+                if not extract_api_key:
+                    st.error("Set your OpenAI API key in Settings first.")
+                else:
+                    with st.spinner("AI is reading your P&S agreement..."):
+                        data, err = extract_document_data(ps_file, extract_api_key, "purchase")
+                        if err:
+                            st.error(f"Extraction error: {err}")
+                        elif data:
+                            st.session_state.extracted_ps_data = data
+                            st.success(f"Extracted {len(data)} fields from P&S!")
+                            with st.expander("Preview P&S data"):
+                                st.json(data)
+                        else:
+                            st.warning("No data could be extracted.")
+
+    # Merge extracted data for form defaults
+    ex = st.session_state.get("extracted_data", {})
+    ps = st.session_state.get("extracted_ps_data", {})
+
+    st.divider()
+
     conn = get_db()
     existing_orders = pd.read_sql_query("SELECT order_id FROM orders ORDER BY created_at DESC", conn)
     conn.close()
@@ -735,22 +903,23 @@ with tab2:
         with ocol1:
             next_num = len(existing_orders) + 1
             order_id = st.text_input("Order ID", value=prefill.get("order_id", f"AT-{datetime.now().strftime('%Y%m%d')}-{next_num:03d}"))
-            client_name = st.text_input("Client Name", value=prefill.get("client_name", ""))
-            client_email = st.text_input("Client Email", value=prefill.get("client_email", ""))
-            client_phone = st.text_input("Client Phone", value=prefill.get("client_phone", ""))
+            client_name = st.text_input("Client Name", value=prefill.get("client_name", "") or ex.get("client_name", ""))
+            client_email = st.text_input("Client Email", value=prefill.get("client_email", "") or ex.get("client_email", ""))
+            client_phone = st.text_input("Client Phone", value=prefill.get("client_phone", "") or ex.get("client_phone", ""))
         with ocol2:
-            lender_name = st.text_input("Lender Name", value=prefill.get("lender_name", ""))
-            loan_number = st.text_input("Loan Number", value=prefill.get("loan_number", ""))
-            fee = st.number_input("Fee ($)", value=float(prefill.get("fee", 0) or 0), step=25.0)
+            lender_name = st.text_input("Lender Name", value=prefill.get("lender_name", "") or ex.get("lender_name", "") or ps.get("lender_name", ""))
+            loan_number = st.text_input("Loan Number", value=prefill.get("loan_number", "") or ex.get("loan_number", ""))
+            fee_default = float(prefill.get("fee", 0) or ex.get("fee", 0) or 0)
+            fee = st.number_input("Fee ($)", value=fee_default, step=25.0)
             due_date = st.date_input("Due Date", value=None)
 
         st.markdown("**Property Info**")
         pcol1, pcol2 = st.columns(2)
         with pcol1:
-            subject_address = st.text_input("Street Address", value=prefill.get("subject_address", ""))
-            city = st.text_input("City", value=prefill.get("city", "Warwick"))
-            state = st.text_input("State", value=prefill.get("state", "RI"))
-            zip_code = st.text_input("Zip", value=prefill.get("zip_code", ""))
+            subject_address = st.text_input("Street Address", value=prefill.get("subject_address", "") or ex.get("subject_address", "") or ps.get("property_address", ""))
+            city = st.text_input("City", value=prefill.get("city", "") or ex.get("city", "") or ps.get("city", "") or "Warwick")
+            state = st.text_input("State", value=prefill.get("state", "") or ex.get("state", "") or ps.get("state", "") or "RI")
+            zip_code = st.text_input("Zip", value=prefill.get("zip_code", "") or ex.get("zip_code", "") or ps.get("zip_code", ""))
         with pcol2:
             property_type = st.selectbox("Property Type",
                 ["Single Family", "Condo", "2-4 Unit", "Multi-Family", "Land", "Other"],
@@ -1535,6 +1704,11 @@ with tab5:
     st.markdown("**Company Info**")
     company_name = st.text_input("Company Name", value=settings.get("company_name", "A-Tech Appraisal Co., LLC"))
     company_phone = st.text_input("Company Phone", value=settings.get("company_phone", ""))
+    company_address = st.text_input("Company Address", value=settings.get("company_address", "Warwick, RI"))
+
+    st.markdown("**Appraiser Info**")
+    appraiser_license = st.text_input("License Number", value=settings.get("appraiser_license", ""))
+    appraiser_cert = st.text_input("State Certification #", value=settings.get("appraiser_cert", ""))
 
     if st.button("Save Settings", type="primary"):
         save_setting("gmail_user", gmail_user)
@@ -1542,4 +1716,173 @@ with tab5:
         save_setting("openai_api_key", openai_key)
         save_setting("company_name", company_name)
         save_setting("company_phone", company_phone)
+        save_setting("company_address", company_address)
+        save_setting("appraiser_license", appraiser_license)
+        save_setting("appraiser_cert", appraiser_cert)
         st.success("Settings saved!")
+
+# ====================== TAB 5: APPRAISER TOOLS ======================
+with tab5_tools:
+    st.subheader("Appraiser Tools & Calculators")
+
+    tool = st.selectbox("Select Tool", [
+        "GLA Calculator", "Adjustment Calculator", "GRM Calculator",
+        "Cost Approach Calculator", "Net/Gross Adjustment Analyzer"
+    ], key="tool_select")
+
+    st.divider()
+
+    if tool == "GLA Calculator":
+        st.markdown("**Gross Living Area Calculator**")
+        st.caption("Enter dimensions for each floor level")
+        total_gla = 0
+        for i in range(1, 5):
+            with st.expander(f"Level {i}", expanded=(i == 1)):
+                gc1, gc2, gc3 = st.columns(3)
+                with gc1:
+                    length = st.number_input(f"Length (ft)", value=0.0, step=1.0, key=f"gla_l{i}")
+                with gc2:
+                    width = st.number_input(f"Width (ft)", value=0.0, step=1.0, key=f"gla_w{i}")
+                with gc3:
+                    area = length * width
+                    st.metric(f"Area", f"{area:,.0f} sqft")
+                total_gla += area
+        st.success(f"**Total GLA: {total_gla:,.0f} square feet**")
+
+    elif tool == "Adjustment Calculator":
+        st.markdown("**Comparable Adjustment Calculator**")
+        preset = st.selectbox("Preset Rates", [
+            "Custom", "GLA ($50/sqft)", "GLA ($65/sqft)", "GLA ($75/sqft)",
+            "Bedroom ($7,500)", "Bedroom ($10,000)", "Bathroom ($10,000)",
+            "Bathroom ($15,000)", "Garage ($15,000)", "Garage ($20,000)",
+            "Fireplace ($4,000)", "Pool ($15,000)", "Age ($1,000/year)"
+        ])
+        ac1, ac2, ac3 = st.columns(3)
+        with ac1:
+            subj_val = st.number_input("Subject Value", value=0.0, step=1.0, key="adj_subj")
+        with ac2:
+            comp_val = st.number_input("Comp Value", value=0.0, step=1.0, key="adj_comp")
+        with ac3:
+            rate_defaults = {"Custom": 0, "GLA ($50/sqft)": 50, "GLA ($65/sqft)": 65, "GLA ($75/sqft)": 75,
+                "Bedroom ($7,500)": 7500, "Bedroom ($10,000)": 10000, "Bathroom ($10,000)": 10000,
+                "Bathroom ($15,000)": 15000, "Garage ($15,000)": 15000, "Garage ($20,000)": 20000,
+                "Fireplace ($4,000)": 4000, "Pool ($15,000)": 15000, "Age ($1,000/year)": 1000}
+            rate = st.number_input("Rate per unit ($)", value=float(rate_defaults.get(preset, 0)), step=1.0, key="adj_rate")
+        diff = subj_val - comp_val
+        adjustment = diff * rate if "GLA" in preset or "Age" in preset else diff * rate if rate != 0 else 0
+        if "GLA" in preset or "Age" in preset:
+            adjustment = diff * rate
+        else:
+            adjustment = diff * rate if diff != 0 and rate != 0 else (subj_val - comp_val) * (1 if rate == 0 else rate)
+        # Simple: difference * rate for per-unit, or just the preset amount * direction for flat
+        if preset != "Custom" and "GLA" not in preset and "Age" not in preset:
+            direction = 1 if subj_val > comp_val else (-1 if subj_val < comp_val else 0)
+            adjustment = rate * direction
+        else:
+            adjustment = diff * rate
+        st.metric("Adjustment Amount", f"${adjustment:,.0f}")
+        if adjustment > 0:
+            st.info("Positive adjustment — comp is inferior to subject")
+        elif adjustment < 0:
+            st.info("Negative adjustment — comp is superior to subject")
+
+    elif tool == "GRM Calculator":
+        st.markdown("**Gross Rent Multiplier Calculator**")
+        grm_mode = st.radio("Mode", ["Calculate GRM", "Calculate Value from GRM"], horizontal=True, key="grm_mode")
+        if grm_mode == "Calculate GRM":
+            gc1, gc2 = st.columns(2)
+            with gc1:
+                sale_price = st.number_input("Sale Price ($)", value=0.0, step=1000.0, key="grm_sp")
+            with gc2:
+                monthly_rent = st.number_input("Monthly Rent ($)", value=0.0, step=50.0, key="grm_rent")
+            if monthly_rent > 0:
+                grm = sale_price / monthly_rent
+                st.success(f"**GRM: {grm:.1f}**")
+                st.caption(f"Annual GRM: {sale_price / (monthly_rent * 12):.2f}")
+        else:
+            gc1, gc2 = st.columns(2)
+            with gc1:
+                grm_val = st.number_input("GRM", value=0.0, step=0.5, key="grm_v")
+            with gc2:
+                rent_val = st.number_input("Monthly Rent ($)", value=0.0, step=50.0, key="grm_r2")
+            if grm_val > 0 and rent_val > 0:
+                indicated = grm_val * rent_val
+                st.success(f"**Indicated Value: ${indicated:,.0f}**")
+
+    elif tool == "Cost Approach Calculator":
+        st.markdown("**Cost Approach Calculator**")
+        cc1, cc2 = st.columns(2)
+        with cc1:
+            ca_gla = st.number_input("GLA (sqft)", value=0.0, step=10.0, key="ca_gla")
+            ca_cost = st.number_input("Cost per sqft ($)", value=0.0, step=5.0, key="ca_cost")
+            ca_site = st.number_input("Site Value ($)", value=0.0, step=1000.0, key="ca_site")
+        with cc2:
+            ca_eff_age = st.number_input("Effective Age (years)", value=0, step=1, key="ca_age")
+            ca_econ_life = st.number_input("Total Economic Life (years)", value=60, step=5, key="ca_life")
+            ca_site_imp = st.number_input("Site Improvements ($)", value=0.0, step=500.0, key="ca_si")
+        if ca_gla > 0 and ca_cost > 0:
+            rcn = ca_gla * ca_cost
+            depr_pct = (ca_eff_age / ca_econ_life * 100) if ca_econ_life > 0 else 0
+            depr_amt = rcn * (depr_pct / 100)
+            depreciated = rcn - depr_amt
+            indicated = depreciated + ca_site + ca_site_imp
+            st.divider()
+            mc1, mc2, mc3, mc4 = st.columns(4)
+            mc1.metric("Replacement Cost New", f"${rcn:,.0f}")
+            mc2.metric("Depreciation", f"${depr_amt:,.0f} ({depr_pct:.1f}%)")
+            mc3.metric("Depreciated Cost", f"${depreciated:,.0f}")
+            mc4.metric("Indicated Value", f"${indicated:,.0f}")
+
+    elif tool == "Net/Gross Adjustment Analyzer":
+        st.markdown("**Net & Gross Adjustment Analyzer**")
+        sale_price = st.number_input("Comp Sale Price ($)", value=0.0, step=1000.0, key="adj_sp")
+        st.caption("Enter adjustments (positive = comp inferior, negative = comp superior)")
+        adj_labels = ["Location", "Site", "View", "Design", "Quality", "Age", "Condition", "GLA", "Basement", "Garage", "Other"]
+        adjs = []
+        acols = st.columns(4)
+        for i, lbl in enumerate(adj_labels):
+            with acols[i % 4]:
+                val = st.number_input(lbl, value=0.0, step=500.0, key=f"ana_{lbl}")
+                adjs.append(val)
+        if sale_price > 0:
+            net = sum(adjs)
+            gross = sum(abs(a) for a in adjs)
+            net_pct = abs(net) / sale_price * 100
+            gross_pct = gross / sale_price * 100
+            adj_price = sale_price + net
+            st.divider()
+            rc1, rc2, rc3, rc4 = st.columns(4)
+            rc1.metric("Net Adjustment", f"${net:,.0f}")
+            rc2.metric("Net %", f"{net_pct:.1f}%")
+            rc3.metric("Gross %", f"{gross_pct:.1f}%")
+            rc4.metric("Adjusted Price", f"${adj_price:,.0f}")
+            if net_pct > 15:
+                st.warning("Net adjustments exceed 15% UAD threshold")
+            if gross_pct > 25:
+                st.warning("Gross adjustments exceed 25% UAD threshold")
+            if net_pct <= 15 and gross_pct <= 25:
+                st.success("Adjustments within UAD guidelines")
+
+# ====================== TAB 6: STR REPORTS ======================
+with tab6_str:
+    st.subheader("Short-Term Rental Income Analysis")
+    st.markdown("""
+    Generate professional STR income analysis reports using AirDNA market data.
+    Upload your market data files and client info to create comprehensive rental income reports.
+    """)
+
+    st.markdown("---")
+    st.markdown("**Access the STR Report Generator:**")
+    st.link_button("Open STR Report Generator", "https://avm-str-generator.onrender.com", type="primary")
+
+    st.markdown("---")
+    st.caption("The STR Report Generator is a standalone tool for creating short-term rental income analysis reports. "
+               "It accepts AirDNA market data PDFs, revenue CSVs, engagement letters, and property photos to generate "
+               "professional PDF reports for appraisal purposes.")
+
+    try:
+        import streamlit.components.v1 as components
+        with st.expander("Embedded STR Generator (click to expand)", expanded=False):
+            components.iframe("https://avm-str-generator.onrender.com", height=800, scrolling=True)
+    except:
+        st.info("Use the link above to access the STR Report Generator.")
