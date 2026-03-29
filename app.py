@@ -141,6 +141,8 @@ if "extracted_data" not in st.session_state:
     st.session_state.extracted_data = {}
 if "extracted_ps_data" not in st.session_state:
     st.session_state.extracted_ps_data = {}
+if "advisor_messages" not in st.session_state:
+    st.session_state.advisor_messages = []
 
 # ====================== DATABASE ======================
 DB_FILE = "a_tech_appraisals.db"
@@ -693,9 +695,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====================== NAVIGATION ======================
-tab0, tab1, tab2, tab3, tab5_tools, tab6_str, tab4, tab5 = st.tabs([
+tab0, tab1, tab2, tab3, tab5_tools, tab6_str, tab7_advisor, tab4, tab5 = st.tabs([
     "🏠 Home", "📊 Dashboard", "📝 New Order", "🤖 AI Reports",
-    "🔧 Tools", "📈 STR Reports", "📋 Activity Log", "⚙️ Settings"
+    "🔧 Tools", "📈 STR Reports", "💬 AI Advisor", "📋 Activity Log", "⚙️ Settings"
 ])
 
 # ====================== TAB 0: HOME ======================
@@ -1991,3 +1993,108 @@ with tab6_str:
             components.iframe("https://avm-str-generator.onrender.com", height=800, scrolling=True)
     except:
         st.info("Use the link above to access the STR Report Generator.")
+
+# ====================== TAB 7: AI ADVISOR ======================
+with tab7_advisor:
+    st.subheader("Appraisal AI Advisor")
+    st.caption("Ask questions about Fannie Mae, Freddie Mac, FHA guidelines, USPAP, revision requests, form completion, and more.")
+
+    advisor_settings = get_settings()
+    advisor_api_key = advisor_settings.get("openai_api_key", "")
+
+    if not advisor_api_key:
+        st.warning("Set your OpenAI API key in the **Settings** tab to use the AI Advisor.")
+    else:
+        # Quick topic buttons
+        st.markdown("**Quick Topics:**")
+        qtcol1, qtcol2, qtcol3, qtcol4 = st.columns(4)
+        with qtcol1:
+            if st.button("📋 USPAP Rules", key="qt_uspap", use_container_width=True):
+                st.session_state.advisor_messages.append({"role": "user", "content": "Summarize the key USPAP requirements that residential appraisers need to follow for every assignment."})
+                st.rerun()
+        with qtcol2:
+            if st.button("🏠 Fannie Mae", key="qt_fnma", use_container_width=True):
+                st.session_state.advisor_messages.append({"role": "user", "content": "What are the current Fannie Mae appraisal requirements for a standard 1004 form? Cover the key things appraisers need to know."})
+                st.rerun()
+        with qtcol3:
+            if st.button("📝 Revision Help", key="qt_revision", use_container_width=True):
+                st.session_state.advisor_messages.append({"role": "user", "content": "I received a revision request from an underwriter. What are the most common revision requests and how should I handle them professionally?"})
+                st.rerun()
+        with qtcol4:
+            if st.button("🔄 FHA Guidelines", key="qt_fha", use_container_width=True):
+                st.session_state.advisor_messages.append({"role": "user", "content": "What are the key FHA appraisal requirements from the HUD Handbook 4000.1 that differ from conventional appraisals?"})
+                st.rerun()
+
+        st.markdown("---")
+
+        # Display chat history
+        for msg in st.session_state.advisor_messages:
+            if msg["role"] == "user":
+                st.chat_message("user").markdown(msg["content"])
+            else:
+                st.chat_message("assistant").markdown(msg["content"])
+
+        # Chat input
+        user_question = st.chat_input("Ask about guidelines, revision requests, form help, adjustments...")
+
+        if user_question:
+            st.session_state.advisor_messages.append({"role": "user", "content": user_question})
+
+            system_prompt = """You are an expert residential real estate appraisal advisor with deep knowledge of:
+
+1. FANNIE MAE (FNMA) Selling Guide - Sections B4-1 through B4-2 covering all appraisal requirements:
+   - Property eligibility, condition ratings (C1-C6), quality ratings (Q1-Q6)
+   - Comparable selection criteria, adjustment guidelines, UAD formatting
+   - Market conditions, neighborhood analysis, condo/2-4 unit requirements
+   - Desktop and hybrid appraisal requirements
+
+2. FREDDIE MAC Single-Family Seller/Servicer Guide - Chapters 44-46:
+   - Appraisal requirements, property eligibility, ACE criteria
+
+3. FHA/HUD Handbook 4000.1:
+   - Minimum Property Requirements (MPR) and Minimum Property Standards (MPS)
+   - Health and safety requirements, repair requirements, escrow holdbacks
+
+4. USPAP (Uniform Standards of Professional Appraisal Practice):
+   - Standards Rule 1 and 2, scope of work, competency, ethics, reporting
+
+5. Common underwriter revision requests and professional response strategies
+
+6. UAD (Uniform Appraisal Dataset) formatting for all fields
+
+7. Appraisal form completion: 1004, 1004C, 1073, 2055, 1025
+
+When answering:
+- Cite the relevant guideline section when possible (e.g. "Per FNMA B4-1.3-06...")
+- Give practical, actionable advice appraisers can use immediately
+- For revision requests, provide sample response language they can adapt
+- Use plain language - be direct and helpful
+- If uncertain about a specific detail, say so
+- Focus on current 2024-2025 requirements"""
+
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=advisor_api_key)
+
+                messages = [{"role": "system", "content": system_prompt}]
+                for m in st.session_state.advisor_messages[-10:]:
+                    messages.append({"role": m["role"], "content": m["content"]})
+
+                with st.spinner("Thinking..."):
+                    response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=messages,
+                        max_tokens=2000,
+                        temperature=0.3
+                    )
+                    answer = response.choices[0].message.content
+                    st.session_state.advisor_messages.append({"role": "assistant", "content": answer})
+                    st.rerun()
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+
+        # Clear chat button
+        if st.session_state.advisor_messages:
+            if st.button("Clear Chat", key="clear_advisor"):
+                st.session_state.advisor_messages = []
+                st.rerun()
