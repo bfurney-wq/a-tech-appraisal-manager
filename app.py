@@ -21,22 +21,110 @@ st.set_page_config(page_title="A-Tech Appraisal Co.", layout="wide", page_icon="
 # ====================== CUSTOM CSS ======================
 st.markdown("""
 <style>
+/* Apple-inspired design system */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 #MainMenu {display: none;}
 footer {display: none;}
-.main {background-color: #f8f9fa;}
-.hero-banner {background: linear-gradient(135deg, #2D4A6F 0%, #1a2f4a 100%); padding: 2rem 2.5rem; border-radius: 10px; margin-bottom: 1.5rem; color: white;}
-.hero-banner h1 {color: white !important; font-size: 2.2rem; margin: 0; font-weight: 700;}
-.hero-banner p {color: rgba(255,255,255,0.85); margin: 0.3rem 0 0 0; font-size: 1rem;}
-.metric-card {background: white; border-radius: 8px; padding: 1.25rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 3px solid #2D4A6F;}
-.metric-value {font-size: 2rem; font-weight: 700; color: #2D4A6F; margin: 0.5rem 0;}
-.metric-label {font-size: 0.8rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px;}
-.feature-card {background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #2D4A6F; margin-bottom: 0.75rem;}
-.feature-card h4 {color: #2D4A6F; margin: 0 0 0.5rem 0;}
-.feature-card p {color: #555; margin: 0; font-size: 0.9rem;}
-.stTabs [data-baseweb="tab-list"] {gap: 4px;}
-.stTabs [data-baseweb="tab"] {background-color: #f0f2f6; border-radius: 6px 6px 0 0; padding: 0.6rem 1.2rem; font-weight: 500;}
-.stTabs [aria-selected="true"] {background-color: #2D4A6F; color: white;}
-h1, h2, h3 {color: #2D4A6F;}
+header[data-testid="stHeader"] {background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.1);}
+
+/* Base */
+.main {background-color: #fbfbfd; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;}
+.block-container {max-width: 1200px; padding: 2rem 1rem;}
+
+/* Hero banner - Apple style gradient */
+.hero-banner {
+    background: linear-gradient(135deg, #1d1d1f 0%, #2d2d30 50%, #1d1d1f 100%);
+    padding: 2.5rem 3rem; border-radius: 18px; margin-bottom: 2rem;
+    color: white; position: relative; overflow: hidden;
+}
+.hero-banner::after {
+    content: ''; position: absolute; top: -50%; right: -20%;
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,122,255,0.15) 0%, transparent 70%);
+}
+.hero-banner h1 {color: white !important; font-size: 2rem; margin: 0; font-weight: 600; letter-spacing: -0.02em;}
+.hero-banner p {color: rgba(255,255,255,0.7); margin: 0.4rem 0 0 0; font-size: 0.95rem; font-weight: 300;}
+
+/* Metric cards - Apple glass style */
+.metric-card {
+    background: white; border-radius: 16px; padding: 1.5rem;
+    text-align: center; border: 0.5px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.metric-card:hover {transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.08);}
+.metric-value {font-size: 2.2rem; font-weight: 600; color: #1d1d1f; margin: 0.5rem 0; letter-spacing: -0.03em;}
+.metric-label {font-size: 0.75rem; color: #86868b; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;}
+
+/* Feature cards */
+.feature-card {
+    background: white; border-radius: 14px; padding: 1.5rem;
+    border: 0.5px solid rgba(0,0,0,0.06);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.03);
+    margin-bottom: 0.75rem;
+    border-left: 3px solid #007AFF;
+}
+
+/* Tabs - Apple segmented control style */
+.stTabs [data-baseweb="tab-list"] {background: #f5f5f7; border-radius: 10px; padding: 3px; gap: 2px;}
+.stTabs [data-baseweb="tab"] {
+    background: transparent; border-radius: 8px; padding: 0.5rem 1rem;
+    font-weight: 500; font-size: 0.85rem; color: #1d1d1f;
+    border: none;
+}
+.stTabs [aria-selected="true"] {
+    background: white !important; color: #1d1d1f !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border: none;
+}
+.stTabs [data-baseweb="tab-highlight"] {display: none;}
+.stTabs [data-baseweb="tab-border"] {display: none;}
+
+/* Typography */
+h1, h2, h3 {color: #1d1d1f; letter-spacing: -0.02em; font-weight: 600;}
+h1 {font-size: 1.8rem;}
+h2 {font-size: 1.4rem;}
+h3 {font-size: 1.15rem;}
+
+/* Buttons - Apple style */
+.stButton > button {
+    border-radius: 10px; font-weight: 500; font-size: 0.9rem;
+    padding: 0.5rem 1.25rem; border: none;
+    transition: all 0.2s ease;
+}
+.stButton > button[kind="primary"] {
+    background: #007AFF; color: white;
+}
+.stButton > button[kind="primary"]:hover {background: #0066d6;}
+.stButton > button[kind="secondary"] {
+    background: #f5f5f7; color: #1d1d1f; border: 0.5px solid rgba(0,0,0,0.1);
+}
+.stButton > button[kind="secondary"]:hover {background: #e8e8ed;}
+
+/* Form inputs */
+.stTextInput > div > div > input, .stSelectbox > div > div, .stNumberInput > div > div > input {
+    border-radius: 10px !important; border: 1px solid #d2d2d7 !important;
+    font-size: 0.9rem; padding: 0.5rem 0.75rem;
+}
+.stTextInput > div > div > input:focus, .stNumberInput > div > div > input:focus {
+    border-color: #007AFF !important; box-shadow: 0 0 0 3px rgba(0,122,255,0.15) !important;
+}
+
+/* Dataframes */
+.stDataFrame {border-radius: 12px; overflow: hidden; border: 0.5px solid rgba(0,0,0,0.06);}
+
+/* Expanders */
+.streamlit-expanderHeader {
+    font-weight: 500; font-size: 0.95rem; color: #1d1d1f;
+    background: #f5f5f7; border-radius: 10px;
+}
+
+/* Dividers */
+hr {border-color: rgba(0,0,0,0.06) !important;}
+
+/* Success/Error/Warning messages */
+.stAlert {border-radius: 12px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -45,6 +133,8 @@ if "show_form" not in st.session_state:
     st.session_state.show_form = False
 if "edit_order_id" not in st.session_state:
     st.session_state.edit_order_id = None
+if "confirm_delete" not in st.session_state:
+    st.session_state.confirm_delete = None
 if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Dashboard"
 if "extracted_data" not in st.session_state:
@@ -644,6 +734,22 @@ with tab0:
         for title, desc in features:
             st.markdown(f'<div class="feature-card"><h4>{title}</h4><p>{desc}</p></div>', unsafe_allow_html=True)
 
+    st.markdown("---")
+    st.subheader("Quick Actions")
+    qa1, qa2, qa3, qa4 = st.columns(4)
+    with qa1:
+        if st.button("➕ New Order", use_container_width=True, key="qa_new"):
+            st.info("Switch to the **New Order** tab above.")
+    with qa2:
+        if st.button("📊 View Dashboard", use_container_width=True, key="qa_dash"):
+            st.info("Switch to the **Dashboard** tab above.")
+    with qa3:
+        if st.button("🔧 Appraiser Tools", use_container_width=True, key="qa_tools"):
+            st.info("Switch to the **Tools** tab above.")
+    with qa4:
+        if st.button("⚙️ Settings", use_container_width=True, key="qa_settings"):
+            st.info("Switch to the **Settings** tab above.")
+
 # ====================== TAB 1: DASHBOARD ======================
 with tab1:
     conn = get_db()
@@ -693,10 +799,9 @@ with tab1:
         status_icons = {"Pending": "🔴", "In Progress": "🟡", "Completed": "🟢", "On Hold": "🟠", "Cancelled": "⚫"}
         filtered["Status Display"] = filtered["status"].apply(lambda s: f"{status_icons.get(s, '⚪')} {s}")
 
-        display_cols = ["order_id", "client_name", "subject_address", "assigned_appraiser",
-                       "Status Display", "due_date", "fee", "created_at"]
-        available_cols = [c for c in display_cols if c in filtered.columns]
-        st.dataframe(filtered[available_cols], use_container_width=True, hide_index=True)
+        display_cols = ["order_id", "subject_address", "client_name", "status", "fee", "created_at"]
+        available = [c for c in display_cols if c in filtered.columns]
+        st.dataframe(filtered[available], use_container_width=True, hide_index=True)
 
         # Order detail expander
         st.subheader("Order Details")
@@ -780,6 +885,35 @@ with tab1:
 
                         st.success(f"Status updated to {new_status}")
                         st.rerun()
+
+                # Edit and Delete
+                st.divider()
+                ecol1, ecol2, ecol3 = st.columns([1, 1, 4])
+                with ecol1:
+                    if st.button("✏️ Edit Order", key="edit_btn"):
+                        st.session_state.edit_order_id = selected
+                        st.info("Switch to the **New Order** tab to edit this order.")
+                with ecol2:
+                    if st.button("🗑️ Delete Order", key="delete_btn", type="secondary"):
+                        st.session_state.confirm_delete = selected
+
+                if st.session_state.get("confirm_delete") == selected:
+                    st.warning(f"⚠️ Are you sure you want to delete order **{selected}**? This cannot be undone.")
+                    cdel1, cdel2, cdel3 = st.columns([1, 1, 4])
+                    with cdel1:
+                        if st.button("Yes, Delete", key="confirm_del_yes", type="primary"):
+                            conn = get_db()
+                            conn.execute("DELETE FROM orders WHERE order_id = ?", (selected,))
+                            conn.execute("DELETE FROM activity_log WHERE order_id = ?", (selected,))
+                            conn.commit()
+                            conn.close()
+                            st.session_state.confirm_delete = None
+                            st.success(f"Order {selected} deleted.")
+                            st.rerun()
+                    with cdel2:
+                        if st.button("Cancel", key="confirm_del_no"):
+                            st.session_state.confirm_delete = None
+                            st.rerun()
     else:
         st.info("No orders found. Create your first order in the 'New Order' tab.")
 
@@ -841,11 +975,22 @@ with tab2:
     existing_orders = pd.read_sql_query("SELECT order_id FROM orders ORDER BY created_at DESC", conn)
     conn.close()
 
-    edit_mode = st.radio("Mode", ["New Order", "Edit Existing"], horizontal=True)
+    # Check if coming from dashboard edit button
+    if st.session_state.edit_order_id:
+        edit_mode = "Edit Existing"
+        st.info(f"Editing order: **{st.session_state.edit_order_id}**")
+        edit_radio_default = 1
+    else:
+        edit_radio_default = 0
+
+    edit_mode = st.radio("Mode", ["New Order", "Edit Existing"], horizontal=True, index=edit_radio_default)
 
     prefill = {}
     if edit_mode == "Edit Existing" and not existing_orders.empty:
-        edit_id = st.selectbox("Select order to edit", existing_orders["order_id"].tolist())
+        default_idx = 0
+        if st.session_state.edit_order_id and st.session_state.edit_order_id in existing_orders["order_id"].tolist():
+            default_idx = existing_orders["order_id"].tolist().index(st.session_state.edit_order_id)
+        edit_id = st.selectbox("Select order to edit", existing_orders["order_id"].tolist(), index=default_idx)
         conn = get_db()
         row = conn.execute("SELECT * FROM orders WHERE order_id = ?", (edit_id,)).fetchone()
         conn.close()
@@ -1012,6 +1157,7 @@ with tab2:
             log_activity(order_id, action, f"Status: {status}")
 
             st.success(f"Order {order_id} saved!")
+            st.session_state.edit_order_id = None
             st.rerun()
 
 # ====================== TAB 3: AI REPORTS ======================
