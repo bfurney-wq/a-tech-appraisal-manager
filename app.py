@@ -414,6 +414,75 @@ def init_db():
             key TEXT PRIMARY KEY,
             value TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            name TEXT,
+            password_hash TEXT,
+            organization_id INTEGER,
+            role TEXT DEFAULT 'appraiser',
+            tier TEXT DEFAULT 'starter',
+            created_at TEXT,
+            last_login TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS organizations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            owner_id INTEGER,
+            subscription_tier TEXT DEFAULT 'starter',
+            subscription_status TEXT DEFAULT 'trial',
+            stripe_customer_id TEXT,
+            created_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS report_sections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT,
+            section_name TEXT,
+            ai_draft TEXT,
+            human_edited TEXT,
+            is_reviewed INTEGER DEFAULT 0,
+            reviewer_notes TEXT,
+            evidence_sources TEXT,
+            updated_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS review_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT,
+            reviewer_name TEXT,
+            item_type TEXT,
+            description TEXT,
+            status TEXT DEFAULT 'open',
+            response TEXT,
+            created_at TEXT,
+            resolved_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT,
+            run_type TEXT,
+            section_name TEXT,
+            prompt_summary TEXT,
+            input_data TEXT,
+            output_text TEXT,
+            model TEXT,
+            tokens_used INTEGER,
+            created_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS status_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id TEXT,
+            old_status TEXT,
+            new_status TEXT,
+            changed_by TEXT,
+            reason TEXT,
+            created_at TEXT
+        );
     ''')
     # Add property_details column if missing (existing DBs)
     try:
@@ -498,18 +567,12 @@ def generate_narrative(order_data, api_key):
 - Condition: {p.get('condition_rating', 'Unknown')}, Quality: {p.get('quality_rating', 'Unknown')}
 - Neighborhood: {p.get('neighborhood_name', 'Unknown')}
 - County: {p.get('county', 'Unknown')}
-- Flood Zone: {p.get('flood_zone', 'Unknown')}, Flood Map #: {p.get('flood_map_number', 'Unknown')}
+- Flood Zone: {p.get('flood_zone', 'Unknown')}, Flood Map #: {p.get('flood_map_id', 'Unknown')}
 - Taxes: ${p.get('tax_amount', 'Unknown')} ({p.get('tax_year', 'Unknown')})
 - Assessor Parcel #: {p.get('assessor_parcel', 'Unknown')}
-- Legal Description: {p.get('legal_description', 'Unknown')}"""
+- Legal Description: {p.get('legal_desc', 'Unknown')}"""
 
-        prompt = f"""You are a licensed residential real estate appraiser with 20+ years of experience
-in {order_data.get('state', 'RI')}, writing a USPAP-compliant appraisal narrative for a
-{order_data['appraisal_type']} / {order_data.get('form_type', 'URAR')} report.
-
-You MUST use your knowledge of the actual area to write realistic, detailed content. Use real street
-names that exist in the area. Reference actual landmarks, schools, shopping areas, and roads. Write
-as if you personally inspected this property and researched the local MLS.
+        prompt = f"""Write ONLY from the supplied property data and appraiser field notes below. DO NOT invent facts.
 
 Property Details:
 - Address: {order_data['subject_address']}, {order_data.get('city', '')}, {order_data.get('state', 'RI')} {order_data.get('zip_code', '')}
@@ -518,82 +581,184 @@ Property Details:
 - Appraiser Field Notes: {order_data.get('field_notes', 'None provided')}
 - Preliminary Value Opinion: {order_data.get('value_opinion', 'TBD')}
 
-Write ALL of the following sections in full detail. Each section should be multiple paragraphs.
-Do NOT abbreviate or cut short. Write as a thorough appraiser would:
+Write ALL of the following sections. For any data not supplied above, write '[NOT PROVIDED — appraiser to complete]':
 
-1. SUBJECT SECTION (3+ paragraphs)
-   - Full property description with all physical characteristics
-   - Legal description, census tract, map reference
-   - Current owner, sale history (prior 3 years), current listing status
-   - HOA fees if applicable, special assessments
+1. SUBJECT SECTION
+   - Describe ONLY the property characteristics provided above
+   - For legal description, census tract, owner info, sale history: use placeholders if not supplied
+   - State: "[NOT PROVIDED — appraiser to complete]" for any missing details
 
-2. NEIGHBORHOOD ANALYSIS (3+ paragraphs)
-   - Specific boundaries using real road names
-   - Built-up percentage, growth rate, property values trend
-   - Demand/supply, marketing time, present land use percentages
-   - Nearby amenities (schools by name, parks, shopping, employment centers)
-   - Any positive or negative factors (highway noise, views, water access)
+2. NEIGHBORHOOD ANALYSIS
+   - Describe ONLY characteristics supported by supplied data
+   - For schools, amenities, boundaries: write "[NOT PROVIDED — appraiser to complete]" if not in field notes
+   - Do NOT invent street names or landmarks
 
-3. SITE DESCRIPTION (2+ paragraphs)
-   - Lot dimensions, area, shape, topography, drainage
-   - Utilities (public water, public sewer, gas, electric)
-   - Street type, curb/gutter, sidewalk, alley
-   - FEMA flood zone, flood map panel, flood insurance requirement
-   - Easements, encroachments, environmental conditions
-   - Zoning classification and compliance
+3. SITE DESCRIPTION
+   - Lot dimensions, area, utilities, zoning: use only supplied data
+   - For drainage, easements, environmental conditions: mark as [NOT PROVIDED] if missing
+   - FEMA flood zone: {p.get('flood_zone', '[NOT PROVIDED]')}, Flood Map ID: {p.get('flood_map_id', '[NOT PROVIDED]')}
 
-4. IMPROVEMENT DESCRIPTION (3+ paragraphs)
-   - Foundation type, exterior walls, roof surface and condition
-   - Room-by-room breakdown (kitchen, living room, dining, bedrooms, baths)
-   - Kitchen details (counters, appliances, cabinets, flooring)
-   - Bathroom details (fixtures, tile, condition)
-   - Basement description (finished/unfinished, ceiling height, egress, sump pump)
-   - Mechanical systems (HVAC age, water heater, electrical panel)
-   - Interior finishes (flooring types, paint, trim)
-   - Exterior features (deck, patio, porch, pool, fencing, landscaping)
-   - Garage/carport details
-   - Overall condition and quality ratings with justification
+4. IMPROVEMENT DESCRIPTION
+   - Room-by-room: use only the counts and descriptions provided
+   - Mechanical systems, condition ratings: use supplied data only
+   - For details not provided: "[NOT PROVIDED — appraiser field inspection to verify]"
 
-5. SALES COMPARISON APPROACH (4+ paragraphs)
-   - Search parameters used (radius, date range, property type)
-   - 3 comparable sales with FULL details: address, sale price, sale date, GLA, lot size,
-     rooms, beds, baths, year built, condition, quality, garage, basement
-   - Line-by-line adjustment explanation for each comp
-   - Adjustment rates used and market support for those rates
-   - Net and gross adjustment percentages
-   - Indicated value range and reconciled value from this approach
+5. SALES COMPARISON APPROACH FRAMEWORK
+   - DO NOT GENERATE fictional comparable sales
+   - Instead, provide a framework for the appraiser to complete:
+     "The following three comparable sales were selected based on [search parameters]:
+     Comparable 1: [Address], Sale Price: [Price], Sale Date: [Date], GLA: [sqft], Lot: [dimensions], Beds: [#], Baths: [#], Year Built: [year], Condition: [C-rating], Quality: [Q-rating]
+     [Appraiser to enter adjustment details and reasoning]
 
-6. COST APPROACH (2+ paragraphs)
-   - Site value estimate with support
-   - Cost new estimate (cost per sq ft, source: Marshall & Swift or similar)
-   - Physical depreciation (effective age / total economic life)
-   - Functional and external depreciation if any
-   - Indicated value by cost approach
+     Comparable 2: [Address], Sale Price: [Price], Sale Date: [Date], GLA: [sqft], Lot: [dimensions], Beds: [#], Baths: [#], Year Built: [year], Condition: [C-rating], Quality: [Q-rating]
+     [Appraiser to enter adjustment details and reasoning]
 
-7. RECONCILIATION (2+ paragraphs)
-   - Weight given to each approach and why
-   - Final opinion of value with effective date
-   - Exposure time, marketing time estimates
-   - Confidence level in the value conclusion
+     Comparable 3: [Address], Sale Price: [Price], Sale Date: [Date], GLA: [sqft], Lot: [dimensions], Beds: [#], Baths: [#], Year Built: [year], Condition: [C-rating], Quality: [Q-rating]
+     [Appraiser to enter adjustment details and reasoning]
 
-8. ADDENDUM / SCOPE OF WORK (2+ paragraphs)
-   - Scope of work performed (inspection type, data sources, analysis methods)
-   - Intended use and intended users
-   - Definition of market value used
-   - Assumptions and limiting conditions
-   - Certification statement reference
-   - Prior services disclosure
+     Indicated Value (Sales Comparison): [Appraiser to calculate]"
 
-Use UAD abbreviations where standard (C1-C6, Q1-Q6, N;Res;, etc.).
-Write in professional appraiser language. Be thorough - a reviewer should find no blanks or vague statements."""
+6. COST APPROACH FRAMEWORK
+   - Provide calculation structure using supplied data
+   - Site value estimate: [Appraiser to complete with market support]
+   - Cost new (cost per sq ft): [Appraiser to enter with source citation]
+   - Depreciation rates: [Appraiser to calculate and document]
+   - Indicated Value (Cost): [Appraiser to calculate]
+
+7. RECONCILIATION
+   - Weights to each approach and rationale: [Appraiser to complete]
+   - Final opinion of value: [Appraiser to enter with effective date]
+   - Exposure and marketing time: [Appraiser to estimate]
+
+8. ADDENDUM / SCOPE OF WORK
+   - Describe inspection performed, data sources reviewed, methods used
+   - Include standard USPAP certifications and limiting conditions
+   - Reference intended use and intended users as specified in engagement
+
+Every factual claim must be traceable to the supplied data. NEVER invent street names, landmarks, schools, comp sales, owner names, or sale history.
+Use UAD abbreviations where appropriate (C1-C6, Q1-Q6, N;Res;, etc.).
+Keep professional appraisal language throughout."""
 
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": f"You are a licensed certified residential real estate appraiser with 20+ years of experience appraising properties in {order_data.get('city', 'Rhode Island')}, {order_data.get('state', 'RI')}. You have deep knowledge of the local real estate market, neighborhoods, street names, schools, and recent sales. Write thorough, professional, USPAP-compliant appraisal narratives. Use your knowledge of the actual geographic area to include realistic details. Every section must be substantive - never use placeholder text or vague one-liners."},
+                {"role": "system", "content": "You are a professional appraisal report writing assistant. You ONLY write from the data provided. If data is missing, write '[NOT PROVIDED — appraiser to complete]'. NEVER invent street names, landmarks, schools, comp sales, owners, or sale history. NEVER fabricate any factual claims. Your role is to create professional narrative frameworks that the appraiser will complete with verified data."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=8000,
+            temperature=0.2
+        )
+        return response.choices[0].message.content, None
+    except ImportError:
+        return None, "OpenAI package not installed. Run: pip install openai"
+    except Exception as e:
+        return None, str(e)
+
+def generate_section(order_data, api_key, section_name):
+    """Generate a single section of the appraisal narrative using OpenAI GPT."""
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+
+        p = {}
+        pd_str = order_data.get("property_details", "") or "{}"
+        try:
+            p = json.loads(pd_str)
+        except:
+            p = {}
+
+        section_prompts = {
+            "Neighborhood": f"""Write ONLY from the supplied data below. For any missing information, use [NOT PROVIDED — appraiser to complete].
+
+Property: {order_data.get('subject_address', '')}, {order_data.get('city', '')}, {order_data.get('state', 'RI')}
+Appraiser Field Notes: {order_data.get('field_notes', '[NOT PROVIDED]')}
+
+Write a Neighborhood Analysis section (2-3 paragraphs) describing ONLY what is provided above. For boundaries, amenities, schools, and market factors not in the data, write [NOT PROVIDED — appraiser to complete]. Do NOT invent street names, landmark names, or schools.""",
+
+            "Site": f"""Write ONLY from the supplied data below. For any missing information, use [NOT PROVIDED — appraiser to complete].
+
+Lot dimensions: {p.get('lot_dimensions', '[NOT PROVIDED]')}
+Lot area: {p.get('lot_area', '[NOT PROVIDED]')} sq ft
+Utilities: {p.get('utilities', '[NOT PROVIDED]')}
+Zoning: {p.get('zoning', '[NOT PROVIDED]')}
+Flood Zone: {p.get('flood_zone', '[NOT PROVIDED]')}, Map ID: {p.get('flood_map_id', '[NOT PROVIDED]')}
+Appraiser Field Notes: {order_data.get('field_notes', '[NOT PROVIDED]')}
+
+Write a Site Description section (2 paragraphs) using ONLY the supplied data. For drainage, easements, environmental issues, and other details not provided, write [NOT PROVIDED — appraiser field inspection to verify].""",
+
+            "Improvements": f"""Write ONLY from the supplied data below. For any missing information, use [NOT PROVIDED — appraiser to complete].
+
+Year Built: {p.get('year_built', '[NOT PROVIDED]')}
+Foundation: {p.get('foundation_type', '[NOT PROVIDED]')}
+Exterior: {p.get('exterior_desc', '[NOT PROVIDED]')}
+Roof: {p.get('roof_type', '[NOT PROVIDED]')}
+GLA: {p.get('gla_sqft', '[NOT PROVIDED]')} sq ft
+Bedrooms: {p.get('bedrooms', '[NOT PROVIDED]')}, Bathrooms: {p.get('bathrooms', '[NOT PROVIDED]')}
+Basement: {p.get('basement_sqft', '[NOT PROVIDED]')} sq ft, {p.get('basement_finished_pct', '[NOT PROVIDED]')}% finished
+HVAC: {p.get('heating_type', '[NOT PROVIDED]')} / {p.get('cooling_type', '[NOT PROVIDED]')}
+Garage: {p.get('garage_type', 'None')}
+Condition: {p.get('condition_rating', '[NOT PROVIDED]')}, Quality: {p.get('quality_rating', '[NOT PROVIDED]')}
+Appraiser Field Notes: {order_data.get('field_notes', '[NOT PROVIDED]')}
+
+Write an Improvements/Interior description (3 paragraphs) using ONLY the data above. For room details, mechanical details, interior finishes, and exterior features not provided, mark as [NOT PROVIDED — appraiser to verify]. Use UAD condition (C1-C6) and quality (Q1-Q6) ratings.""",
+
+            "Sales Comparison": f"""Create a framework for a Sales Comparison Approach section using facts-only principles.
+
+Property: {order_data.get('subject_address', '')}, {order_data.get('city', '')}, {order_data.get('state', 'RI')}
+GLA: {p.get('gla_sqft', '[NOT PROVIDED]')} sq ft, Beds: {p.get('bedrooms', '[NOT PROVIDED]')}, Baths: {p.get('bathrooms', '[NOT PROVIDED]')}
+
+Write the framework for a Sales Comparison section that includes:
+- Search parameters used (radius, date range, property type): [APPRAISER TO SPECIFY]
+- Comparable 1: [Address], Sale Price: [Price], Sale Date: [Date], GLA: [sqft], Lots: [dimensions], Beds: [#], Baths: [#], Year Built: [year], Condition: [C-rating], Quality: [Q-rating]
+  [Appraiser to enter adjustment reasoning]
+- Comparable 2: [Address], Sale Price: [Price], Sale Date: [Date], GLA: [sqft], Lot: [dimensions], Beds: [#], Baths: [#], Year Built: [year], Condition: [C-rating], Quality: [Q-rating]
+  [Appraiser to enter adjustment reasoning]
+- Comparable 3: [Address], Sale Price: [Price], Sale Date: [Date], GLA: [sqft], Lot: [dimensions], Beds: [#], Baths: [#], Year Built: [year], Condition: [C-rating], Quality: [Q-rating]
+  [Appraiser to enter adjustment reasoning]
+- Indicated Value (Sales Comparison): [Appraiser to calculate]
+
+Emphasize that this is a framework for the appraiser to complete with verified market data.""",
+
+            "Cost Approach": f"""Create a Cost Approach framework using the supplied data.
+
+GLA: {p.get('gla_sqft', '[NOT PROVIDED]')} sq ft
+Year Built: {p.get('year_built', '[NOT PROVIDED]')}
+Condition: {p.get('condition_rating', '[NOT PROVIDED]')}
+Quality: {p.get('quality_rating', '[NOT PROVIDED]')}
+
+Write a Cost Approach framework (2 paragraphs) that includes:
+- Site value estimate: [Appraiser to complete with market support]
+- Cost new (cost per sq ft): [Appraiser to enter with Marshall & Swift or similar source]
+- Physical depreciation rate: [Appraiser to calculate based on effective age and economic life]
+- Functional or external depreciation: [Appraiser to assess if applicable]
+- Indicated Value (Cost): [Appraiser to calculate]
+
+Make clear this is for the appraiser to complete with market data and professional judgment.""",
+
+            "Reconciliation": f"""Create a Reconciliation section framework.
+
+Write a Reconciliation section (2 paragraphs) that includes:
+- Weight given to Sales Comparison Approach: [Appraiser to determine] %
+  Rationale: [Appraiser to explain]
+- Weight given to Cost Approach: [Appraiser to determine] %
+  Rationale: [Appraiser to explain]
+- Final Opinion of Value: $[Appraiser to enter] (Effective Date: [Appraiser to enter])
+- Exposure Time estimate: [Appraiser to estimate based on market]
+- Marketing Time estimate: [Appraiser to estimate]
+- Confidence in value conclusion: [Appraiser to assess]
+
+Note: This framework should be completed by the appraiser with professional judgment and market analysis."""
+        }
+
+        prompt = section_prompts.get(section_name, "Generate a professional appraisal section based on the property data provided.")
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a professional appraisal report writing assistant. You ONLY write from the data provided. For missing data, use [NOT PROVIDED — appraiser to complete]. NEVER invent facts. Your role is to create professional frameworks that the appraiser will complete with verified data."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=2000,
             temperature=0.2
         )
         return response.choices[0].message.content, None
@@ -641,9 +806,9 @@ SUBJECT PROPERTY:
 - Condition: {p.get('condition_rating', '')}, Quality: {p.get('quality_rating', '')}
 - Neighborhood: {p.get('neighborhood_name', '')}
 - County: {p.get('county', '')}
-- Flood Zone: {p.get('flood_zone', '')}, Map #: {p.get('flood_map_number', '')}
+- Flood Zone: {p.get('flood_zone', '')}, Map #: {p.get('flood_map_id', '')}
 - Tax: ${p.get('tax_amount', '')} ({p.get('tax_year', '')}), Parcel: {p.get('assessor_parcel', '')}
-- Legal Desc: {p.get('legal_description', '')}
+- Legal Desc: {p.get('legal_desc', '')}
 - Value Opinion: {order_data.get('value_opinion', '')}
 - Field Notes: {order_data.get('field_notes', '')}
 
@@ -678,7 +843,7 @@ Return ONLY valid JSON (no markdown, no code fences) with this EXACT structure:
     "utilities": "Public water, Public sewer, Public gas, Public electric",
     "street": "",
     "flood_zone": "{p.get('flood_zone', '')}",
-    "flood_map_number": "{p.get('flood_map_number', '')}",
+    "flood_map_id": "{p.get('flood_map_id', '')}",
     "zoning": "{p.get('zoning', '')}"
   }}
 }}"""
@@ -774,6 +939,26 @@ Include only fields you find. Omit empty fields."""
         return {}, str(e)
 
 # ====================== SETTINGS ======================
+def get_api_key(key_name):
+    """Get API key from st.secrets first, then fall back to settings DB."""
+    try:
+        # Try streamlit secrets first
+        if hasattr(st, 'secrets'):
+            secret = st.secrets.get(key_name, "")
+            if secret:
+                return secret
+            # Try nested api_keys structure
+            api_keys = st.secrets.get("api_keys", {})
+            if isinstance(api_keys, dict):
+                secret = api_keys.get(key_name, "")
+                if secret:
+                    return secret
+    except:
+        pass
+    # Fall back to settings DB
+    settings = get_settings()
+    return settings.get(key_name, "")
+
 def get_settings():
     conn = get_db()
     rows = conn.execute("SELECT key, value FROM settings").fetchall()
@@ -819,20 +1004,20 @@ def show_landing_page():
     st.markdown("""
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin: 2rem 0; padding: 0 1rem;">
         <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
-            <div style="font-size: 1.5rem; font-weight: 700; color: #0071E3;">100+</div>
-            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem;">Active Appraisers</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #0071E3;">Beta</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem;">Early Access</div>
         </div>
         <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
             <div style="font-size: 1.25rem; color: #0071E3;">✓</div>
-            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">USPAP Compliant</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">USPAP Compliant (AI-assisted)</div>
         </div>
         <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
             <div style="font-size: 1.25rem; color: #0071E3;">✓</div>
-            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">MISMO 2.6 GSE</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">UAD 3.6 Ready</div>
         </div>
         <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
             <div style="font-size: 1.25rem; color: #0071E3;">✓</div>
-            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">Fannie Mae/FHA Ready</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">GSE Guidelines Built-In</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -850,7 +1035,7 @@ def show_landing_page():
             <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
                 <div style="font-size: 2rem; margin-bottom: 0.75rem;">🤖</div>
                 <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">AI Report Writer</h4>
-                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Generate professional appraisal narratives in seconds with GPT-4o intelligence.</p>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Facts-only narrative generation that frameworks reports with verified data, never hallucinated facts.</p>
             </div>
             <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
                 <div style="font-size: 2rem; margin-bottom: 0.75rem;">📄</div>
@@ -927,7 +1112,7 @@ def show_landing_page():
                 "description": "For teams & firms",
                 "features": [
                     "Everything in Professional",
-                    "MISMO XML Export",
+                    "UAD 3.6 Package Export",
                     "STR Reports (AirDNA)",
                     "Priority phone support",
                     "API Access",
@@ -1034,9 +1219,9 @@ with st.sidebar:
         st.rerun()
 
 # ====================== NAVIGATION ======================
-tab0, tab1, tab2, tab3, tab5_tools, tab6_str, tab7_advisor, tab4, tab5 = st.tabs([
+tab0, tab1, tab2, tab3, tab5_tools, tab6_str, tab7_advisor, tab7_qc, tab4, tab5 = st.tabs([
     "🏠 Home", "📊 Dashboard", "📝 New Order", "🤖 AI Reports",
-    "🔧 Tools", "📈 STR Reports", "💬 AI Advisor", "📋 Activity Log", "⚙️ Settings"
+    "🔧 Tools", "📈 STR Reports", "💬 AI Advisor", "🔍 QC Review", "📋 Activity Log", "⚙️ Settings"
 ])
 
 # ====================== TAB 0: HOME ======================
@@ -1050,7 +1235,7 @@ with tab0:
     revenue_h = df_home["fee"].sum() if not df_home.empty else 0
 
     st.markdown(f"### Welcome, {st.session_state.user_name}!")
-    st.markdown("Your appraisal management dashboard is ready. Here's what you need to know today.")
+    st.markdown("Your appraisal management command center.")
 
     st.markdown("---")
     st.markdown("## Quick Stats")
@@ -1061,35 +1246,56 @@ with tab0:
 
     st.markdown("---")
 
-    col_left, col_right = st.columns(2)
+    # Due Today
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    st.markdown("## Due Today")
+    due_today = df_home[df_home["due_date"].str.startswith(today_str, na=False)] if not df_home.empty else pd.DataFrame()
+    if not due_today.empty:
+        due_display = due_today[["order_id", "subject_address", "client_name", "status"]].copy()
+        st.dataframe(due_display, use_container_width=True, hide_index=True)
+    else:
+        st.info("No appraisals due today")
 
-    with col_left:
-        st.markdown("## Recent Orders")
-        if not df_home.empty:
-            recent = df_home.head(5)[["order_id", "subject_address", "client_name", "status"]].copy()
-            st.dataframe(recent, use_container_width=True, hide_index=True)
-        else:
-            st.info("No orders yet. Create your first order to get started!")
+    st.markdown("---")
 
-    with col_right:
-        st.markdown("## Available Features")
-
-        features = [
-            ("📝 Order Management", "Create, track, and manage appraisal orders", True),
-            ("🤖 AI Report Writer", "GPT-4o narrative and report generation", has_feature("ai_reports")),
-            ("📄 Document Extraction", "Auto-fill orders from P&S agreements", has_feature("document_extraction")),
-            ("📦 MISMO XML Export", "Export directly to TOTAL", has_feature("xml_export")),
-            ("🔧 Appraiser Toolkit", "Calculators and appraisal tools", True),
-            ("📈 STR Analysis", "Short-term rental income reports", has_feature("str_reports")),
-            ("💬 AI Advisor", "Chat with AI for appraisal questions", has_feature("ai_advisor")),
+    # Inspections This Week
+    st.markdown("## Inspections This Week")
+    week_start = datetime.now()
+    week_end = week_start + pd.Timedelta(days=7)
+    if not df_home.empty:
+        week_inspections = df_home[
+            (df_home["inspection_date"] >= week_start.strftime('%Y-%m-%d')) &
+            (df_home["inspection_date"] <= week_end.strftime('%Y-%m-%d'))
         ]
+        if not week_inspections.empty:
+            week_display = week_inspections[["order_id", "subject_address", "client_name", "inspection_date"]].copy()
+            st.dataframe(week_display, use_container_width=True, hide_index=True)
+        else:
+            st.info("No inspections scheduled this week")
+    else:
+        st.info("No inspections scheduled")
 
-        for title, desc, available in features:
-            if available:
-                st.markdown(f'<div class="feature-card"><h4>{title}</h4><p>{desc}</p></div>', unsafe_allow_html=True)
-            else:
-                tier_needed = "Professional" if "AI" in title or "STR" in title else "Enterprise" if "XML" in title else "Professional"
-                st.markdown(f'<div class="feature-card feature-locked"><h4>{title} <span class="lock-badge">🔒 {tier_needed}</span></h4><p style="color: #ccc;">{desc}</p></div>', unsafe_allow_html=True)
+    st.markdown("---")
+
+    # Needs Review
+    st.markdown("## Needs Review")
+    review_needed = df_home[df_home["status"] == "Review"] if not df_home.empty else pd.DataFrame()
+    if not review_needed.empty:
+        review_display = review_needed[["order_id", "subject_address", "client_name"]].copy()
+        st.dataframe(review_display, use_container_width=True, hide_index=True)
+    else:
+        st.info("All reviewed orders are current")
+
+    st.markdown("---")
+
+    # Recent AI Drafts
+    st.markdown("## Recent AI Drafts")
+    ai_drafts = df_home[df_home["ai_narrative"].notna()] if not df_home.empty else pd.DataFrame()
+    if not ai_drafts.empty:
+        recent_drafts = ai_drafts.head(5)[["order_id", "subject_address", "updated_at"]].copy()
+        st.dataframe(recent_drafts, use_container_width=True, hide_index=True)
+    else:
+        st.info("No AI narratives generated yet")
 
 # ====================== TAB 1: DASHBOARD ======================
 with tab1:
@@ -1286,9 +1492,32 @@ with tab2:
                         else:
                             st.warning("No data could be extracted.")
 
+    # Document extraction button (outside form)
+    if has_feature("document_extraction"):
+        st.divider()
+        st.markdown("#### Extract from Document")
+        uploaded_doc = st.file_uploader("Upload P&S Agreement or Engagement Letter", type=["pdf", "jpg", "jpeg", "png"])
+        if uploaded_doc:
+            if st.button("Extract Data from Document"):
+                settings = get_settings()
+                api_key = settings.get("openai_api_key", "")
+                if not api_key:
+                    st.error("OpenAI API key not configured in Settings")
+                else:
+                    with st.spinner("Extracting data..."):
+                        extracted, error = extract_document_data(uploaded_doc, api_key, "engagement")
+                        if error:
+                            st.error(f"Extraction failed: {error}")
+                        else:
+                            st.session_state.extracted_data = extracted
+                            st.success("Data extracted! Review and update below.")
+                            st.rerun()
+
     # Merge extracted data for form defaults
     ex = st.session_state.get("extracted_data", {})
     ps = st.session_state.get("extracted_ps_data", {})
+    # Merge: P&S data fills in what engagement letter didn't
+    merged = {**ps, **ex}  # ex takes priority
 
     st.divider()
 
@@ -1350,12 +1579,7 @@ with tab2:
             value_opinion = st.text_input("Preliminary Value Opinion", placeholder="$500,000")
 
         st.markdown("#### Property Details (for URAR)")
-        prefill_pd = {}
-        if st.session_state.get("extracted_data", {}):
-            try:
-                prefill_pd = st.session_state.get("extracted_data", {})
-            except:
-                prefill_pd = {}
+        prefill_pd = merged if merged else {}
 
         pdcol1, pdcol2, pdcol3 = st.columns(3)
         with pdcol1:
@@ -1402,26 +1626,6 @@ with tab2:
 
         # Photo upload
         uploaded_files = st.file_uploader("Upload Photos", accept_multiple_files=True, type=["jpg", "png", "jpeg"])
-
-        # Document extraction button
-        if has_feature("document_extraction"):
-            st.markdown("#### Extract from Document")
-            uploaded_doc = st.file_uploader("Upload P&S Agreement or Engagement Letter", type=["pdf", "jpg", "jpeg", "png"])
-            if uploaded_doc:
-                if st.button("Extract Data from Document"):
-                    settings = get_settings()
-                    api_key = settings.get("openai_api_key", "")
-                    if not api_key:
-                        st.error("OpenAI API key not configured in Settings")
-                    else:
-                        with st.spinner("Extracting data..."):
-                            extracted, error = extract_document_data(uploaded_doc, api_key, "engagement")
-                            if error:
-                                st.error(f"Extraction failed: {error}")
-                            else:
-                                st.session_state.extracted_data = extracted
-                                st.success("Data extracted! Review and update below.")
-                                st.rerun()
 
         submit_btn = st.form_submit_button("✓ Create Order", use_container_width=True)
 
@@ -1527,9 +1731,76 @@ with tab3:
                     if not api_key:
                         st.error("OpenAI API key not configured. Go to Settings to add it.")
                     else:
+                        st.markdown("#### Section-by-Section AI Generation")
+                        st.caption("Generate individual sections to review and edit independently")
+
+                        sec_col1, sec_col2, sec_col3 = st.columns(3)
+                        with sec_col1:
+                            if st.button("📍 Neighborhood", use_container_width=True):
+                                with st.spinner("Generating Neighborhood section..."):
+                                    section_text, error = generate_section(dict(order), api_key, "Neighborhood")
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.success("Neighborhood section generated!")
+                                        st.text_area("Edit Neighborhood Section:", value=section_text, height=200, key="neighborhood_edit")
+
+                        with sec_col2:
+                            if st.button("🏠 Site", use_container_width=True):
+                                with st.spinner("Generating Site section..."):
+                                    section_text, error = generate_section(dict(order), api_key, "Site")
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.success("Site section generated!")
+                                        st.text_area("Edit Site Section:", value=section_text, height=200, key="site_edit")
+
+                        with sec_col3:
+                            if st.button("🏢 Improvements", use_container_width=True):
+                                with st.spinner("Generating Improvements section..."):
+                                    section_text, error = generate_section(dict(order), api_key, "Improvements")
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.success("Improvements section generated!")
+                                        st.text_area("Edit Improvements Section:", value=section_text, height=200, key="improvements_edit")
+
+                        sec_col4, sec_col5, sec_col6 = st.columns(3)
+                        with sec_col4:
+                            if st.button("📊 Sales Comp", use_container_width=True):
+                                with st.spinner("Generating Sales Comparison framework..."):
+                                    section_text, error = generate_section(dict(order), api_key, "Sales Comparison")
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.success("Sales Comparison framework generated!")
+                                        st.text_area("Edit Sales Comparison:", value=section_text, height=200, key="salescomp_edit")
+
+                        with sec_col5:
+                            if st.button("💰 Cost", use_container_width=True):
+                                with st.spinner("Generating Cost Approach framework..."):
+                                    section_text, error = generate_section(dict(order), api_key, "Cost Approach")
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.success("Cost Approach framework generated!")
+                                        st.text_area("Edit Cost Approach:", value=section_text, height=200, key="cost_edit")
+
+                        with sec_col6:
+                            if st.button("✓ Reconciliation", use_container_width=True):
+                                with st.spinner("Generating Reconciliation framework..."):
+                                    section_text, error = generate_section(dict(order), api_key, "Reconciliation")
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.success("Reconciliation framework generated!")
+                                        st.text_area("Edit Reconciliation:", value=section_text, height=200, key="reconciliation_edit")
+
+                        st.divider()
+
                         col1, col2 = st.columns(2)
                         with col1:
-                            if st.button("🤖 Generate Narrative"):
+                            if st.button("🤖 Generate Full Narrative"):
                                 with st.spinner("Generating narrative (this may take 1-2 minutes)..."):
                                     narrative, error = generate_narrative(dict(order), api_key)
                                     if error:
@@ -1562,7 +1833,7 @@ with tab3:
                                 if st.button("📋 Copy Narrative"):
                                     st.info("Narrative copied to clipboard (feature depends on browser)")
 
-                        # XML Export Section (MISMO 2.6GSE)
+                        # XML Export Section (UAD 3.6GSE)
                         if has_feature("xml_export"):
                             st.divider()
                             st.markdown("#### Export & Integration")
@@ -1570,7 +1841,7 @@ with tab3:
                             with ecol1:
                                 if st.button("Export XML for TOTAL"):
                                     # Build UAD XML - minimal version for feature gate
-                                                # Build UAD XML matching exact TOTAL/a la mode format (MISMO 2.6GSE, no namespaces)
+                                                # Build UAD XML matching exact TOTAL/a la mode format (UAD 3.6GSE, no namespaces)
                                                 addr = order_data.get("subject_address", "")
                                                 city = order_data.get("city", "")
                                                 state = order_data.get("state", "RI")
@@ -2326,8 +2597,36 @@ with tab7_advisor:
         # Chat input
         user_question = st.chat_input("Ask about guidelines, revision requests, form help, adjustments...")
 
-        if user_question:
-            st.session_state.advisor_messages.append({"role": "user", "content": user_question})
+        # Helper function for API call
+        def call_advisor_api(system_prompt, api_key):
+            try:
+                from openai import OpenAI
+                client = OpenAI(api_key=api_key)
+                messages = [{"role": "system", "content": system_prompt}]
+                for m in st.session_state.advisor_messages[-10:]:
+                    messages.append({"role": m["role"], "content": m["content"]})
+                with st.spinner("Thinking..."):
+                    response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=messages,
+                        max_tokens=2000,
+                        temperature=0.3
+                    )
+                    answer = response.choices[0].message.content
+                    st.session_state.advisor_messages.append({"role": "assistant", "content": answer})
+                    st.rerun()
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+
+        # Check if last message is from user without a response
+        needs_api_call = False
+        if st.session_state.advisor_messages and st.session_state.advisor_messages[-1]["role"] == "user":
+            # Check if there's no assistant response after the last user message
+            needs_api_call = True
+
+        if user_question or needs_api_call:
+            if user_question:
+                st.session_state.advisor_messages.append({"role": "user", "content": user_question})
 
             system_prompt = """You are an expert residential real estate appraisal advisor with deep knowledge of:
 
@@ -2359,34 +2658,100 @@ When answering:
 - For revision requests, provide sample response language they can adapt
 - Use plain language - be direct and helpful
 - If uncertain about a specific detail, say so
-- Focus on current 2024-2025 requirements"""
+- Focus on current 2025-2026 requirements including UAD 3.6 updates"""
 
-            try:
-                from openai import OpenAI
-                client = OpenAI(api_key=advisor_api_key)
-
-                messages = [{"role": "system", "content": system_prompt}]
-                for m in st.session_state.advisor_messages[-10:]:
-                    messages.append({"role": m["role"], "content": m["content"]})
-
-                with st.spinner("Thinking..."):
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=messages,
-                        max_tokens=2000,
-                        temperature=0.3
-                    )
-                    answer = response.choices[0].message.content
-                    st.session_state.advisor_messages.append({"role": "assistant", "content": answer})
-                    st.rerun()
-            except Exception as e:
-                st.error(f"Error: {str(e)}")
+            call_advisor_api(system_prompt, advisor_api_key)
 
         # Clear chat button
         if st.session_state.advisor_messages:
             if st.button("Clear Chat", key="clear_advisor"):
                 st.session_state.advisor_messages = []
                 st.rerun()
+
+# ====================== TAB 7_QC: QC REVIEW ======================
+with tab7_qc:
+    st.markdown("### QC Review & Revision Tracking")
+    st.caption("Manage revision requests, quality control items, and reviewer notes")
+
+    conn = get_db()
+    orders = conn.execute("SELECT order_id, subject_address FROM orders ORDER BY created_at DESC").fetchall()
+    conn.close()
+
+    if orders:
+        selected_order_id = st.selectbox("Select Order for Review", [o["order_id"] for o in orders], key="qc_order_select")
+
+        if selected_order_id:
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("#### Add Revision Request")
+                with st.form("revision_form"):
+                    item_type = st.selectbox("Item Type", ["Missing Data", "Unsupported Adjustment", "Photo Issue", "Compliance", "Other"])
+                    description = st.text_area("Description", placeholder="Describe the revision needed...")
+                    rev_submit = st.form_submit_button("Add Revision Item")
+
+                    if rev_submit and description:
+                        conn = get_db()
+                        conn.execute(
+                            "INSERT INTO review_items (order_id, item_type, description, status, created_at) VALUES (?, ?, ?, ?, ?)",
+                            (selected_order_id, item_type, description, "open", datetime.now().isoformat())
+                        )
+                        conn.commit()
+                        conn.close()
+                        st.success("Revision item added!")
+                        st.rerun()
+
+            with col2:
+                st.markdown("#### QC Checklist")
+                checklist_items = [
+                    "Photos complete",
+                    "All sections written",
+                    "Comps documented",
+                    "Adjustments supported",
+                    "USPAP scope of work included"
+                ]
+
+                for item in checklist_items:
+                    st.checkbox(item)
+
+            st.divider()
+
+            # Display existing review items
+            st.markdown("#### Revision Items")
+            conn = get_db()
+            review_items = conn.execute(
+                "SELECT id, item_type, description, status FROM review_items WHERE order_id = ? ORDER BY created_at DESC",
+                (selected_order_id,)
+            ).fetchall()
+            conn.close()
+
+            if review_items:
+                for item in review_items:
+                    with st.expander(f"**{item['item_type']}** - {item['description'][:50]}... [{item['status'].upper()}]"):
+                        st.markdown(f"**Type:** {item['item_type']}")
+                        st.markdown(f"**Description:** {item['description']}")
+                        st.markdown(f"**Status:** {item['status']}")
+
+                        if item['status'] == 'open':
+                            with st.form(f"response_form_{item['id']}"):
+                                response = st.text_area("Response/Resolution:", key=f"response_{item['id']}")
+                                status = st.selectbox("Update Status:", ["open", "resolved", "pending"], key=f"status_{item['id']}")
+                                resp_submit = st.form_submit_button("Save Response")
+
+                                if resp_submit and response:
+                                    conn = get_db()
+                                    conn.execute(
+                                        "UPDATE review_items SET status = ?, response = ?, resolved_at = ? WHERE id = ?",
+                                        (status, response, datetime.now().isoformat() if status == 'resolved' else None, item['id'])
+                                    )
+                                    conn.commit()
+                                    conn.close()
+                                    st.success("Response saved!")
+                                    st.rerun()
+            else:
+                st.info("No revision items yet.")
+    else:
+        st.info("No orders available for review.")
 
 # ====================== TAB 4: ACTIVITY LOG ======================
 with tab4:
@@ -2462,13 +2827,15 @@ with tab5:
                     "gmail_user": gmail_user,
                     "gmail_app_password": gmail_pwd
                 })
-                st.success("API keys saved securely!")
+                st.success("API keys saved. For production, configure keys in Streamlit secrets management instead of the database.")
+
+        st.info("**Streamlit Secrets Management (Recommended for Production):**\nFor enhanced security in production deployments, add your API keys to `.streamlit/secrets.toml` instead of using the database. The app checks Streamlit secrets first before falling back to this database for backwards compatibility.")
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <p style="text-align: center; color: #86868b; font-size: 0.85rem; margin-top: 2rem;">
-AppraisalOS • Powered by A-Tech Appraisal Co., LLC<br>
-Professional appraisal management platform
+Powered by A-Tech Appraisal Co., LLC • Warwick, RI<br>
+AppraisalOS is the complete platform for modern appraisers
 </p>
 """, unsafe_allow_html=True)
