@@ -13,6 +13,7 @@ import base64
 import io
 import math
 import requests
+import fitz  # PyMuPDF - for converting PDF pages to images
 
 # ====================== CONFIG ======================
 st.set_page_config(page_title="A-Tech Appraisal Co.", layout="wide", page_icon="🏠")
@@ -619,17 +620,39 @@ Include only fields you find. Omit empty fields."""
 
     try:
         headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
+
+        # Build image content - PDFs need to be converted to images first
+        image_contents = []
+        if ext == 'pdf':
+            # Convert PDF pages to images using PyMuPDF
+            pdf_doc = fitz.open(stream=file_bytes, filetype="pdf")
+            max_pages = min(len(pdf_doc), 5)  # Limit to first 5 pages
+            for page_num in range(max_pages):
+                page = pdf_doc[page_num]
+                pix = page.get_pixmap(dpi=200)
+                img_bytes = pix.tobytes("png")
+                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+                image_contents.append({
+                    'type': 'image_url',
+                    'image_url': {'url': f'data:image/png;base64,{img_b64}', 'detail': 'high'}
+                })
+            pdf_doc.close()
+        else:
+            # Regular image file
+            image_contents.append({
+                'type': 'image_url',
+                'image_url': {'url': f'data:{media_type};base64,{b64_data}', 'detail': 'high'}
+            })
+
         payload = {
             'model': 'gpt-4o',
-            'messages': [{'role': 'user', 'content': [
-                {'type': 'image_url', 'image_url': {'url': f'data:{media_type};base64,{b64_data}', 'detail': 'high'}},
-                {'type': 'text', 'text': prompt}
-            ]}],
+            'messages': [{'role': 'user', 'content': image_contents + [{'type': 'text', 'text': prompt}]}],
             'max_tokens': 2000, 'temperature': 0.1
         }
         resp = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=payload, timeout=60)
         if resp.status_code != 200:
-            return {}, f"API error: {resp.status_code}"
+            err_detail = resp.text[:200] if resp.text else str(resp.status_code)
+            return {}, f"API error: {resp.status_code} - {err_detail}"
         content = resp.json()['choices'][0]['message']['content']
         json_start = content.find('{')
         json_end = content.rfind('}') + 1
