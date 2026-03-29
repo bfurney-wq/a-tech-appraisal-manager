@@ -310,11 +310,13 @@ def generate_report_data(order_data, api_key):
         zipcode = order_data.get('zip_code', '')
 
         prompt = f"""You are a licensed certified residential appraiser with 20+ years of experience
-in {city}, {state}. Generate COMPLETE structured appraisal data as JSON for a URAR form.
-This data will be imported into TOTAL appraisal software via UAD XML.
+in {city}, {state}. Generate ONLY the URAR PAGE 1 data as JSON. This is for the Subject,
+Neighborhood, and Site sections ONLY. Do NOT make up comparable sales, adjustments, or values.
 
-USE YOUR KNOWLEDGE OF THE ACTUAL AREA. Use real street names that exist in {city}, {state}.
-Use realistic sale prices for the area. Reference actual neighborhoods, school districts, and landmarks.
+ONLY use data that is provided below or that you can reasonably know about the area (like
+neighborhood character, typical utilities, zoning descriptions, etc.).
+If you don't have specific data for a field, leave it as an empty string "".
+DO NOT FABRICATE specific numbers, addresses, or sale prices.
 
 SUBJECT PROPERTY:
 - Address: {order_data['subject_address']}, {city}, {state} {zipcode}
@@ -335,231 +337,161 @@ SUBJECT PROPERTY:
 - Value Opinion: {order_data.get('value_opinion', '')}
 - Field Notes: {order_data.get('field_notes', '')}
 
-CRITICAL RULES:
-1. Use REAL street names from {city}, {state} for comparable sales
-2. Sale prices must be realistic for this specific zip code and neighborhood
-3. Sale dates must be within the last 12 months
-4. Every adjustment must have a dollar amount that makes sense (e.g. $50/sqft for GLA, $5000-15000 for garage)
-5. Net adjustments should typically be under 15% of sale price, gross under 25%
-6. All comments must be 3-5 sentences minimum - NO one-liners
-7. The addendum must be a FULL scope of work (8+ sentences)
-8. All monetary values as strings without $ signs or commas
+RULES:
+1. Only fill fields you have actual data for or general area knowledge about
+2. Leave unknown fields as empty strings - DO NOT GUESS
+3. Neighborhood description should reflect your general knowledge of {city}, {state} areas
+4. All comments should be based on the provided subject data only
+5. DO NOT generate comps, adjustments, or values - the appraiser will add those manually
+6. All monetary values as strings without $ signs or commas
 
 Return ONLY valid JSON (no markdown, no code fences) with this EXACT structure:
 {{
-  "comps": [
-    {{
-      "address": "use a real street name from {city}",
-      "city": "{city}",
-      "state": "{state}",
-      "zip": "{zipcode}",
-      "sale_price": "350000",
-      "sale_date": "01/2026",
-      "financing_type": "FHA",
-      "financing_adj": "0",
-      "concessions": "0",
-      "concessions_adj": "0",
-      "gla": "1800",
-      "total_rooms": "7",
-      "bedrooms": "3",
-      "bathrooms": "2",
-      "year_built": "1985",
-      "lot_size": "10000",
-      "design_style": "Colonial",
-      "exterior_walls": "Vinyl Siding",
-      "roof_surface": "Asphalt Shingle",
-      "condition": "C3",
-      "quality": "Q3",
-      "view": "N;Res;",
-      "foundation": "Full Basement",
-      "basement_total_sqft": "900",
-      "basement_finished_sqft": "400",
-      "heating_cooling": "FWA/Central",
-      "garage_parking": "2gbi",
-      "porch_patio_deck": "Deck, Patio",
-      "fireplace": "1fp1wbfp",
-      "pool": "None",
-      "fence": "Wood Privacy",
-      "functional_utility": "Average",
-      "energy_efficiency": "Typical",
-      "location_adj": "0",
-      "lease_fee_adj": "0",
-      "site_adj": "0",
-      "view_adj": "0",
-      "design_adj": "0",
-      "quality_adj": "0",
-      "age_adj": "0",
-      "condition_adj": "0",
-      "gla_adj": "-5000",
-      "room_adj": "0",
-      "basement_adj": "0",
-      "functional_adj": "0",
-      "heating_adj": "0",
-      "energy_adj": "0",
-      "garage_adj": "0",
-      "porch_adj": "0",
-      "fireplace_adj": "0",
-      "pool_adj": "0",
-      "fence_adj": "0",
-      "net_adj": "-5000",
-      "gross_adj": "5000",
-      "net_adj_pct": "1.4",
-      "gross_adj_pct": "1.4",
-      "adj_sale_price": "345000",
-      "data_source": "RIMLS#12345678;DOM 30",
-      "verification_source": "Public Records/MLS",
-      "proximity": "0.3 miles",
-      "prior_sale_date": "N/A",
-      "prior_sale_price": "N/A"
-    }}
-  ],
+  "comps": [],
   "neighborhood": {{
-    "name": "use actual neighborhood name for this area",
-    "boundaries": "North: real road, South: real road, East: real road, West: real road",
-    "description": "3+ sentences describing the actual neighborhood character, housing stock, and appeal",
-    "built_up": "Over 75%",
-    "growth_rate": "Stable",
-    "property_values": "Increasing",
-    "demand_supply": "Shortage",
-    "marketing_time": "Under 3 Months",
-    "market_conditions": "3+ sentences about the current local real estate market conditions and trends",
-    "price_low": "250000",
-    "price_high": "500000",
-    "price_predominant": "375000",
-    "age_low": "10",
-    "age_high": "80",
-    "age_predominant": "40",
-    "land_use_sf_pct": "85",
-    "land_use_24_pct": "5",
-    "land_use_apt_pct": "5",
-    "land_use_comm_pct": "3",
-    "land_use_other_pct": "2",
-    "neighborhood_factors": "2+ sentences about any positive or negative neighborhood factors"
+    "name": "{p.get('neighborhood_name', '')}",
+    "boundaries": "",
+    "description": "3+ sentences describing the general character of this area in {city}, {state} based on your knowledge. Housing types, age of homes, appeal, proximity to amenities.",
+    "built_up": "",
+    "growth_rate": "",
+    "property_values": "",
+    "demand_supply": "",
+    "marketing_time": "",
+    "market_conditions": "3+ sentences about general market conditions in {city}, {state}.",
+    "price_low": "",
+    "price_high": "",
+    "price_predominant": "",
+    "age_low": "",
+    "age_high": "",
+    "age_predominant": "",
+    "land_use_sf_pct": "",
+    "land_use_24_pct": "",
+    "land_use_apt_pct": "",
+    "land_use_comm_pct": "",
+    "land_use_other_pct": "",
+    "neighborhood_factors": "2+ sentences about general factors affecting value in this area"
   }},
   "site": {{
     "dimensions": "{p.get('lot_dimensions', '')}",
     "area": "{p.get('lot_area', '')}",
-    "shape": "Rectangular",
-    "view": "N;Res;",
-    "topography": "Level",
+    "shape": "",
+    "view": "",
+    "topography": "",
     "drainage": "Adequate",
     "utilities_electric": "Public",
     "utilities_gas": "Public",
     "utilities_water": "Public",
     "utilities_sewer": "Public",
     "street": "Asphalt",
-    "curb_gutter": "Yes",
-    "sidewalk": "Yes",
-    "street_lights": "Yes",
+    "curb_gutter": "",
+    "sidewalk": "",
+    "street_lights": "",
     "alley": "None",
-    "fema_flood_zone": "{p.get('flood_zone', 'X')}",
+    "fema_flood_zone": "{p.get('flood_zone', '')}",
     "fema_map_number": "{p.get('flood_map_number', '')}",
     "fema_map_date": "",
-    "flood_insurance_required": "No",
-    "easements": "Typical utility easements noted",
-    "encroachments": "None observed",
-    "special_assessments": "None",
-    "environmental_conditions": "None observed",
+    "flood_insurance_required": "",
+    "easements": "",
+    "encroachments": "",
+    "special_assessments": "",
+    "environmental_conditions": "",
     "zoning_class": "{p.get('zoning', '')}",
-    "zoning_description": "Single Family Residential",
-    "zoning_compliance": "Legal conforming",
+    "zoning_description": "",
+    "zoning_compliance": "",
     "highest_best_use": "Present use as improved - single family residential"
   }},
   "subject_improvements": {{
-    "general_description": "3+ sentences describing the overall structure and its characteristics",
+    "general_description": "Describe the subject based ONLY on the provided data above. Do not invent details.",
     "foundation_walls": "{p.get('foundation_type', '')}",
     "exterior_walls": "{p.get('exterior_desc', '')}",
-    "roof_surface": "Asphalt Shingle",
-    "roof_condition": "Average - no visible defects",
-    "gutters_downspouts": "Aluminum",
-    "window_type": "Double Hung/Insulated",
-    "storm_screens": "Yes",
-    "insulation": "Adequate",
-    "flooring": "Hardwood, Carpet, Tile",
-    "walls_trim": "Drywall, Painted, Wood Trim",
-    "bath_floor": "Ceramic Tile",
-    "bath_wainscot": "Ceramic Tile",
-    "kitchen_counters": "Granite",
-    "kitchen_cabinets": "Wood",
-    "kitchen_appliances": "Refrigerator, Range/Oven, Dishwasher, Microwave",
-    "attic": "Scuttle",
-    "amenities": "Fireplace, Deck, Patio",
+    "roof_surface": "",
+    "roof_condition": "",
+    "gutters_downspouts": "",
+    "window_type": "",
+    "storm_screens": "",
+    "insulation": "",
+    "flooring": "",
+    "walls_trim": "",
+    "bath_floor": "",
+    "bath_wainscot": "",
+    "kitchen_counters": "",
+    "kitchen_cabinets": "",
+    "kitchen_appliances": "",
+    "attic": "",
+    "amenities": "",
     "car_storage": "{p.get('garage_type', '')}",
-    "physical_depreciation": "Normal for age",
-    "functional_depreciation": "None noted",
-    "external_depreciation": "None noted",
+    "physical_depreciation": "",
+    "functional_depreciation": "",
+    "external_depreciation": "",
     "effective_age": "",
-    "remaining_economic_life": "50",
-    "overall_condition_comment": "3+ sentences about the overall condition of improvements"
+    "remaining_economic_life": "",
+    "overall_condition_comment": "Based on the provided data, describe overall condition. Only reference what you actually know."
   }},
   "comments": {{
-    "additional_features": "3-5 sentences describing additional features, upgrades, renovations, and amenities. Mention specific items like updated kitchen, new roof, deck/patio size, landscaping quality, storage, and any other value-adding features.",
-    "condition_comment": "3-5 sentences about the overall condition. Reference specific systems (roof age, HVAC age, water heater), recent updates, deferred maintenance if any, and effective age vs actual age.",
-    "quality_comment": "3-5 sentences about construction quality. Mention materials used, workmanship, quality tier (Q1-Q6 with description), how it compares to neighborhood standards.",
-    "adverse_conditions": "2-3 sentences about any adverse environmental conditions, external factors, or special assessments observed. If none, explain what was checked and that none were found.",
-    "conforms_to_neighborhood": "2-3 sentences about how the subject conforms or does not conform to the neighborhood in terms of size, style, condition, and price range. Note any over-improvements or under-improvements.",
-    "reconciliation": "4-6 sentences. State the indicated value from each approach (Sales Comparison, Cost, Income if applicable). Explain the weight given to each approach and why. State the final opinion of market value and the effective date. Mention the exposure time and marketing time estimates.",
-    "conditions_comment": "3-4 sentences about any conditions of the appraisal. Is it subject to completion of repairs? Subject to inspection? As-is? Hypothetical conditions? Extraordinary assumptions?",
-    "sales_comparison_comment": "4-6 sentences. Describe the comparable selection process, search parameters used, why these comps were chosen, the adjustment methodology, and the reliability of the indicated value from this approach. Mention the MLS searched, date range, and any limiting factors in comp availability.",
-    "cost_comment": "3-4 sentences about the cost approach. Source of cost data (Marshall & Swift, local builders, etc.), how site value was estimated, depreciation methodology, and reliability of this approach for this property type and age.",
-    "addendum": "ADDENDUM / SCOPE OF WORK: 8-12 sentences minimum. Include: (1) Scope of work performed - type of inspection (interior/exterior), data sources consulted (MLS, public records, assessor), analysis performed. (2) Intended use: mortgage lending. Intended user: lender/client. (3) Market value definition per USPAP/OCC/FIRREA. (4) Three-year sale/listing history of the subject. (5) Three-year sale/listing history of each comparable. (6) Market trend analysis with data support (median prices, days on market, inventory levels). (7) Any extraordinary assumptions or hypothetical conditions. (8) Appraiser competency statement. (9) Prior services statement."
+    "additional_features": "",
+    "condition_comment": "",
+    "quality_comment": "",
+    "adverse_conditions": "",
+    "conforms_to_neighborhood": "",
+    "reconciliation": "",
+    "conditions_comment": "",
+    "sales_comparison_comment": "",
+    "cost_comment": "",
+    "addendum": ""
   }},
   "cost_approach": {{
     "site_value": "",
-    "site_value_source": "Comparable land sales and assessor allocation",
+    "site_value_source": "",
     "dwelling_sqft": "{p.get('gla_sqft', '')}",
     "dwelling_cost_per_sqft": "",
-    "dwelling_cost_source": "Marshall & Swift Residential Cost Handbook",
+    "dwelling_cost_source": "",
     "dwelling_cost": "",
     "garage_sqft": "",
     "garage_cost_per_sqft": "",
     "garage_cost": "",
     "other_improvements": "",
-    "other_improvements_cost": "0",
+    "other_improvements_cost": "",
     "total_new_cost": "",
     "physical_depreciation_pct": "",
     "physical_depreciation_amt": "",
-    "functional_depreciation_amt": "0",
-    "functional_depreciation_desc": "None observed",
-    "external_depreciation_amt": "0",
-    "external_depreciation_desc": "None observed",
+    "functional_depreciation_amt": "",
+    "functional_depreciation_desc": "",
+    "external_depreciation_amt": "",
+    "external_depreciation_desc": "",
     "total_depreciation": "",
     "depreciated_cost": "",
     "site_improvements": "",
-    "site_improvements_desc": "Driveway, walkways, landscaping, fencing",
+    "site_improvements_desc": "",
     "indicated_value": "",
     "effective_age": "",
-    "remaining_economic_life": "50",
+    "remaining_economic_life": "",
     "total_economic_life": ""
   }},
   "prior_sales": {{
-    "subject_prior_sale_date": "N/A or date",
-    "subject_prior_sale_price": "N/A or price",
-    "subject_current_listing": "N/A or listing price",
-    "subject_current_listing_dom": "N/A or days"
+    "subject_prior_sale_date": "",
+    "subject_prior_sale_price": "",
+    "subject_current_listing": "",
+    "subject_current_listing_dom": ""
   }},
   "valuation_summary": {{
     "sales_comparison_value": "",
     "cost_approach_value": "",
-    "income_approach_value": "N/A",
+    "income_approach_value": "",
     "final_opinion_value": "",
     "effective_date": "",
-    "exposure_time": "30-90 days",
-    "marketing_time": "30-90 days"
+    "exposure_time": "",
+    "marketing_time": ""
   }}
 }}
 
-IMPORTANT: Generate 3 realistic comparable sales from {city}, {state} {zipcode}.
-Use REAL street names from this area. Make adjustments that are mathematically correct
-(net_adj = sum of all individual adjustments, adj_sale_price = sale_price + net_adj).
-Net adjustment percentage = abs(net_adj) / sale_price * 100.
-Gross adjustment percentage = sum of abs values of all adjustments / sale_price * 100.
-All comps should bracket the subject value opinion. Fill in EVERY field. No blanks."""
+IMPORTANT: The comps array MUST be empty []. Do NOT generate fake comparable sales.
+Only fill in fields where you have actual data or reasonable general knowledge of the area.
+Leave everything else as empty strings."""
 
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": f"You are a licensed certified residential real estate appraiser with 20+ years experience in {city}, {state}. You have deep knowledge of local street names, neighborhoods, recent sales, and market conditions. Return ONLY valid JSON - no markdown formatting, no code fences, no commentary. Every field must be filled in with realistic, specific data appropriate for this market area."},
+                {"role": "system", "content": f"You are a licensed certified residential real estate appraiser with 20+ years experience in {city}, {state}. Return ONLY valid JSON - no markdown formatting, no code fences, no commentary. ONLY fill in fields where you have actual data from the prompt or general area knowledge. Leave unknown fields as empty strings. DO NOT fabricate comparable sales, prices, or specific numbers you don't actually know."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=8000,
