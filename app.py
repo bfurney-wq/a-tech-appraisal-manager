@@ -946,6 +946,10 @@ def show_landing_page():
                 card_style = "border: 2.5px solid #0071E3; box-shadow: 0 12px 32px rgba(0,122,255,0.15);" if featured else "border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04);"
                 transform = "transform: scale(1.02);" if featured else ""
 
+                features_html = ""
+                for feature in tier["features"]:
+                    features_html += f'<li style="padding: 0.6rem 0; color: #555; font-size: 0.9rem; position: relative; padding-left: 1.75rem;"><span style="position: absolute; left: 0; color: #0071E3; font-weight: bold; font-size: 1.1rem;">✓</span>{feature}</li>'
+
                 st.markdown(f"""
                 <div style="background: white; border-radius: 18px; padding: 2rem 1.5rem; text-align: center; {card_style} {transform} transition: all 0.3s ease;">
                     {badge_html}
@@ -953,12 +957,10 @@ def show_landing_page():
                     <div style="color: #86868b; font-size: 0.85rem; margin-bottom: 1.5rem;">{tier['description']}</div>
                     <div style="font-size: 2.8rem; font-weight: 700; color: #1d1d1f; margin: 0.75rem 0;"><span style="font-size: 1.5rem; vertical-align: super;">$</span>{tier['price']}<span style="font-size: 1rem; color: #86868b; font-weight: 400;">/mo</span></div>
                     <ul style="text-align: left; margin: 2rem 0; min-height: 200px; list-style: none; padding: 0;">
+                        {features_html}
+                    </ul>
+                </div>
                 """, unsafe_allow_html=True)
-
-                for feature in tier["features"]:
-                    st.markdown(f'<li style="padding: 0.6rem 0; color: #555; font-size: 0.9rem; position: relative; padding-left: 1.75rem;"><span style="position: absolute; left: 0; color: #0071E3; font-weight: bold; font-size: 1.1rem;">✓</span>{feature}</li>', unsafe_allow_html=True)
-
-                st.markdown('</ul>', unsafe_allow_html=True)
 
                 if st.button(tier['cta'], key=f"tier_{tier['key']}", use_container_width=True):
                     st.session_state.user_tier = tier['key']
