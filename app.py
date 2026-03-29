@@ -932,7 +932,11 @@ with tab2:
         with ocol2:
             lender_name = st.text_input("Lender Name", value=prefill.get("lender_name", "") or ex.get("lender_name", "") or ps.get("lender_name", ""))
             loan_number = st.text_input("Loan Number", value=prefill.get("loan_number", "") or ex.get("loan_number", ""))
-            fee_default = float(prefill.get("fee", 0) or ex.get("fee", 0) or 0)
+            try:
+                fee_raw = prefill.get("fee", 0) or ex.get("fee", 0) or 0
+                fee_default = float(str(fee_raw).replace("$", "").replace(",", "").strip() or 0)
+            except (ValueError, TypeError):
+                fee_default = 0.0
             fee = st.number_input("Fee ($)", value=fee_default, step=25.0)
             due_date = st.date_input("Due Date", value=None)
 
