@@ -2361,11 +2361,11 @@ with tab5_tools:
     with ext_col2:
         st.markdown('''
         <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e5e5e5; text-align: center;">
-            <h4 style="margin: 0 0 0.5rem 0;">📈 STR Report Generator</h4>
-            <p style="color: #666; font-size: 0.85rem; margin-bottom: 1rem;">Generate AirDNA-powered short-term rental income analysis reports for appraisal work.</p>
+            <h4 style="margin: 0 0 0.5rem 0;">🗺️ FEMA Flood Maps</h4>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 1rem;">Look up FEMA flood zone designations, map panels, and community information for any property address.</p>
         </div>
         ''', unsafe_allow_html=True)
-        st.link_button("Open STR Generator", "https://avm-str-generator.onrender.com", use_container_width=True)
+        st.link_button("Open FEMA Flood Map", "https://msc.fema.gov/portal/search", use_container_width=True)
     st.markdown("---")
 
     st.markdown("### Appraiser Toolkit")
