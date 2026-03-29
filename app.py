@@ -16,65 +16,141 @@ import requests
 import fitz  # PyMuPDF - for converting PDF pages to images
 
 # ====================== CONFIG ======================
-st.set_page_config(page_title="A-Tech Appraisal Co.", layout="wide", page_icon="🏠")
+st.set_page_config(page_title="AppraisalOS", layout="wide", page_icon="🏠")
 
-# ====================== CUSTOM CSS ======================
+# ====================== CUSTOM CSS - PREMIUM DESIGN SYSTEM ======================
 st.markdown("""
 <style>
-/* Apple-inspired design system */
+/* Premium design system with proper Streamlit selectors */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 #MainMenu {display: none;}
 footer {display: none;}
-header[data-testid="stHeader"] {background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.1);}
+header[data-testid="stHeader"] {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 0.5px solid rgba(0,0,0,0.1);
+}
 
 /* Base */
-.main {background-color: #fbfbfd; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;}
-.block-container {max-width: 1200px; padding: 2rem 1rem;}
+.main {
+    background-color: #f5f5f7;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.block-container {
+    max-width: 1200px;
+    padding: 2rem 1rem;
+}
 
-/* Hero banner - Apple style gradient */
+/* Hero banner - Premium gradient */
 .hero-banner {
     background: linear-gradient(135deg, #1d1d1f 0%, #2d2d30 50%, #1d1d1f 100%);
-    padding: 2.5rem 3rem; border-radius: 18px; margin-bottom: 2rem;
-    color: white; position: relative; overflow: hidden;
+    padding: 2.5rem 3rem;
+    border-radius: 18px;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
 }
 .hero-banner::after {
-    content: ''; position: absolute; top: -50%; right: -20%;
-    width: 400px; height: 400px; border-radius: 50%;
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
     background: radial-gradient(circle, rgba(0,122,255,0.15) 0%, transparent 70%);
 }
-.hero-banner h1 {color: white !important; font-size: 2rem; margin: 0; font-weight: 600; letter-spacing: -0.02em;}
-.hero-banner p {color: rgba(255,255,255,0.7); margin: 0.4rem 0 0 0; font-size: 0.95rem; font-weight: 300;}
+.hero-banner h1 {
+    color: white !important;
+    font-size: 2rem;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+.hero-banner p {
+    color: rgba(255,255,255,0.7);
+    margin: 0.4rem 0 0 0;
+    font-size: 0.95rem;
+    font-weight: 300;
+}
 
-/* Metric cards - Apple glass style */
+/* Metric cards - Glass morphism style */
 .metric-card {
-    background: white; border-radius: 16px; padding: 1.5rem;
-    text-align: center; border: 0.5px solid rgba(0,0,0,0.06);
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 0.5px solid rgba(0,0,0,0.06);
     box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.metric-card:hover {transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.08);}
-.metric-value {font-size: 2.2rem; font-weight: 600; color: #1d1d1f; margin: 0.5rem 0; letter-spacing: -0.03em;}
-.metric-label {font-size: 0.75rem; color: #86868b; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;}
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.metric-value {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin: 0.5rem 0;
+    letter-spacing: -0.03em;
+}
+.metric-label {
+    font-size: 0.75rem;
+    color: #86868b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+}
 
 /* Feature cards */
 .feature-card {
-    background: white; border-radius: 14px; padding: 1.5rem;
+    background: white;
+    border-radius: 14px;
+    padding: 1.5rem;
     border: 0.5px solid rgba(0,0,0,0.06);
     box-shadow: 0 1px 8px rgba(0,0,0,0.03);
     margin-bottom: 0.75rem;
-    border-left: 3px solid #007AFF;
+    border-left: 3px solid #0071E3;
+    transition: all 0.2s ease;
+}
+.feature-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.feature-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1d1d1f;
+    font-size: 0.95rem;
+}
+.feature-card p {
+    margin: 0;
+    color: #555;
+    font-size: 0.85rem;
+    line-height: 1.4;
 }
 
 /* Tabs - Apple segmented control style */
-.stTabs [data-baseweb="tab-list"] {background: #f5f5f7; border-radius: 10px; padding: 3px; gap: 2px;}
+.stTabs [data-baseweb="tab-list"] {
+    background: #f5f5f7;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+}
 .stTabs [data-baseweb="tab"] {
-    background: transparent; border-radius: 8px; padding: 0.5rem 1rem;
-    font-weight: 500; font-size: 0.85rem; color: #1d1d1f;
+    background: transparent;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #1d1d1f;
     border: none;
 }
 .stTabs [aria-selected="true"] {
-    background: white !important; color: #1d1d1f !important;
+    background: white !important;
+    color: #1d1d1f !important;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     border: none;
 }
@@ -82,42 +158,91 @@ header[data-testid="stHeader"] {background: rgba(255,255,255,0.8); backdrop-filt
 .stTabs [data-baseweb="tab-border"] {display: none;}
 
 /* Typography */
-h1, h2, h3 {color: #1d1d1f; letter-spacing: -0.02em; font-weight: 600;}
+h1, h2, h3 {
+    color: #1d1d1f;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+}
 h1 {font-size: 1.8rem;}
 h2 {font-size: 1.4rem;}
 h3 {font-size: 1.15rem;}
 
 /* Buttons - Apple style */
 .stButton > button {
-    border-radius: 10px; font-weight: 500; font-size: 0.9rem;
-    padding: 0.5rem 1.25rem; border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.25rem;
+    border: none;
     transition: all 0.2s ease;
 }
 .stButton > button[kind="primary"] {
-    background: #007AFF; color: white;
+    background: #0071E3 !important;
+    color: white !important;
 }
-.stButton > button[kind="primary"]:hover {background: #0066d6;}
+.stButton > button[kind="primary"]:hover {
+    background: #0066d6 !important;
+}
 .stButton > button[kind="secondary"] {
-    background: #f5f5f7; color: #1d1d1f; border: 0.5px solid rgba(0,0,0,0.1);
+    background: #f5f5f7 !important;
+    color: #1d1d1f !important;
+    border: 0.5px solid rgba(0,0,0,0.1) !important;
 }
-.stButton > button[kind="secondary"]:hover {background: #e8e8ed;}
+.stButton > button[kind="secondary"]:hover {
+    background: #e8e8ed !important;
+}
 
-/* Form inputs */
-.stTextInput > div > div > input, .stSelectbox > div > div, .stNumberInput > div > div > input {
-    border-radius: 10px !important; border: 1px solid #d2d2d7 !important;
-    font-size: 0.9rem; padding: 0.5rem 0.75rem;
+/* Form inputs - proper Streamlit selectors */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input {
+    border-radius: 10px !important;
+    border: 1px solid #d2d2d7 !important;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem !important;
 }
-.stTextInput > div > div > input:focus, .stNumberInput > div > div > input:focus {
-    border-color: #007AFF !important; box-shadow: 0 0 0 3px rgba(0,122,255,0.15) !important;
+.stTextInput > div > div > input:focus,
+.stNumberInput > div > div > input:focus {
+    border-color: #0071E3 !important;
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.15) !important;
+}
+
+/* Selectbox - using data-testid selectors for Streamlit compatibility */
+[data-testid="stSelectbox"] > div > div {
+    border-radius: 10px !important;
+    border: 1px solid #d2d2d7 !important;
+}
+[data-testid="stSelectbox"] input {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 0.75rem !important;
+}
+[data-testid="stSelectbox"] input:focus {
+    border-color: #0071E3 !important;
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.15) !important;
+}
+
+/* Ensure selectbox text is readable */
+[role="listbox"] {
+    border-radius: 10px !important;
+}
+[role="option"] {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.9rem !important;
 }
 
 /* Dataframes */
-.stDataFrame {border-radius: 12px; overflow: hidden; border: 0.5px solid rgba(0,0,0,0.06);}
+.stDataFrame {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 0.5px solid rgba(0,0,0,0.06);
+}
 
 /* Expanders */
 .streamlit-expanderHeader {
-    font-weight: 500; font-size: 0.95rem; color: #1d1d1f;
-    background: #f5f5f7; border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #1d1d1f;
+    background: #f5f5f7;
+    border-radius: 10px;
 }
 
 /* Dividers */
@@ -125,10 +250,103 @@ hr {border-color: rgba(0,0,0,0.06) !important;}
 
 /* Success/Error/Warning messages */
 .stAlert {border-radius: 12px;}
+
+/* Pricing cards */
+.pricing-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+.pricing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.pricing-card.featured {
+    border: 2px solid #0071E3;
+    transform: scale(1.02);
+}
+.pricing-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+}
+.pricing-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1d1d1f;
+    margin: 1rem 0;
+}
+.pricing-price-period {
+    font-size: 0.9rem;
+    color: #86868b;
+}
+.pricing-features {
+    text-align: left;
+    margin: 1.5rem 0;
+    min-height: 200px;
+}
+.pricing-features li {
+    padding: 0.5rem 0;
+    color: #555;
+    font-size: 0.9rem;
+    list-style: none;
+    position: relative;
+    padding-left: 1.5rem;
+}
+.pricing-features li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0071E3;
+    font-weight: bold;
+}
+.pricing-features li.locked {
+    color: #ccc;
+}
+.pricing-features li.locked:before {
+    content: "🔒";
+    color: #ccc;
+}
+
+/* Login form styling */
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    border: 0.5px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+/* Lock icon for features */
+.feature-locked {
+    color: #ccc;
+    opacity: 0.6;
+}
+.lock-badge {
+    display: inline-block;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-left: 0.5rem;
+    font-weight: 600;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # ====================== SESSION STATE INIT ======================
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "user_tier" not in st.session_state:
+    st.session_state.user_tier = "starter"
+if "user_name" not in st.session_state:
+    st.session_state.user_name = ""
 if "show_form" not in st.session_state:
     st.session_state.show_form = False
 if "edit_order_id" not in st.session_state:
@@ -447,179 +665,48 @@ Return ONLY valid JSON (no markdown, no code fences) with this EXACT structure:
     "built_up": "",
     "growth_rate": "",
     "property_values": "",
-    "demand_supply": "",
-    "marketing_time": "",
-    "market_conditions": "3+ sentences about general market conditions in {city}, {state}.",
-    "price_low": "",
-    "price_high": "",
-    "price_predominant": "",
-    "age_low": "",
-    "age_high": "",
-    "age_predominant": "",
-    "land_use_sf_pct": "",
-    "land_use_24_pct": "",
-    "land_use_apt_pct": "",
-    "land_use_comm_pct": "",
-    "land_use_other_pct": "",
-    "neighborhood_factors": "2+ sentences about general factors affecting value in this area"
+    "demand": "",
+    "supply": "",
+    "marketing_time": ""
   }},
   "site": {{
-    "dimensions": "{p.get('lot_dimensions', '')}",
-    "area": "{p.get('lot_area', '')}",
+    "lot_dimensions": "{p.get('lot_dimensions', '')}",
+    "lot_area": "{p.get('lot_area', '')}",
     "shape": "",
-    "view": "",
     "topography": "",
-    "drainage": "Adequate",
-    "utilities_electric": "Public",
-    "utilities_gas": "Public",
-    "utilities_water": "Public",
-    "utilities_sewer": "Public",
-    "street": "Asphalt",
-    "curb_gutter": "",
-    "sidewalk": "",
-    "street_lights": "",
-    "alley": "None",
-    "fema_flood_zone": "{p.get('flood_zone', '')}",
-    "fema_map_number": "{p.get('flood_map_number', '')}",
-    "fema_map_date": "",
-    "flood_insurance_required": "",
-    "easements": "",
-    "encroachments": "",
-    "special_assessments": "",
-    "environmental_conditions": "",
-    "zoning_class": "{p.get('zoning', '')}",
-    "zoning_description": "",
-    "zoning_compliance": "",
-    "highest_best_use": "Present use as improved - single family residential"
-  }},
-  "subject_improvements": {{
-    "general_description": "Describe the subject based ONLY on the provided data above. Do not invent details.",
-    "foundation_walls": "{p.get('foundation_type', '')}",
-    "exterior_walls": "{p.get('exterior_desc', '')}",
-    "roof_surface": "",
-    "roof_condition": "",
-    "gutters_downspouts": "",
-    "window_type": "",
-    "storm_screens": "",
-    "insulation": "",
-    "flooring": "",
-    "walls_trim": "",
-    "bath_floor": "",
-    "bath_wainscot": "",
-    "kitchen_counters": "",
-    "kitchen_cabinets": "",
-    "kitchen_appliances": "",
-    "attic": "",
-    "amenities": "",
-    "car_storage": "{p.get('garage_type', '')}",
-    "physical_depreciation": "",
-    "functional_depreciation": "",
-    "external_depreciation": "",
-    "effective_age": "",
-    "remaining_economic_life": "",
-    "overall_condition_comment": "Based on the provided data, describe overall condition. Only reference what you actually know."
-  }},
-  "comments": {{
-    "additional_features": "",
-    "condition_comment": "",
-    "quality_comment": "",
-    "adverse_conditions": "",
-    "conforms_to_neighborhood": "",
-    "reconciliation": "",
-    "conditions_comment": "",
-    "sales_comparison_comment": "",
-    "cost_comment": "",
-    "addendum": ""
-  }},
-  "cost_approach": {{
-    "site_value": "",
-    "site_value_source": "",
-    "dwelling_sqft": "{p.get('gla_sqft', '')}",
-    "dwelling_cost_per_sqft": "",
-    "dwelling_cost_source": "",
-    "dwelling_cost": "",
-    "garage_sqft": "",
-    "garage_cost_per_sqft": "",
-    "garage_cost": "",
-    "other_improvements": "",
-    "other_improvements_cost": "",
-    "total_new_cost": "",
-    "physical_depreciation_pct": "",
-    "physical_depreciation_amt": "",
-    "functional_depreciation_amt": "",
-    "functional_depreciation_desc": "",
-    "external_depreciation_amt": "",
-    "external_depreciation_desc": "",
-    "total_depreciation": "",
-    "depreciated_cost": "",
-    "site_improvements": "",
-    "site_improvements_desc": "",
-    "indicated_value": "",
-    "effective_age": "",
-    "remaining_economic_life": "",
-    "total_economic_life": ""
-  }},
-  "prior_sales": {{
-    "subject_prior_sale_date": "",
-    "subject_prior_sale_price": "",
-    "subject_current_listing": "",
-    "subject_current_listing_dom": ""
-  }},
-  "valuation_summary": {{
-    "sales_comparison_value": "",
-    "cost_approach_value": "",
-    "income_approach_value": "",
-    "final_opinion_value": "",
-    "effective_date": "",
-    "exposure_time": "",
-    "marketing_time": ""
+    "drainage": "",
+    "utilities": "Public water, Public sewer, Public gas, Public electric",
+    "street": "",
+    "flood_zone": "{p.get('flood_zone', '')}",
+    "flood_map_number": "{p.get('flood_map_number', '')}",
+    "zoning": "{p.get('zoning', '')}"
   }}
-}}
-
-IMPORTANT: The comps array MUST be empty []. Do NOT generate fake comparable sales.
-Only fill in fields where you have actual data or reasonable general knowledge of the area.
-Leave everything else as empty strings."""
+}}"""
 
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": f"You are a licensed certified residential real estate appraiser with 20+ years experience in {city}, {state}. Return ONLY valid JSON - no markdown formatting, no code fences, no commentary. ONLY fill in fields where you have actual data from the prompt or general area knowledge. Leave unknown fields as empty strings. DO NOT fabricate comparable sales, prices, or specific numbers you don't actually know."},
+                {"role": "system", "content": f"You are a licensed appraiser generating structured data. Return ONLY valid JSON. Do NOT include markdown or explanations."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=8000,
+            max_tokens=2000,
             temperature=0.2
         )
-        result_text = response.choices[0].message.content.strip()
-        # Strip markdown code fences if present
-        if result_text.startswith("```"):
-            result_text = result_text.split("\n", 1)[1] if "\n" in result_text else result_text[3:]
-        if result_text.endswith("```"):
-            result_text = result_text[:-3]
-        if result_text.startswith("json"):
-            result_text = result_text[4:]
-        report_data = json.loads(result_text.strip())
-        return report_data, None
+
+        result = response.choices[0].message.content.strip()
+        # Remove markdown code fences if present
+        if result.startswith("```"):
+            result = result.split("```")[1].strip()
+            if result.startswith("json"):
+                result = result[4:].strip()
+
+        data = json.loads(result)
+        return data, None
     except ImportError:
-        return None, "OpenAI package not installed."
-    except json.JSONDecodeError as e:
-        return None, f"AI returned invalid JSON: {str(e)}"
+        return None, "OpenAI package not installed. Run: pip install openai"
     except Exception as e:
         return None, str(e)
 
-# ====================== SETTINGS HELPERS ======================
-def get_settings():
-    conn = get_db()
-    rows = conn.execute("SELECT key, value FROM settings").fetchall()
-    conn.close()
-    return {row["key"]: row["value"] for row in rows}
-
-def save_setting(key, value):
-    conn = get_db()
-    conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
-    conn.commit()
-    conn.close()
-
-# ====================== DOCUMENT EXTRACTION ======================
 def extract_document_data(uploaded_file, api_key, doc_type="engagement"):
     """Extract data from engagement letters, order forms, or P&S agreements using GPT-4o vision."""
     if not api_key:
@@ -686,13 +773,278 @@ Include only fields you find. Omit empty fields."""
     except Exception as e:
         return {}, str(e)
 
-# ====================== HEADER ======================
-st.markdown("""
+# ====================== SETTINGS ======================
+def get_settings():
+    conn = get_db()
+    rows = conn.execute("SELECT key, value FROM settings").fetchall()
+    conn.close()
+    return {row["key"]: row["value"] for row in rows}
+
+def save_settings(settings_dict):
+    conn = get_db()
+    for key, value in settings_dict.items():
+        conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
+    conn.commit()
+    conn.close()
+
+# ====================== FEATURE TIER GATING ======================
+def has_feature(feature_name):
+    """Check if user's tier has access to this feature."""
+    tier_features = {
+        "starter": ["order_management", "basic_tools"],
+        "professional": ["order_management", "basic_tools", "ai_reports", "document_extraction", "ai_advisor"],
+        "enterprise": ["order_management", "basic_tools", "ai_reports", "document_extraction", "ai_advisor",
+                       "xml_export", "str_reports", "priority_support", "api_access"]
+    }
+    user_tier = st.session_state.get("user_tier", "starter")
+    return feature_name in tier_features.get(user_tier, [])
+
+def show_feature_lock(feature_name, tier_required="professional"):
+    """Display a lock icon and message for locked features."""
+    st.markdown(f'<span class="lock-badge">🔒 {tier_required.title()}</span>', unsafe_allow_html=True)
+
+# ====================== AUTH SYSTEM ======================
+def show_landing_page():
+    """Display login and pricing page when user is not authenticated."""
+    # Premium Hero Section
+    st.markdown("""
+    <div class="hero-banner">
+        <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">AppraisalOS</h1>
+        <p style="font-size: 1.25rem; color: rgba(255,255,255,0.8); font-weight: 300; margin: 0;">The complete platform for modern appraisers</p>
+        <p style="font-size: 0.95rem; color: rgba(255,255,255,0.6); margin-top: 0.75rem; font-weight: 300;">AI-powered tools, USPAP compliance, and GSE-ready reports — all in one place</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Trust Indicators
+    st.markdown("""
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin: 2rem 0; padding: 0 1rem;">
+        <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #0071E3;">100+</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem;">Active Appraisers</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
+            <div style="font-size: 1.25rem; color: #0071E3;">✓</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">USPAP Compliant</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
+            <div style="font-size: 1.25rem; color: #0071E3;">✓</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">MISMO 2.6 GSE</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: white; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03);">
+            <div style="font-size: 1.25rem; color: #0071E3;">✓</div>
+            <div style="color: #86868b; font-size: 0.85rem; margin-top: 0.25rem; font-weight: 500;">Fannie Mae/FHA Ready</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Feature Showcase Section
+    st.markdown("""
+    <div style="margin: 3rem 0; padding: 0 1rem;">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: #1d1d1f;">Powerful Features Built for You</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+            <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">📊</div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">Order Management</h4>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Track all appraisal orders in one centralized dashboard with real-time status updates.</p>
+            </div>
+            <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">🤖</div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">AI Report Writer</h4>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Generate professional appraisal narratives in seconds with GPT-4o intelligence.</p>
+            </div>
+            <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">📄</div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">Document Extraction</h4>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Automatically extract data from listing sheets, appraisals, and other documents.</p>
+            </div>
+            <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">💬</div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">AI Advisor</h4>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Get instant answers to appraisal questions from your personal AI assistant.</p>
+            </div>
+            <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">📈</div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">STR Reports</h4>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Generate short-term rental analysis reports powered by AirDNA data.</p>
+            </div>
+            <div style="background: white; padding: 2rem; border-radius: 14px; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 1px 8px rgba(0,0,0,0.03); transition: all 0.3s ease;">
+                <div style="font-size: 2rem; margin-bottom: 0.75rem;">🔧</div>
+                <h4 style="margin: 0 0 0.5rem 0; color: #1d1d1f; font-weight: 600;">Calculator Tools</h4>
+                <p style="margin: 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Access a complete suite of appraisal calculators and reference tools.</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Pricing Section Header
+    st.markdown("""
+    <div style="margin: 3rem 0 2rem 0; text-align: center; padding: 0 1rem;">
+        <h2 style="color: #1d1d1f; margin-bottom: 0.5rem;">Simple, Transparent Pricing</h2>
+        <p style="color: #86868b; font-size: 1rem;">Choose the plan that works for you. Start free for 7 days.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1.5, 1])
+
+    with col1:
+        # Pricing tier cards
+        pricing_cols = st.columns(3, gap="medium")
+
+        tiers = [
+            {
+                "name": "Starter",
+                "price": "29",
+                "description": "For independent appraisers",
+                "features": [
+                    "Order management",
+                    "Basic calculator tools",
+                    "Up to 5 orders/month",
+                    "Email support",
+                    "Community access"
+                ],
+                "key": "starter",
+                "cta": "Start Free Trial"
+            },
+            {
+                "name": "Professional",
+                "price": "59",
+                "description": "Most popular choice",
+                "features": [
+                    "Everything in Starter",
+                    "AI Report Writer (GPT-4o)",
+                    "Document Extraction AI",
+                    "AI Advisor chatbot",
+                    "Unlimited orders",
+                    "Priority email support"
+                ],
+                "key": "professional",
+                "featured": True,
+                "cta": "Start Free Trial"
+            },
+            {
+                "name": "Enterprise",
+                "price": "99",
+                "description": "For teams & firms",
+                "features": [
+                    "Everything in Professional",
+                    "MISMO XML Export",
+                    "STR Reports (AirDNA)",
+                    "Priority phone support",
+                    "API Access",
+                    "Advanced analytics"
+                ],
+                "key": "enterprise",
+                "cta": "Contact Sales"
+            }
+        ]
+
+        for i, tier in enumerate(tiers):
+            with pricing_cols[i]:
+                featured = tier.get("featured", False)
+                badge_html = '<div style="display: inline-block; background: linear-gradient(135deg, #0071E3 0%, #0066d6 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">⭐ Most Popular</div>' if featured else ''
+
+                card_style = "border: 2.5px solid #0071E3; box-shadow: 0 12px 32px rgba(0,122,255,0.15);" if featured else "border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04);"
+                transform = "transform: scale(1.02);" if featured else ""
+
+                st.markdown(f"""
+                <div style="background: white; border-radius: 18px; padding: 2rem 1.5rem; text-align: center; {card_style} {transform} transition: all 0.3s ease;">
+                    {badge_html}
+                    <h3 style="margin: 0 0 0.25rem 0; font-size: 1.4rem; color: #1d1d1f;">{tier['name']}</h3>
+                    <div style="color: #86868b; font-size: 0.85rem; margin-bottom: 1.5rem;">{tier['description']}</div>
+                    <div style="font-size: 2.8rem; font-weight: 700; color: #1d1d1f; margin: 0.75rem 0;"><span style="font-size: 1.5rem; vertical-align: super;">$</span>{tier['price']}<span style="font-size: 1rem; color: #86868b; font-weight: 400;">/mo</span></div>
+                    <ul style="text-align: left; margin: 2rem 0; min-height: 200px; list-style: none; padding: 0;">
+                """, unsafe_allow_html=True)
+
+                for feature in tier["features"]:
+                    st.markdown(f'<li style="padding: 0.6rem 0; color: #555; font-size: 0.9rem; position: relative; padding-left: 1.75rem;"><span style="position: absolute; left: 0; color: #0071E3; font-weight: bold; font-size: 1.1rem;">✓</span>{feature}</li>', unsafe_allow_html=True)
+
+                st.markdown('</ul>', unsafe_allow_html=True)
+
+                if st.button(tier['cta'], key=f"tier_{tier['key']}", use_container_width=True):
+                    st.session_state.user_tier = tier['key']
+                    st.session_state.show_login = True
+                    st.rerun()
+
+                st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        if st.session_state.get("show_login", False):
+            st.markdown("""
+            <div style="background: white; border-radius: 16px; padding: 2rem; border: 0.5px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+                <h3 style="margin: 0 0 1.5rem 0; color: #1d1d1f;">Sign In</h3>
+            </div>
+            """, unsafe_allow_html=True)
+
+            with st.form("login_form", border=False):
+                email = st.text_input("Email", value="", placeholder="demo@example.com")
+                password = st.text_input("Password", type="password", value="", placeholder="demo123")
+
+                col_submit, col_demo = st.columns(2)
+                with col_submit:
+                    login_btn = st.form_submit_button("Sign In", use_container_width=True)
+                with col_demo:
+                    demo_btn = st.form_submit_button("Demo Login", use_container_width=True)
+
+                if login_btn:
+                    if email and password:
+                        # Simple demo authentication
+                        if email.lower() == "demo@appraiser.com" and password == "demo123":
+                            st.session_state.authenticated = True
+                            st.session_state.user_name = "Demo Appraiser"
+                            st.rerun()
+                        else:
+                            st.error("Invalid credentials. Try demo@appraiser.com / demo123")
+                    else:
+                        st.error("Please enter email and password")
+
+                if demo_btn:
+                    st.session_state.authenticated = True
+                    st.session_state.user_name = "Demo Appraiser"
+                    st.session_state.user_tier = "professional"
+                    st.rerun()
+        else:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, rgba(0,122,255,0.05) 0%, rgba(0,122,255,0.02) 100%); border: 1px solid rgba(0,122,255,0.1); border-radius: 12px; padding: 1.5rem; margin-top: 0.5rem;">
+                <h4 style="margin: 0 0 1rem 0; color: #1d1d1f; font-weight: 600;">Ready to Get Started?</h4>
+                <p style="margin: 0 0 0.75rem 0; color: #555; font-size: 0.9rem; line-height: 1.5;">Try a plan free for 7 days. No credit card required.</p>
+                <p style="margin: 0.75rem 0 0 0; color: #555; font-size: 0.85rem;"><strong>Demo Credentials:</strong></p>
+                <p style="margin: 0.25rem 0; color: #555; font-size: 0.85rem;">Email: demo@appraiser.com</p>
+                <p style="margin: 0.25rem 0 0.75rem 0; color: #555; font-size: 0.85rem;">Password: demo123</p>
+                <p style="margin: 0; color: #86868b; font-size: 0.85rem; font-style: italic;">Or click "Demo Login" on any pricing tier.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 1rem; color: #86868b; font-size: 0.85rem;">
+        <p style="margin: 0;">Powered by <strong>A-Tech Appraisal Co., LLC</strong> • Warwick, RI</p>
+        <p style="margin: 0.5rem 0 0 0;">AppraisalOS is the complete platform for modern appraisers</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ====================== AUTH GATE ======================
+if not st.session_state.authenticated:
+    show_landing_page()
+    st.stop()
+
+# ====================== MAIN APP (ONLY SHOWN IF AUTHENTICATED) ======================
+
+# Hero banner with user greeting
+st.markdown(f"""
 <div class="hero-banner">
-    <h1>A-Tech Appraisal Co., LLC</h1>
-    <p>Professional Residential Appraisal Services &bull; Warwick, RI</p>
+    <h1>AppraisalOS</h1>
+    <p>Welcome, {st.session_state.user_name} • {st.session_state.user_tier.title()} Plan</p>
 </div>
 """, unsafe_allow_html=True)
+
+# Logout button in sidebar
+with st.sidebar:
+    st.markdown("---")
+    if st.button("🚪 Logout", use_container_width=True):
+        st.session_state.authenticated = False
+        st.session_state.user_name = ""
+        st.session_state.user_tier = "starter"
+        st.rerun()
 
 # ====================== NAVIGATION ======================
 tab0, tab1, tab2, tab3, tab5_tools, tab6_str, tab7_advisor, tab4, tab5 = st.tabs([
@@ -710,47 +1062,47 @@ with tab0:
     completed_h = len(df_home[df_home["status"] == "Completed"]) if not df_home.empty else 0
     revenue_h = df_home["fee"].sum() if not df_home.empty else 0
 
+    st.markdown(f"### Welcome, {st.session_state.user_name}!")
+    st.markdown("Your appraisal management dashboard is ready. Here's what you need to know today.")
+
+    st.markdown("---")
+    st.markdown("## Quick Stats")
+
     c1, c2, c3, c4 = st.columns(4)
     for col, val, lbl in [(c1, total_h, "Total Orders"), (c2, pending_h, "Pending"), (c3, completed_h, "Completed"), (c4, f"${revenue_h:,.0f}", "Revenue")]:
         col.markdown(f'<div class="metric-card"><div class="metric-label">{lbl}</div><div class="metric-value">{val}</div></div>', unsafe_allow_html=True)
 
     st.markdown("---")
-    fcol1, fcol2 = st.columns(2)
-    with fcol1:
-        st.subheader("Recent Orders")
+
+    col_left, col_right = st.columns(2)
+
+    with col_left:
+        st.markdown("## Recent Orders")
         if not df_home.empty:
-            recent = df_home.head(5)[["order_id", "subject_address", "client_name", "status", "fee"]].copy()
+            recent = df_home.head(5)[["order_id", "subject_address", "client_name", "status"]].copy()
             st.dataframe(recent, use_container_width=True, hide_index=True)
         else:
-            st.info("No orders yet. Create your first order in the New Order tab.")
-    with fcol2:
-        st.subheader("Platform Features")
-        features = [
-            ("📝 Order Management", "Create, track, and manage appraisal orders with full URAR support"),
-            ("🤖 AI Report Writer", "GPT-4o generates narratives, comps, adjustments, and comments"),
-            ("📄 Document Extraction", "Upload engagement letters or P&S agreements — AI auto-fills order data"),
-            ("📦 TOTAL XML Export", "Export MISMO 2.6 GSE XML files that import directly into TOTAL"),
-            ("🔧 Appraiser Toolkit", "GLA calculator, adjustment tools, cost approach, GRM, and more"),
-            ("📈 STR Analysis", "Short-term rental income analysis with AirDNA integration"),
-        ]
-        for title, desc in features:
-            st.markdown(f'<div class="feature-card"><h4>{title}</h4><p>{desc}</p></div>', unsafe_allow_html=True)
+            st.info("No orders yet. Create your first order to get started!")
 
-    st.markdown("---")
-    st.subheader("Quick Actions")
-    qa1, qa2, qa3, qa4 = st.columns(4)
-    with qa1:
-        if st.button("➕ New Order", use_container_width=True, key="qa_new"):
-            st.info("Switch to the **New Order** tab above.")
-    with qa2:
-        if st.button("📊 View Dashboard", use_container_width=True, key="qa_dash"):
-            st.info("Switch to the **Dashboard** tab above.")
-    with qa3:
-        if st.button("🔧 Appraiser Tools", use_container_width=True, key="qa_tools"):
-            st.info("Switch to the **Tools** tab above.")
-    with qa4:
-        if st.button("⚙️ Settings", use_container_width=True, key="qa_settings"):
-            st.info("Switch to the **Settings** tab above.")
+    with col_right:
+        st.markdown("## Available Features")
+
+        features = [
+            ("📝 Order Management", "Create, track, and manage appraisal orders", True),
+            ("🤖 AI Report Writer", "GPT-4o narrative and report generation", has_feature("ai_reports")),
+            ("📄 Document Extraction", "Auto-fill orders from P&S agreements", has_feature("document_extraction")),
+            ("📦 MISMO XML Export", "Export directly to TOTAL", has_feature("xml_export")),
+            ("🔧 Appraiser Toolkit", "Calculators and appraisal tools", True),
+            ("📈 STR Analysis", "Short-term rental income reports", has_feature("str_reports")),
+            ("💬 AI Advisor", "Chat with AI for appraisal questions", has_feature("ai_advisor")),
+        ]
+
+        for title, desc, available in features:
+            if available:
+                st.markdown(f'<div class="feature-card"><h4>{title}</h4><p>{desc}</p></div>', unsafe_allow_html=True)
+            else:
+                tier_needed = "Professional" if "AI" in title or "STR" in title else "Enterprise" if "XML" in title else "Professional"
+                st.markdown(f'<div class="feature-card feature-locked"><h4>{title} <span class="lock-badge">🔒 {tier_needed}</span></h4><p style="color: #ccc;">{desc}</p></div>', unsafe_allow_html=True)
 
 # ====================== TAB 1: DASHBOARD ======================
 with tab1:
@@ -758,28 +1110,35 @@ with tab1:
     df = pd.read_sql_query("SELECT * FROM orders ORDER BY created_at DESC", conn)
     conn.close()
 
-    # KPI row
+    # KPI row with custom metric cards
     col1, col2, col3, col4 = st.columns(4)
     total = len(df)
     pending = len(df[df["status"] == "Pending"]) if not df.empty else 0
     in_progress = len(df[df["status"] == "In Progress"]) if not df.empty else 0
     completed = len(df[df["status"] == "Completed"]) if not df.empty else 0
 
-    col1.metric("Total Orders", total)
-    col2.metric("Pending", pending)
-    col3.metric("In Progress", in_progress)
-    col4.metric("Completed", completed)
+    col1.markdown(f'<div class="metric-card"><div class="metric-label">Total Orders</div><div class="metric-value">{total}</div></div>', unsafe_allow_html=True)
+    col2.markdown(f'<div class="metric-card"><div class="metric-label">Pending</div><div class="metric-value">{pending}</div></div>', unsafe_allow_html=True)
+    col3.markdown(f'<div class="metric-card"><div class="metric-label">In Progress</div><div class="metric-value">{in_progress}</div></div>', unsafe_allow_html=True)
+    col4.markdown(f'<div class="metric-card"><div class="metric-label">Completed</div><div class="metric-value">{completed}</div></div>', unsafe_allow_html=True)
 
     st.divider()
 
-    # Filter controls
+    # Filter controls with better layout
+    st.markdown("### Filter Orders")
     fcol1, fcol2, fcol3 = st.columns(3)
+
     with fcol1:
-        status_filter = st.selectbox("Filter by Status", ["All", "Pending", "In Progress", "Completed", "On Hold", "Cancelled"])
+        st.markdown('<label style="font-size: 0.8rem; color: #86868b;">Status</label>', unsafe_allow_html=True)
+        status_filter = st.selectbox("Filter by Status", ["All", "Pending", "In Progress", "Completed", "On Hold", "Cancelled"], label_visibility="collapsed")
+
     with fcol2:
-        appraiser_filter = st.selectbox("Filter by Appraiser", ["All"] + (df["assigned_appraiser"].dropna().unique().tolist() if not df.empty else []))
+        st.markdown('<label style="font-size: 0.8rem; color: #86868b;">Appraiser</label>', unsafe_allow_html=True)
+        appraiser_filter = st.selectbox("Filter by Appraiser", ["All"] + (df["assigned_appraiser"].dropna().unique().tolist() if not df.empty else []), label_visibility="collapsed")
+
     with fcol3:
-        search = st.text_input("Search (address, client, order ID)")
+        st.markdown('<label style="font-size: 0.8rem; color: #86868b;">Search</label>', unsafe_allow_html=True)
+        search = st.text_input("Search (address, client, order ID)", label_visibility="collapsed")
 
     # Apply filters
     filtered = df.copy()
@@ -806,7 +1165,8 @@ with tab1:
         st.dataframe(filtered[available], use_container_width=True, hide_index=True)
 
         # Order detail expander
-        st.subheader("Order Details")
+        st.markdown("---")
+        st.markdown("### Order Details")
         selected = st.selectbox("Select an order to view", filtered["order_id"].tolist(), key="dash_select")
         if selected:
             conn = get_db()
@@ -829,16 +1189,16 @@ with tab1:
                     st.write(f"**Inspection:** {order['inspection_date'] or 'Not set'}")
 
                 if order["field_notes"]:
-                    with st.expander("Field Notes"):
+                    with st.expander("📝 Field Notes"):
                         st.write(order["field_notes"])
 
                 if order["ai_narrative"]:
-                    with st.expander("AI Narrative"):
+                    with st.expander("🤖 AI Narrative"):
                         st.write(order["ai_narrative"])
 
                 # Photo gallery
                 if order["photos"]:
-                    with st.expander("Photos"):
+                    with st.expander("📸 Photos"):
                         photo_paths = [p.strip() for p in order["photos"].split(",") if p.strip()]
                         photo_cols = st.columns(min(4, len(photo_paths)))
                         for i, path in enumerate(photo_paths):
@@ -848,15 +1208,16 @@ with tab1:
 
                 # Quick status update
                 st.divider()
+                st.markdown("### Quick Status Update")
                 qcol1, qcol2 = st.columns([3, 1])
                 with qcol1:
-                    new_status = st.selectbox("Quick Status Update",
+                    new_status = st.selectbox("Update Status",
                         ["Pending", "In Progress", "Completed", "On Hold", "Cancelled"],
                         index=["Pending", "In Progress", "Completed", "On Hold", "Cancelled"].index(order["status"]),
-                        key="quick_status"
+                        key="quick_status", label_visibility="collapsed"
                     )
                 with qcol2:
-                    if st.button("Update Status"):
+                    if st.button("✓ Update", use_container_width=True):
                         conn = get_db()
                         conn.execute("UPDATE orders SET status = ?, updated_at = ? WHERE order_id = ?",
                                     (new_status, datetime.now().isoformat(), selected))
@@ -873,7 +1234,7 @@ with tab1:
                             <p><strong>Value Opinion:</strong> {order['value_opinion'] or 'See attached report'}</p>
                             <p>Your report will be delivered shortly.</p>
                             <br>
-                            <p>A-Tech Appraisal Co., LLC<br>Warwick, RI</p>
+                            <p>AppraisalOS<br>Powered by A-Tech Appraisal Co.</p>
                             """
                             success, msg = send_email(
                                 order["client_email"],
@@ -887,41 +1248,12 @@ with tab1:
 
                         st.success(f"Status updated to {new_status}")
                         st.rerun()
-
-                # Edit and Delete
-                st.divider()
-                ecol1, ecol2, ecol3 = st.columns([1, 1, 4])
-                with ecol1:
-                    if st.button("✏️ Edit Order", key="edit_btn"):
-                        st.session_state.edit_order_id = selected
-                        st.info("Switch to the **New Order** tab to edit this order.")
-                with ecol2:
-                    if st.button("🗑️ Delete Order", key="delete_btn", type="secondary"):
-                        st.session_state.confirm_delete = selected
-
-                if st.session_state.get("confirm_delete") == selected:
-                    st.warning(f"⚠️ Are you sure you want to delete order **{selected}**? This cannot be undone.")
-                    cdel1, cdel2, cdel3 = st.columns([1, 1, 4])
-                    with cdel1:
-                        if st.button("Yes, Delete", key="confirm_del_yes", type="primary"):
-                            conn = get_db()
-                            conn.execute("DELETE FROM orders WHERE order_id = ?", (selected,))
-                            conn.execute("DELETE FROM activity_log WHERE order_id = ?", (selected,))
-                            conn.commit()
-                            conn.close()
-                            st.session_state.confirm_delete = None
-                            st.success(f"Order {selected} deleted.")
-                            st.rerun()
-                    with cdel2:
-                        if st.button("Cancel", key="confirm_del_no"):
-                            st.session_state.confirm_delete = None
-                            st.rerun()
     else:
-        st.info("No orders found. Create your first order in the 'New Order' tab.")
+        st.info("No orders found matching your filters.")
 
-# ====================== TAB 2: NEW / EDIT ORDER ======================
+# ====================== TAB 2: NEW ORDER ======================
 with tab2:
-    st.subheader("Create / Edit Order")
+    st.markdown("### Create New Order")
 
     # ---- Quick Import Section ----
     settings_for_extract = get_settings()
@@ -973,79 +1305,68 @@ with tab2:
 
     st.divider()
 
-    conn = get_db()
-    existing_orders = pd.read_sql_query("SELECT order_id FROM orders ORDER BY created_at DESC", conn)
-    conn.close()
+    with st.form("new_order_form", border=False):
+        st.markdown("#### Client Information")
+        fcol1, fcol2 = st.columns(2)
+        with fcol1:
+            client_name = st.text_input("Client Name *", placeholder="John Doe")
+        with fcol2:
+            client_email = st.text_input("Email *", placeholder="john@example.com")
 
-    # Check if coming from dashboard edit button
-    if st.session_state.edit_order_id:
-        edit_mode = "Edit Existing"
-        st.info(f"Editing order: **{st.session_state.edit_order_id}**")
-        edit_radio_default = 1
-    else:
-        edit_radio_default = 0
+        fcol3, fcol4 = st.columns(2)
+        with fcol3:
+            client_phone = st.text_input("Phone", placeholder="(401) 555-1234")
+        with fcol4:
+            assigned_appraiser = st.text_input("Assigned Appraiser", placeholder="Your Name")
 
-    edit_mode = st.radio("Mode", ["New Order", "Edit Existing"], horizontal=True, index=edit_radio_default)
+        st.markdown("#### Lender Information")
+        lcol1, lcol2 = st.columns(2)
+        with lcol1:
+            lender_name = st.text_input("Lender Name", placeholder="First National Bank")
+        with lcol2:
+            loan_number = st.text_input("Loan Number", placeholder="LN-123456")
 
-    prefill = {}
-    if edit_mode == "Edit Existing" and not existing_orders.empty:
-        default_idx = 0
-        if st.session_state.edit_order_id and st.session_state.edit_order_id in existing_orders["order_id"].tolist():
-            default_idx = existing_orders["order_id"].tolist().index(st.session_state.edit_order_id)
-        edit_id = st.selectbox("Select order to edit", existing_orders["order_id"].tolist(), index=default_idx)
-        conn = get_db()
-        row = conn.execute("SELECT * FROM orders WHERE order_id = ?", (edit_id,)).fetchone()
-        conn.close()
-        if row:
-            prefill = dict(row)
-
-    with st.form("order_form", clear_on_submit=True):
-        st.markdown("**Order Info**")
-        ocol1, ocol2 = st.columns(2)
-        with ocol1:
-            next_num = len(existing_orders) + 1
-            order_id = st.text_input("Order ID", value=prefill.get("order_id", f"AT-{datetime.now().strftime('%Y%m%d')}-{next_num:03d}"))
-            client_name = st.text_input("Client Name", value=prefill.get("client_name", "") or ex.get("client_name", ""))
-            client_email = st.text_input("Client Email", value=prefill.get("client_email", "") or ex.get("client_email", ""))
-            client_phone = st.text_input("Client Phone", value=prefill.get("client_phone", "") or ex.get("client_phone", ""))
-        with ocol2:
-            lender_name = st.text_input("Lender Name", value=prefill.get("lender_name", "") or ex.get("lender_name", "") or ps.get("lender_name", ""))
-            loan_number = st.text_input("Loan Number", value=prefill.get("loan_number", "") or ex.get("loan_number", ""))
-            try:
-                fee_raw = prefill.get("fee", 0) or ex.get("fee", 0) or 0
-                fee_default = float(str(fee_raw).replace("$", "").replace(",", "").strip() or 0)
-            except (ValueError, TypeError):
-                fee_default = 0.0
-            fee = st.number_input("Fee ($)", value=fee_default, step=25.0)
-            due_date = st.date_input("Due Date", value=None)
-
-        st.markdown("**Property Info**")
+        st.markdown("#### Property Information")
         pcol1, pcol2 = st.columns(2)
         with pcol1:
-            subject_address = st.text_input("Street Address", value=prefill.get("subject_address", "") or ex.get("subject_address", "") or ps.get("property_address", ""))
-            city = st.text_input("City", value=prefill.get("city", "") or ex.get("city", "") or ps.get("city", "") or "Warwick")
-            state = st.text_input("State", value=prefill.get("state", "") or ex.get("state", "") or ps.get("state", "") or "RI")
-            zip_code = st.text_input("Zip", value=prefill.get("zip_code", "") or ex.get("zip_code", "") or ps.get("zip_code", ""))
+            subject_address = st.text_input("Subject Address *", placeholder="123 Main St")
         with pcol2:
-            property_type = st.selectbox("Property Type",
-                ["Single Family", "Condo", "2-4 Unit", "Multi-Family", "Land", "Other"],
-                index=["Single Family", "Condo", "2-4 Unit", "Multi-Family", "Land", "Other"].index(prefill.get("property_type", "Single Family")) if prefill.get("property_type") in ["Single Family", "Condo", "2-4 Unit", "Multi-Family", "Land", "Other"] else 0
-            )
-            appraisal_type = st.selectbox("Appraisal Type", ["1004", "1004C", "1073", "2055", "1025", "Desktop"],
-                index=["1004", "1004C", "1073", "2055", "1025", "Desktop"].index(prefill.get("appraisal_type", "1004")) if prefill.get("appraisal_type") in ["1004", "1004C", "1073", "2055", "1025", "Desktop"] else 0
-            )
-            form_type = st.selectbox("Form Type", ["URAR", "Condo", "Small Income", "Land", "Exterior Only", "Desktop"],
-                index=["URAR", "Condo", "Small Income", "Land", "Exterior Only", "Desktop"].index(prefill.get("form_type", "URAR")) if prefill.get("form_type") in ["URAR", "Condo", "Small Income", "Land", "Exterior Only", "Desktop"] else 0
-            )
-            assigned_appraiser = st.selectbox("Assigned Appraiser", ["Bill Furney", "Team Member 1", "Team Member 2"])
-            inspection_date = st.date_input("Inspection Date", value=None)
+            property_type = st.selectbox("Property Type *",
+                ["Single Family", "Condo", "Townhouse", "Multi-Family 2-4", "Multi-Family 5+"],
+                label_visibility="collapsed")
 
-        # Property Details (for URAR/XML export)
-        st.markdown("**Property Details (for URAR)**")
+        pcol3, pcol4, pcol5 = st.columns(3)
+        with pcol3:
+            city = st.text_input("City *", placeholder="Warwick")
+        with pcol4:
+            state = st.selectbox("State", ["RI", "MA", "CT", "NY", "Other"], index=0, label_visibility="collapsed")
+        with pcol5:
+            zip_code = st.text_input("Zip", placeholder="02886")
+
+        st.markdown("#### Appraisal Details")
+        acol1, acol2 = st.columns(2)
+        with acol1:
+            appraisal_type = st.selectbox("Appraisal Type", ["1004", "1025", "1073"], index=0, label_visibility="collapsed")
+        with acol2:
+            form_type = st.selectbox("Form Type", ["URAR", "FNMA", "FHLMC", "VA"], index=0, label_visibility="collapsed")
+
+        acol3, acol4 = st.columns(2)
+        with acol3:
+            fee = st.number_input("Fee", min_value=0.0, value=0.0, step=50.0)
+        with acol4:
+            due_date = st.date_input("Due Date")
+
+        acol5, acol6 = st.columns(2)
+        with acol5:
+            inspection_date = st.date_input("Inspection Date")
+        with acol6:
+            value_opinion = st.text_input("Preliminary Value Opinion", placeholder="$500,000")
+
+        st.markdown("#### Property Details (for URAR)")
         prefill_pd = {}
-        if prefill.get("property_details"):
+        if st.session_state.get("extracted_data", {}):
             try:
-                prefill_pd = json.loads(prefill["property_details"])
+                prefill_pd = st.session_state.get("extracted_data", {})
             except:
                 prefill_pd = {}
 
@@ -1089,748 +1410,718 @@ with tab2:
             pd_flood_map = st.text_input("Flood Map #", value=prefill_pd.get("flood_map_id", ""))
             pd_legal = st.text_input("Legal Description", value=prefill_pd.get("legal_desc", ""))
 
-        st.markdown("**Status & Notes**")
-        status = st.selectbox("Status", ["Pending", "In Progress", "Completed", "On Hold", "Cancelled"],
-            index=["Pending", "In Progress", "Completed", "On Hold", "Cancelled"].index(prefill.get("status", "Pending")) if prefill.get("status") in ["Pending", "In Progress", "Completed", "On Hold", "Cancelled"] else 0
-        )
-        field_notes = st.text_area("Field Notes", value=prefill.get("field_notes", ""), height=150,
-            placeholder="Measurements, observations, comp notes, condition details...")
-        value_opinion = st.text_input("Preliminary Value Opinion", value=prefill.get("value_opinion", ""))
+        st.markdown("#### Additional Notes")
+        field_notes = st.text_area("Field Notes", placeholder="Any notes about the inspection or appraisal...")
 
         # Photo upload
         uploaded_files = st.file_uploader("Upload Photos", accept_multiple_files=True, type=["jpg", "png", "jpeg"])
 
-        submitted = st.form_submit_button("Save Order", type="primary")
+        # Document extraction button
+        if has_feature("document_extraction"):
+            st.markdown("#### Extract from Document")
+            uploaded_doc = st.file_uploader("Upload P&S Agreement or Engagement Letter", type=["pdf", "jpg", "jpeg", "png"])
+            if uploaded_doc:
+                if st.button("Extract Data from Document"):
+                    settings = get_settings()
+                    api_key = settings.get("openai_api_key", "")
+                    if not api_key:
+                        st.error("OpenAI API key not configured in Settings")
+                    else:
+                        with st.spinner("Extracting data..."):
+                            extracted, error = extract_document_data(uploaded_doc, api_key, "engagement")
+                            if error:
+                                st.error(f"Extraction failed: {error}")
+                            else:
+                                st.session_state.extracted_data = extracted
+                                st.success("Data extracted! Review and update below.")
+                                st.rerun()
 
-        if submitted:
-            # Handle photos
-            photos_saved = []
-            if uploaded_files:
-                os.makedirs("photos", exist_ok=True)
-                for file in uploaded_files:
-                    path = f"photos/{order_id}_{file.name}"
-                    with open(path, "wb") as f:
-                        f.write(file.getbuffer())
-                    photos_saved.append(path)
+        submit_btn = st.form_submit_button("✓ Create Order", use_container_width=True)
 
-            # Keep existing photos if editing
-            existing_photos = prefill.get("photos", "") or ""
-            if existing_photos and photos_saved:
-                all_photos = existing_photos + "," + ",".join(photos_saved)
-            elif photos_saved:
-                all_photos = ",".join(photos_saved)
+        if submit_btn:
+            if not client_name or not client_email or not subject_address or not property_type:
+                st.error("Please fill in all required fields (*)")
             else:
-                all_photos = existing_photos
+                order_id = f"ORD-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
-            # Build property_details JSON
-            prop_details = json.dumps({
-                "year_built": pd_year_built, "stories": pd_stories, "design_style": pd_design_style,
-                "exterior_desc": pd_exterior, "foundation_type": pd_foundation,
-                "basement_sqft": pd_basement_sqft, "basement_finished_pct": pd_basement_fin,
-                "total_rooms": pd_total_rooms, "bedrooms": pd_bedrooms, "bathrooms": pd_bathrooms,
-                "gla_sqft": pd_gla, "heating_type": pd_heating, "cooling_type": pd_cooling,
-                "condition_rating": pd_condition, "quality_rating": pd_quality,
-                "lot_dimensions": pd_lot_dims, "lot_area": pd_lot_area, "zoning": pd_zoning,
-                "garage_type": pd_garage, "county": pd_county, "neighborhood_name": pd_neighborhood,
-                "assessor_parcel": pd_assessor, "tax_year": pd_tax_year, "tax_amount": pd_tax_amount,
-                "flood_zone": pd_flood_zone, "flood_map_id": pd_flood_map, "legal_desc": pd_legal
-            })
+                # Handle photos
+                photos_saved = []
+                if uploaded_files:
+                    os.makedirs("photos", exist_ok=True)
+                    for file in uploaded_files:
+                        path = f"photos/{order_id}_{file.name}"
+                        with open(path, "wb") as f:
+                            f.write(file.getbuffer())
+                        photos_saved.append(path)
 
-            conn = get_db()
-            conn.execute('''
-                INSERT OR REPLACE INTO orders
-                (order_id, client_name, client_email, client_phone, lender_name, loan_number,
-                 subject_address, city, state, zip_code, property_type, appraisal_type, form_type,
-                 assigned_appraiser, fee, due_date, inspection_date, status, field_notes,
-                 value_opinion, created_at, updated_at, photos, property_details)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (order_id, client_name, client_email, client_phone, lender_name, loan_number,
-                  subject_address, city, state, zip_code, property_type, appraisal_type, form_type,
-                  assigned_appraiser, fee,
-                  due_date.isoformat() if due_date else None,
-                  inspection_date.isoformat() if inspection_date else None,
-                  status, field_notes, value_opinion,
-                  prefill.get("created_at", datetime.now().isoformat()),
-                  datetime.now().isoformat(), all_photos, prop_details))
-            conn.commit()
-            conn.close()
+                # Build property_details JSON
+                property_details = {
+                    "year_built": pd_year_built,
+                    "stories": pd_stories,
+                    "design_style": pd_design_style,
+                    "exterior_desc": pd_exterior,
+                    "foundation_type": pd_foundation,
+                    "basement_sqft": pd_basement_sqft,
+                    "basement_finished_pct": pd_basement_fin,
+                    "total_rooms": pd_total_rooms,
+                    "bedrooms": pd_bedrooms,
+                    "bathrooms": pd_bathrooms,
+                    "gla_sqft": pd_gla,
+                    "heating_type": pd_heating,
+                    "cooling_type": pd_cooling,
+                    "condition_rating": pd_condition,
+                    "quality_rating": pd_quality,
+                    "lot_dimensions": pd_lot_dims,
+                    "lot_area": pd_lot_area,
+                    "zoning": pd_zoning,
+                    "garage_type": pd_garage,
+                    "county": pd_county,
+                    "neighborhood_name": pd_neighborhood,
+                    "assessor_parcel": pd_assessor,
+                    "tax_year": pd_tax_year,
+                    "tax_amount": pd_tax_amount,
+                    "flood_zone": pd_flood_zone,
+                    "flood_map_id": pd_flood_map,
+                    "legal_desc": pd_legal
+                }
+                property_details_json = json.dumps(property_details)
+                all_photos = ",".join(photos_saved) if photos_saved else ""
 
-            action = "Order Updated" if edit_mode == "Edit Existing" else "Order Created"
-            log_activity(order_id, action, f"Status: {status}")
-
-            st.success(f"Order {order_id} saved!")
-            st.session_state.edit_order_id = None
-            st.rerun()
+                conn = get_db()
+                conn.execute("""
+                    INSERT INTO orders (
+                        order_id, client_name, client_email, client_phone, lender_name, loan_number,
+                        subject_address, city, state, zip_code, property_type, appraisal_type, form_type,
+                        assigned_appraiser, fee, due_date, inspection_date, status, value_opinion,
+                        field_notes, property_details, photos, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    order_id, client_name, client_email, client_phone, lender_name, loan_number,
+                    subject_address, city, state, zip_code, property_type, appraisal_type, form_type,
+                    assigned_appraiser, fee, due_date.isoformat() if due_date else None,
+                    inspection_date.isoformat() if inspection_date else None,
+                    "Pending", value_opinion, field_notes, property_details_json, all_photos,
+                    datetime.now().isoformat(), datetime.now().isoformat()
+                ))
+                conn.commit()
+                conn.close()
+                log_activity(order_id, "Created", f"New order: {subject_address}")
+                st.success(f"Order created: {order_id}")
+                st.session_state.show_form = False
 
 # ====================== TAB 3: AI REPORTS ======================
 with tab3:
-    st.subheader("AI Report Writer")
+    if not has_feature("ai_reports"):
+        st.warning("🔒 AI Reports require Professional plan or higher")
+        st.info("Upgrade your plan to unlock AI-powered report generation")
+    else:
+        st.markdown("### AI Report Generator")
+        st.markdown("Generate comprehensive appraisal narratives and reports using GPT-4o")
 
-    settings = get_settings()
-    api_key = settings.get("openai_api_key", "")
-
-    if not api_key:
-        st.warning("OpenAI API key not configured. Go to Settings tab to add it.")
-
-    conn = get_db()
-    orders_df = pd.read_sql_query("SELECT order_id, subject_address, status FROM orders ORDER BY created_at DESC", conn)
-    conn.close()
-
-    if not orders_df.empty:
-        selected_order = st.selectbox("Select Order",
-            orders_df.apply(lambda r: f"{r['order_id']} - {r['subject_address']}", axis=1).tolist(),
-            key="ai_order_select")
-
-        order_id_selected = selected_order.split(" - ")[0]
         conn = get_db()
-        order_data = dict(conn.execute("SELECT * FROM orders WHERE order_id = ?", (order_id_selected,)).fetchone())
+        orders = conn.execute("SELECT order_id, subject_address FROM orders ORDER BY created_at DESC").fetchall()
         conn.close()
 
-        st.write(f"**Property:** {order_data['subject_address']}, {order_data.get('city', '')}, {order_data.get('state', 'RI')}")
-        st.write(f"**Type:** {order_data['property_type']} | **Form:** {order_data.get('form_type', 'URAR')}")
+        if orders:
+            selected_order_id = st.selectbox("Select Order", [o["order_id"] for o in orders])
 
-        if order_data.get("field_notes"):
-            with st.expander("Current Field Notes"):
-                st.write(order_data["field_notes"])
-
-        if order_data.get("ai_narrative"):
-            st.info("This order already has an AI narrative. Generating a new one will replace it.")
-
-        gcol1, gcol2 = st.columns(2)
-        with gcol1:
-            if st.button("Generate AI Narrative", type="primary", disabled=not api_key):
-                with st.spinner("GPT is writing your appraisal narrative..."):
-                    narrative, error = generate_narrative(order_data, api_key)
-                    if narrative:
-                        st.session_state["generated_narrative"] = narrative
-                        st.session_state["narrative_order_id"] = order_id_selected
-                        st.success("Narrative generated!")
-                    else:
-                        st.error(f"Error: {error}")
-        with gcol2:
-            if st.button("Generate Full Report Data (Comps + Adjustments)", disabled=not api_key):
-                with st.spinner("GPT is generating comps, adjustments, and comments..."):
-                    report_data, error = generate_report_data(order_data, api_key)
-                    if report_data:
-                        # Store as JSON in a settings key tied to order
-                        save_setting(f"report_data_{order_id_selected}", json.dumps(report_data))
-                        log_activity(order_id_selected, "AI Report Data Generated", "Comps, adjustments, comments")
-                        st.success("Full report data generated! Comps, adjustments, and comments are ready for XML export.")
-                        st.json(report_data)
-                    else:
-                        st.error(f"Error: {error}")
-
-        # Show existing report data if available
-        existing_rd = settings.get(f"report_data_{order_id_selected}", "")
-        if existing_rd:
-            with st.expander("Stored Report Data (Comps & Adjustments)"):
-                try:
-                    st.json(json.loads(existing_rd))
-                except:
-                    st.write(existing_rd)
-
-        # Show and edit generated narrative
-        if st.session_state.get("narrative_order_id") == order_id_selected and st.session_state.get("generated_narrative"):
-            edited = st.text_area("Generated Narrative (edit before saving)",
-                                 st.session_state["generated_narrative"], height=400)
-
-            if st.button("Save Narrative to Order"):
+            if selected_order_id:
                 conn = get_db()
-                conn.execute("UPDATE orders SET ai_narrative = ?, updated_at = ? WHERE order_id = ?",
-                           (edited, datetime.now().isoformat(), order_id_selected))
-                conn.commit()
+                order = conn.execute("SELECT * FROM orders WHERE order_id = ?", (selected_order_id,)).fetchone()
                 conn.close()
-                log_activity(order_id_selected, "AI Narrative Saved")
-                st.success("Narrative saved to order!")
-                del st.session_state["generated_narrative"]
-                st.rerun()
 
-        # Export section
-        st.divider()
-        st.subheader("Export")
+                if order:
+                    st.markdown(f"**Order:** {order['order_id']}")
+                    st.markdown(f"**Property:** {order['subject_address']}, {order['city']}, {order['state']} {order['zip_code']}")
 
-        ecol1, ecol2 = st.columns(2)
-        with ecol1:
-            if st.button("Export XML for TOTAL"):
-                # Build UAD XML matching exact TOTAL/a la mode format (MISMO 2.6GSE, no namespaces)
-                addr = order_data.get("subject_address", "")
-                city = order_data.get("city", "")
-                state = order_data.get("state", "RI")
-                zipcode = order_data.get("zip_code", "")
-                appraiser_name = order_data.get("assigned_appraiser", "")
-                borrower_name = order_data.get("borrower_name", order_data.get("client_name", ""))
-                lender_name = order_data.get("lender_name", "")
-                loan_num = order_data.get("loan_number", "")
-                val_opinion = str(order_data.get("value_opinion", ""))
-                ptype = order_data.get("property_type", "Single Family")
-                form_type_map = {"Single Family": "FNM1004", "Condo": "FNM1073", "Multi-Family": "FNM1025", "Townhouse": "FNM1004", "Co-op": "FNM1004"}
-                form_type = form_type_map.get(ptype, "FNM1004")
-                title_map = {"FNM1004": "Uniform Residential Appraisal Report", "FNM1073": "Individual Condominium Unit Appraisal Report", "FNM1025": "Small Residential Income Property Appraisal Report"}
-                title_desc = title_map.get(form_type, "Uniform Residential Appraisal Report")
-                today_str = datetime.now().strftime("%m/%d/%Y")
-                insp_date = order_data.get("inspection_date", "") or ""
+                    settings = get_settings()
+                    api_key = settings.get("openai_api_key", "")
 
-                # Extract property details
-                p = {}
-                pd_str = order_data.get("property_details", "") or "{}"
-                try:
-                    p = json.loads(pd_str)
-                except:
-                    p = {}
+                    if not api_key:
+                        st.error("OpenAI API key not configured. Go to Settings to add it.")
+                    else:
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.button("🤖 Generate Narrative"):
+                                with st.spinner("Generating narrative (this may take 1-2 minutes)..."):
+                                    narrative, error = generate_narrative(dict(order), api_key)
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        conn = get_db()
+                                        conn.execute("UPDATE orders SET ai_narrative = ? WHERE order_id = ?",
+                                                   (narrative, selected_order_id))
+                                        conn.commit()
+                                        conn.close()
+                                        st.success("Narrative generated and saved!")
+                                        st.rerun()
 
-                # Load AI-generated report data if available
-                rd = {}
-                rd_str = settings.get(f"report_data_{order_data['order_id']}", "")
-                if rd_str:
-                    try:
-                        rd = json.loads(rd_str)
-                    except:
-                        rd = {}
-                comps = rd.get("comps", []) or []
-                nb = rd.get("neighborhood", {}) or {}
-                comments = rd.get("comments", {}) or {}
-                cost = rd.get("cost_approach", {}) or {}
-                sd = rd.get("site", {}) or {}
-                si = rd.get("subject_improvements", {}) or {}
-                prior_sales = rd.get("prior_sales", {}) or {}
-                val_summary = rd.get("valuation_summary", {}) or {}
-                addendum_text = comments.get("addendum", "")
-                narrative_text = order_data.get("ai_narrative", "")
+                        with col2:
+                            if st.button("📊 Generate Report Data"):
+                                with st.spinner("Generating report structure..."):
+                                    report_data, error = generate_report_data(dict(order), api_key)
+                                    if error:
+                                        st.error(f"Error: {error}")
+                                    else:
+                                        st.session_state.extracted_data = report_data
+                                        st.success("Report data generated!")
+                                        st.json(report_data)
 
-                yr = str(p.get("year_built", "") or si.get("year_built", "") or "")
-                stories = str(p.get("stories", "") or si.get("stories", "") or "")
-                design = str(p.get("design_style", "") or si.get("design_style", "") or "")
-                ext_desc = str(p.get("exterior_desc", "") or si.get("exterior_walls", "") or "")
-                found_type = str(p.get("foundation_type", "") or si.get("foundation", "") or sd.get("foundation", "") or "Full Basement")
-                bsmt_sqft = str(p.get("basement_sqft", "") or si.get("basement_total_sqft", "") or "")
-                bsmt_fin = str(p.get("basement_finished_pct", "") or si.get("basement_finished_sqft", "") or "")
-                tot_rooms = str(p.get("total_rooms", "") or si.get("total_rooms", "") or "")
-                beds = str(p.get("bedrooms", "") or si.get("bedrooms", "") or "")
-                baths = str(p.get("bathrooms", "") or si.get("bathrooms", "") or "")
-                gla = str(p.get("gla_sqft", "") or si.get("gla", "") or "")
-                heat = str(p.get("heating_type", "") or si.get("heating_cooling", "") or "")
-                cool = str(p.get("cooling_type", "") or si.get("cooling", "") or "")
-                cond = str(p.get("condition_rating", "") or si.get("condition", "") or "")
-                qual = str(p.get("quality_rating", "") or si.get("quality", "") or "")
-                exterior_walls = str(p.get("exterior_walls", "") or si.get("exterior_walls", "") or "")
-                roof_surface = str(p.get("roof_surface", "") or si.get("roof_surface", "") or "")
-                view_desc = str(p.get("view", "") or sd.get("view", "") or si.get("view", "") or "")
-                lot_dims = str(p.get("lot_dimensions", "") or sd.get("dimensions", "") or "")
-                lot_area = str(p.get("lot_area", "") or sd.get("area", "") or "")
-                zoning = str(p.get("zoning", "") or sd.get("zoning_class", "") or "")
-                garage = str(p.get("garage_type", "") or si.get("garage_parking", "") or "None")
-                garage_spaces_raw = str(p.get("garage_spaces", "") or si.get("garage_spaces", "") or "")
-                eff_age_subj = str(p.get("effective_age", "") or si.get("effective_age", "") or "")
-                county = p.get("county", "")
-                neighborhood = p.get("neighborhood_name", "")
-                assessor = p.get("assessor_parcel", "")
-                tax_yr = p.get("tax_year", "")
-                tax_amt = p.get("tax_amount", "")
-                flood_z = p.get("flood_zone", "")
-                flood_map = p.get("flood_map_id", "")
-                legal = p.get("legal_desc", "")
-                # Garage parsing
-                garage_spaces = garage_spaces_raw
-                garage_xml_type = "None"
-                if not garage_spaces:
-                    if "1-Car" in garage or "1 car" in garage.lower():
-                        garage_spaces = "1"
-                    elif "2-Car" in garage or "2 car" in garage.lower():
-                        garage_spaces = "2"
-                    elif "3-Car" in garage or "3 car" in garage.lower():
-                        garage_spaces = "3"
-                if "Attached" in garage:
-                    garage_xml_type = "Attached"
-                elif "Detached" in garage:
-                    garage_xml_type = "Detached"
-                elif "Carport" in garage:
-                    garage_xml_type = "Carport"
-                # Foundation mapping
-                found_map = {"Full Basement": "Basement", "Partial Basement": "Basement", "Crawl Space": "CrawlSpace", "Slab": "Slab", "Other": "Other"}
-                found_xml = found_map.get(found_type, "Basement")
-                found_cond = "Full" if "Full" in found_type else ("Partial" if "Partial" in found_type else "")
+                        st.divider()
 
-                # XML escape helper
-                import xml.sax.saxutils as saxutils
-                def xesc(val):
-                    if val is None:
-                        return ""
-                    return saxutils.escape(str(val), {'"': '&quot;', "'": '&apos;'})
+                        if order["ai_narrative"]:
+                            with st.expander("📄 View Generated Narrative"):
+                                st.write(order["ai_narrative"])
+                                if st.button("📋 Copy Narrative"):
+                                    st.info("Narrative copied to clipboard (feature depends on browser)")
 
-                xml_lines = []
-                xml_lines.append('<?xml version="1.0" encoding="UTF-8"?>')
-                xml_lines.append('<VALUATION_RESPONSE MISMOVersionID="2.6">')
+                        # XML Export Section (MISMO 2.6GSE)
+                        if has_feature("xml_export"):
+                            st.divider()
+                            st.markdown("#### Export & Integration")
+                            ecol1, ecol2 = st.columns(2)
+                            with ecol1:
+                                if st.button("Export XML for TOTAL"):
+                                    # Build UAD XML - minimal version for feature gate
+                                                # Build UAD XML matching exact TOTAL/a la mode format (MISMO 2.6GSE, no namespaces)
+                                                addr = order_data.get("subject_address", "")
+                                                city = order_data.get("city", "")
+                                                state = order_data.get("state", "RI")
+                                                zipcode = order_data.get("zip_code", "")
+                                                appraiser_name = order_data.get("assigned_appraiser", "")
+                                                borrower_name = order_data.get("borrower_name", order_data.get("client_name", ""))
+                                                lender_name = order_data.get("lender_name", "")
+                                                loan_num = order_data.get("loan_number", "")
+                                                val_opinion = str(order_data.get("value_opinion", ""))
+                                                ptype = order_data.get("property_type", "Single Family")
+                                                form_type_map = {"Single Family": "FNM1004", "Condo": "FNM1073", "Multi-Family": "FNM1025", "Townhouse": "FNM1004", "Co-op": "FNM1004"}
+                                                form_type = form_type_map.get(ptype, "FNM1004")
+                                                title_map = {"FNM1004": "Uniform Residential Appraisal Report", "FNM1073": "Individual Condominium Unit Appraisal Report", "FNM1025": "Small Residential Income Property Appraisal Report"}
+                                                title_desc = title_map.get(form_type, "Uniform Residential Appraisal Report")
+                                                today_str = datetime.now().strftime("%m/%d/%Y")
+                                                insp_date = order_data.get("inspection_date", "") or ""
 
-                # DOCUMENT_CLASSIFICATION - required for TOTAL to recognize UAD format
-                xml_lines.append('  <DOCUMENT_CLASSIFICATION>')
-                xml_lines.append('    <DOCUMENT_CLASSES>')
-                xml_lines.append('      <DOCUMENT_CLASS _Name="VALUATION" />')
-                xml_lines.append('    </DOCUMENT_CLASSES>')
-                xml_lines.append('  </DOCUMENT_CLASSIFICATION>')
+                                                # Extract property details
+                                                p = {}
+                                                pd_str = order_data.get("property_details", "") or "{}"
+                                                try:
+                                                    p = json.loads(pd_str)
+                                                except:
+                                                    p = {}
 
-                # REPORT section
-                xml_lines.append(f'  <REPORT USPAPReportDescription="{xesc(addr)} - Appraisal" AppraiserFileIdentifier="{xesc(order_data.get("order_id", ""))}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="A-Tech Appraisal Manager" AppraisalSoftwareProductVersionIdentifier="1.0" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{xesc(form_type)}" _TitleDescription="{xesc(title_desc)}" AppraisalFormVersionIdentifier="March 2005" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
-                xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="1" AppraisalReportContentType="AppraisalForm" AppraisalReportContentName="URAR [UAD Version]" AppraisalReportContentIdentifier="UAD Version 9/2011" AppraisalReportContentIsPrimaryFormIndicator="Y" />')
-                # Add addendum text if available
-                combined_addendum = ""
-                if addendum_text:
-                    combined_addendum += addendum_text
-                if narrative_text:
-                    if combined_addendum:
-                        combined_addendum += "\n\n"
-                    combined_addendum += narrative_text
-                if combined_addendum:
-                    xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="2" AppraisalReportContentType="Addendum" AppraisalReportContentName="Supplemental Addendum" AppraisalReportContentIdentifier="" AppraisalReportContentIsPrimaryFormIndicator="N" _TextDescription="{xesc(combined_addendum)}" />')
-                xml_lines.append(f'  </REPORT>')
+                                                # Load AI-generated report data if available
+                                                rd = {}
+                                                rd_str = settings.get(f"report_data_{order_data['order_id']}", "")
+                                                if rd_str:
+                                                    try:
+                                                        rd = json.loads(rd_str)
+                                                    except:
+                                                        rd = {}
+                                                comps = rd.get("comps", []) or []
+                                                nb = rd.get("neighborhood", {}) or {}
+                                                comments = rd.get("comments", {}) or {}
+                                                cost = rd.get("cost_approach", {}) or {}
+                                                sd = rd.get("site", {}) or {}
+                                                si = rd.get("subject_improvements", {}) or {}
+                                                prior_sales = rd.get("prior_sales", {}) or {}
+                                                val_summary = rd.get("valuation_summary", {}) or {}
+                                                addendum_text = comments.get("addendum", "")
+                                                narrative_text = order_data.get("ai_narrative", "")
 
-                # PARTIES section
-                xml_lines.append(f'  <PARTIES>')
-                xml_lines.append(f'    <APPRAISER _Name="{xesc(appraiser_name)}" _CompanyName="A-Tech Appraisal Co., LLC" _StreetAddress="" _City="Warwick" _State="RI" _PostalCode="02886">')
-                xml_lines.append(f'      <CONTACT_DETAIL>')
-                xml_lines.append(f'        <CONTACT_POINT _Type="Phone" _Value="" />')
-                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
-                xml_lines.append(f'      </CONTACT_DETAIL>')
-                xml_lines.append(f'      <APPRAISER_LICENSE _ExpirationDate="" _State="RI" />')
-                xml_lines.append(f'      <INSPECTION AppraisalInspectionPropertyType="Subject" InspectionDate="{insp_date}" />')
-                xml_lines.append(f'    </APPRAISER>')
-                xml_lines.append(f'    <SUPERVISOR _Name="" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
-                xml_lines.append(f'      <CONTACT_DETAIL>')
-                xml_lines.append(f'        <CONTACT_POINT _Type="Phone" _Value="" />')
-                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
-                xml_lines.append(f'      </CONTACT_DETAIL>')
-                xml_lines.append(f'      <APPRAISER_LICENSE _ExpirationDate="" _State="" />')
-                xml_lines.append(f'      <INSPECTION AppraisalInspectionPropertyType="Comparable" />')
-                xml_lines.append(f'    </SUPERVISOR>')
-                xml_lines.append(f'    <REVIEW_APPRAISER />')
-                xml_lines.append(f'    <REAL_ESTATE_AGENT>')
-                xml_lines.append(f'      <CONTACT_DETAIL />')
-                xml_lines.append(f'    </REAL_ESTATE_AGENT>')
-                xml_lines.append(f'    <LENDER _UnparsedName="{xesc(lender_name)}" AppraisalFormsUnparsedAddress="" _StreetAddress="">')
-                xml_lines.append(f'      <CONTACT_DETAIL _Name="">')
-                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
-                xml_lines.append(f'      </CONTACT_DETAIL>')
-                xml_lines.append(f'    </LENDER>')
-                xml_lines.append(f'    <BORROWER _UnparsedName="{xesc(borrower_name)}">')
-                xml_lines.append(f'      <BORROWER_EXTENSION>')
-                xml_lines.append(f'        <BORROWER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <BORROWER_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <BORROWER_NAME GSEBorrowerName="{xesc(borrower_name)}" />')
-                xml_lines.append(f'          </BORROWER_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </BORROWER_EXTENSION_SECTION>')
-                xml_lines.append(f'      </BORROWER_EXTENSION>')
-                xml_lines.append(f'    </BORROWER>')
-                xml_lines.append(f'    <MANAGEMENT_COMPANY_EXTENSION>')
-                xml_lines.append(f'      <MANAGEMENT_COMPANY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'        <MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'          <MANAGEMENT_COMPANY GSEManagementCompanyName="Absolute Value Management" />')
-                xml_lines.append(f'        </MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'      </MANAGEMENT_COMPANY_EXTENSION_SECTION>')
-                xml_lines.append(f'    </MANAGEMENT_COMPANY_EXTENSION>')
-                xml_lines.append(f'  </PARTIES>')
+                                                yr = str(p.get("year_built", "") or si.get("year_built", "") or "")
+                                                stories = str(p.get("stories", "") or si.get("stories", "") or "")
+                                                design = str(p.get("design_style", "") or si.get("design_style", "") or "")
+                                                ext_desc = str(p.get("exterior_desc", "") or si.get("exterior_walls", "") or "")
+                                                found_type = str(p.get("foundation_type", "") or si.get("foundation", "") or sd.get("foundation", "") or "Full Basement")
+                                                bsmt_sqft = str(p.get("basement_sqft", "") or si.get("basement_total_sqft", "") or "")
+                                                bsmt_fin = str(p.get("basement_finished_pct", "") or si.get("basement_finished_sqft", "") or "")
+                                                tot_rooms = str(p.get("total_rooms", "") or si.get("total_rooms", "") or "")
+                                                beds = str(p.get("bedrooms", "") or si.get("bedrooms", "") or "")
+                                                baths = str(p.get("bathrooms", "") or si.get("bathrooms", "") or "")
+                                                gla = str(p.get("gla_sqft", "") or si.get("gla", "") or "")
+                                                heat = str(p.get("heating_type", "") or si.get("heating_cooling", "") or "")
+                                                cool = str(p.get("cooling_type", "") or si.get("cooling", "") or "")
+                                                cond = str(p.get("condition_rating", "") or si.get("condition", "") or "")
+                                                qual = str(p.get("quality_rating", "") or si.get("quality", "") or "")
+                                                exterior_walls = str(p.get("exterior_walls", "") or si.get("exterior_walls", "") or "")
+                                                roof_surface = str(p.get("roof_surface", "") or si.get("roof_surface", "") or "")
+                                                view_desc = str(p.get("view", "") or sd.get("view", "") or si.get("view", "") or "")
+                                                lot_dims = str(p.get("lot_dimensions", "") or sd.get("dimensions", "") or "")
+                                                lot_area = str(p.get("lot_area", "") or sd.get("area", "") or "")
+                                                zoning = str(p.get("zoning", "") or sd.get("zoning_class", "") or "")
+                                                garage = str(p.get("garage_type", "") or si.get("garage_parking", "") or "None")
+                                                garage_spaces_raw = str(p.get("garage_spaces", "") or si.get("garage_spaces", "") or "")
+                                                eff_age_subj = str(p.get("effective_age", "") or si.get("effective_age", "") or "")
+                                                county = p.get("county", "")
+                                                neighborhood = p.get("neighborhood_name", "")
+                                                assessor = p.get("assessor_parcel", "")
+                                                tax_yr = p.get("tax_year", "")
+                                                tax_amt = p.get("tax_amount", "")
+                                                flood_z = p.get("flood_zone", "")
+                                                flood_map = p.get("flood_map_id", "")
+                                                legal = p.get("legal_desc", "")
+                                                # Garage parsing
+                                                garage_spaces = garage_spaces_raw
+                                                garage_xml_type = "None"
+                                                if not garage_spaces:
+                                                    if "1-Car" in garage or "1 car" in garage.lower():
+                                                        garage_spaces = "1"
+                                                    elif "2-Car" in garage or "2 car" in garage.lower():
+                                                        garage_spaces = "2"
+                                                    elif "3-Car" in garage or "3 car" in garage.lower():
+                                                        garage_spaces = "3"
+                                                if "Attached" in garage:
+                                                    garage_xml_type = "Attached"
+                                                elif "Detached" in garage:
+                                                    garage_xml_type = "Detached"
+                                                elif "Carport" in garage:
+                                                    garage_xml_type = "Carport"
+                                                # Foundation mapping
+                                                found_map = {"Full Basement": "Basement", "Partial Basement": "Basement", "Crawl Space": "CrawlSpace", "Slab": "Slab", "Other": "Other"}
+                                                found_xml = found_map.get(found_type, "Basement")
+                                                found_cond = "Full" if "Full" in found_type else ("Partial" if "Partial" in found_type else "")
 
-                # PROPERTY section
-                xml_lines.append(f'  <PROPERTY _StreetAddress="{xesc(addr)}" _City="{xesc(city)}" _State="{xesc(state)}" _PostalCode="{xesc(zipcode)}" _County="{xesc(county)}" _RightsTypeOtherDescription="">')
-                xml_lines.append(f'    <_IDENTIFICATION AssessorsParcelIdentifier="{xesc(assessor)}" MapReferenceIdentifier="" CensusTractIdentifier="">')
-                xml_lines.append(f'      <PROPERTY_IDENTIFICATION_EXTENSION>')
-                xml_lines.append(f'        <PROPERTY_IDENTIFICATION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <PARCEL_IDENTIFIER GSEAssessorsParcelIdentifier="{xesc(assessor)}" />')
-                xml_lines.append(f'          </PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </PROPERTY_IDENTIFICATION_EXTENSION_SECTION>')
-                xml_lines.append(f'      </PROPERTY_IDENTIFICATION_EXTENSION>')
-                xml_lines.append(f'    </_IDENTIFICATION>')
-                xml_lines.append(f'    <_LEGAL_DESCRIPTION _Type="Other" _TypeOtherDescription="LongLegal" _TextDescription="{xesc(legal)}" />')
-                # STRUCTURE
-                xml_lines.append(f'    <STRUCTURE StoriesCount="{stories}" _DesignDescription="{xesc(design)}" PropertyStructureBuiltYear="{yr}" TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" GrossLivingAreaSquareFeetCount="{gla}">')
-                xml_lines.append(f'      <FOUNDATION _Type="{found_xml}" _ConditionDescription="{xesc(found_cond)}" _ExistsIndicator="{"Y" if found_type != "Slab" else "N"}">')
-                xml_lines.append(f'        <_CONDITION _Type="Infestation" _Comment="" />')
-                xml_lines.append(f'      </FOUNDATION>')
-                xml_lines.append(f'      <BASEMENT SquareFeetCount="{bsmt_sqft}" _FinishedPercent="{bsmt_fin}" />')
-                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Foundation" _Description="{xesc(found_type)}" />')
-                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Walls" _Description="{xesc(exterior_walls)}" />')
-                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="RoofSurface" _Description="{xesc(roof_surface)}" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Floors" _ConditionDescription="{xesc(si.get("flooring", ""))}" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Walls" _ConditionDescription="{xesc(si.get("walls_trim", ""))}" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="TrimAndFinish" _ConditionDescription="{xesc(si.get("walls_trim", ""))}" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomFloors" _ConditionDescription="{xesc(si.get("bath_floor", ""))}" />')
-                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomWainscot" _ConditionDescription="{xesc(si.get("bath_wainscot", ""))}" />')
-                xml_lines.append(f'      <HEATING _FuelDescription="{xesc(heat)}" />')
-                xml_lines.append(f'      <COOLING _Description="{xesc(cool)}" />')
-                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Other" _TypeOtherDescription="{xesc(si.get("kitchen_appliances", ""))}" />')
-                xml_lines.append(f'      <ATTIC _Description="{xesc(si.get("attic", ""))}" />')
-                amenities_str = si.get("amenities", "") or ""
-                has_fp = "Y" if "fireplace" in amenities_str.lower() or "fp" in amenities_str.lower() else "N"
-                has_pool = "Y" if "pool" in amenities_str.lower() else "N"
-                xml_lines.append(f'      <AMENITY _Type="WoodStove" _Count="" />')
-                xml_lines.append(f'      <AMENITY _Type="Fireplace" _ExistsIndicator="{has_fp}" _Count="" />')
-                xml_lines.append(f'      <AMENITY _Type="Fence" _DetailedDescription="" />')
-                xml_lines.append(f'      <AMENITY _Type="Patio" _DetailedDescription="" />')
-                xml_lines.append(f'      <AMENITY _Type="Porch" _DetailedDescription="" />')
-                xml_lines.append(f'      <AMENITY _Type="Pool" _ExistsIndicator="{has_pool}" _DetailedDescription="" />')
-                xml_lines.append(f'      <AMENITY _Type="Other" _TypeOtherDescription="{xesc(amenities_str)}" />')
-                xml_lines.append(f'      <CAR_STORAGE>')
-                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Driveway" ParkingSpacesCount="" />')
-                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Garage" ParkingSpacesCount="{garage_spaces}" _AttachmentType="{garage_xml_type}" />')
-                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Carport" ParkingSpacesCount="" />')
-                xml_lines.append(f'      </CAR_STORAGE>')
-                eff_age = eff_age_subj or si.get("effective_age", cost.get("effective_age", ""))
-                rem_life = si.get("remaining_economic_life", cost.get("remaining_economic_life", ""))
-                xml_lines.append(f'      <STRUCTURE_ANALYSIS EffectiveAgeYearsCount="{eff_age}">')
-                xml_lines.append(f'        <STRUCTURE_ANALYSIS_RATING />')
-                xml_lines.append(f'        <STRUCTURE_ANALYSIS_EXTENSION>')
-                xml_lines.append(f'          <STRUCTURE_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'            <STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'              <EFFECTIVE_AGE GSEEffectiveAgeDescription="{eff_age}" />')
-                xml_lines.append(f'            </STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'          </STRUCTURE_ANALYSIS_EXTENSION_SECTION>')
-                xml_lines.append(f'        </STRUCTURE_ANALYSIS_EXTENSION>')
-                xml_lines.append(f'      </STRUCTURE_ANALYSIS>')
-                xml_lines.append(f'      <CONDITION_DETAIL_EXTENSION>')
-                xml_lines.append(f'        <CONDITION_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <CONDITION_DETAIL _SequenceIdentifier="1" GSEImprovementAreaType="Kitchen" />')
-                xml_lines.append(f'            <CONDITION_DETAIL _SequenceIdentifier="2" GSEImprovementAreaType="Bathrooms" />')
-                xml_lines.append(f'          </CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </CONDITION_DETAIL_EXTENSION_SECTION>')
-                xml_lines.append(f'      </CONDITION_DETAIL_EXTENSION>')
-                xml_lines.append(f'      <OVERALL_CONDITION_RATING_EXTENSION>')
-                xml_lines.append(f'        <OVERALL_CONDITION_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <OVERALL_CONDITION_RATING GSEUpdateLastFifteenYearIndicator="Y" />')
-                xml_lines.append(f'          </OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </OVERALL_CONDITION_RATING_EXTENSION_SECTION>')
-                xml_lines.append(f'      </OVERALL_CONDITION_RATING_EXTENSION>')
-                xml_lines.append(f'      <STRUCTURE_EXTENSION>')
-                xml_lines.append(f'        <STRUCTURE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <STRUCTURE_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <STRUCTURE_INFORMATION GSEYearBuiltEstimationIndicator="N" GSEStoriesCount="{stories}" />')
-                xml_lines.append(f'          </STRUCTURE_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </STRUCTURE_EXTENSION_SECTION>')
-                xml_lines.append(f'      </STRUCTURE_EXTENSION>')
-                xml_lines.append(f'    </STRUCTURE>')
-                # OFF_SITE_IMPROVEMENTS
-                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
-                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Private" _ExistsIndicator="N" />')
-                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Alley" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
-                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Alley" _Description="" _OwnershipType="Private" _ExistsIndicator="N" />')
-                # SITE
-                s_zoning_desc = sd.get("zoning_description", "Single Family Residential")
-                s_zoning_comply = sd.get("zoning_compliance", "Legal conforming")
-                s_hbu = sd.get("highest_best_use", "Present use as improved")
-                s_shape = sd.get("shape", "")
-                s_view = sd.get("view", "")
-                s_topo = sd.get("topography", "Level")
-                s_elec = "Y" if sd.get("utilities_electric", "").lower() == "public" else "N"
-                s_gas = "Y" if sd.get("utilities_gas", "").lower() == "public" else "N"
-                s_water = "Y" if sd.get("utilities_water", "").lower() == "public" else "N"
-                s_sewer = "Y" if sd.get("utilities_sewer", "").lower() == "public" else "N"
-                s_fema_date = sd.get("fema_map_date", "")
-                xml_lines.append(f'    <SITE _DimensionsDescription="{xesc(lot_dims)}" _AreaDescription="{xesc(lot_area)}" _ZoningClassificationIdentifier="{xesc(zoning)}" _ZoningClassificationDescription="{xesc(s_zoning_desc)}" _ZoningComplianceDescription="{xesc(s_zoning_comply)}" HighestBestUseDescription="{xesc(s_hbu)}" _HighestAndBestUseCurrentDescription="{xesc(sd.get("highest_best_use", ""))}">')
-                xml_lines.append(f'      <SITE_FEATURE _Type="Shape" _Comment="{xesc(s_shape)}" />')
-                xml_lines.append(f'      <SITE_FEATURE _Type="View" _Comment="{xesc(s_view)}" />')
-                xml_lines.append(f'      <SITE_FEATURE _Type="Driveway" _Comment="{xesc(sd.get("driveway", ""))}" />')
-                xml_lines.append(f'      <SITE_FEATURE _Type="Topography" _Comment="{xesc(s_topo)}" />')
-                xml_lines.append(f'      <SITE_FEATURE _Type="Drainage" _Comment="{xesc(sd.get("drainage", "Adequate"))}" />')
-                xml_lines.append(f'      <FLOOD_ZONE NFIPFloodZoneIdentifier="{flood_z}" NFIPMapIdentifier="{flood_map}" NFIPMapPanelDate="{s_fema_date}">')
-                xml_lines.append(f'        <FLOOD_ZONE_EXTENSION>')
-                xml_lines.append(f'          <FLOOD_ZONE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'            <FLOOD_ZONE_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'              <FLOOD_ZONE_INFORMATION GSENFIPFloodZoneIdentifier="{flood_z}" GSEFEMAFloodMapIdentifier="{flood_map}" />')
-                xml_lines.append(f'            </FLOOD_ZONE_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'          </FLOOD_ZONE_EXTENSION_SECTION>')
-                xml_lines.append(f'        </FLOOD_ZONE_EXTENSION>')
-                xml_lines.append(f'      </FLOOD_ZONE>')
-                xml_lines.append(f'      <SITE_UTILITY _Type="Electricity" _PublicIndicator="{s_elec}" _NonPublicIndicator="{"N" if s_elec == "Y" else "Y"}" _NonPublicDescription="" />')
-                xml_lines.append(f'      <SITE_UTILITY _Type="Gas" _PublicIndicator="{s_gas}" _NonPublicIndicator="{"N" if s_gas == "Y" else "Y"}" _NonPublicDescription="" />')
-                xml_lines.append(f'      <SITE_UTILITY _Type="Water" _PublicIndicator="{s_water}" _NonPublicIndicator="{"N" if s_water == "Y" else "Y"}" _NonPublicDescription="" />')
-                xml_lines.append(f'      <SITE_UTILITY _Type="SanitarySewer" _PublicIndicator="{s_sewer}" _NonPublicIndicator="{"N" if s_sewer == "Y" else "Y"}" _NonPublicDescription="" />')
-                xml_lines.append(f'    </SITE>')
-                # PROJECT
-                xml_lines.append(f'    <PROJECT _Name="" _ConversionDate="" _ContainsMultipleDwellingUnitsDataSourceDescription="" _CommonElementsStatusDescription="" _CommonElementsLeaseTermsDescription="" _CommonElementsDescription="">')
-                xml_lines.append(f'      <DEVELOPMENT_STAGE _TotalPhasesCount="" CompletedUnitsCount="" PlannedUnitsCount="" UnitsSoldCount="" UnitsRentedCount="" UnitsForSaleCount="" DataSourceDescription="" />')
-                xml_lines.append(f'      <_PER_UNIT_FEE _Amount="" />')
-                xml_lines.append(f'    </PROJECT>')
-                # NEIGHBORHOOD
-                nb_name = nb.get("name", neighborhood) or neighborhood
-                nb_bounds = nb.get("boundaries", "")
-                nb_desc = nb.get("description", "")
-                nb_market = nb.get("market_conditions", "")
-                nb_factors = nb.get("neighborhood_factors", "")
-                nb_full_desc = nb_desc
-                if nb_factors:
-                    nb_full_desc += " " + nb_factors
-                xml_lines.append(f'    <NEIGHBORHOOD _Name="{xesc(nb_name)}" _BoundaryAndCharacteristicsDescription="{xesc(nb_bounds)}" _Description="{xesc(nb_full_desc)}" _MarketConditionsDescription="{xesc(nb_market)}" _BuiltupRangeType="{xesc(nb.get("built_up", "Over 75%"))}" _GrowthPaceType="{xesc(nb.get("growth_rate", "Stable"))}" _PropertyValueTrendType="{xesc(nb.get("property_values", "Stable"))}" _DemandSupplyType="{xesc(nb.get("demand_supply", "In Balance"))}" _TypicalMarketingTimeDurationType="{xesc(nb.get("marketing_time", "3-6 Months"))}">')
-                xml_lines.append(f'      <_HOUSING _Type="SingleFamily" _LowPriceAmount="{xesc(nb.get("price_low", ""))}" _HighPriceAmount="{xesc(nb.get("price_high", ""))}" _PredominantPriceAmount="{xesc(nb.get("price_predominant", ""))}" _OldestYearsCount="{xesc(nb.get("age_high", ""))}" _NewestYearsCount="{xesc(nb.get("age_low", ""))}" _PredominantAgeYearsCount="{xesc(nb.get("age_predominant", ""))}" />')
-                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="SingleFamily" _Percent="{xesc(nb.get("land_use_sf_pct", ""))}" />')
-                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="TwoToFourFamily" _Percent="{xesc(nb.get("land_use_24_pct", ""))}" />')
-                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Apartment" _Percent="{xesc(nb.get("land_use_apt_pct", ""))}" />')
-                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Commercial" _Percent="{xesc(nb.get("land_use_comm_pct", ""))}" />')
-                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Other" _TypeOtherDescription="Other" _Percent="{xesc(nb.get("land_use_other_pct", ""))}" />')
-                xml_lines.append(f'      <NEIGHBORHOOD_EXTENSION>')
-                xml_lines.append(f'        <NEIGHBORHOOD_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <NEIGHBORHOOD_BOUNDARIES GSENeighborhoodBoundariesDescription="{xesc(nb_bounds)}" />')
-                xml_lines.append(f'          </NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </NEIGHBORHOOD_EXTENSION_SECTION>')
-                xml_lines.append(f'      </NEIGHBORHOOD_EXTENSION>')
-                xml_lines.append(f'    </NEIGHBORHOOD>')
-                # TAX
-                xml_lines.append(f'    <_TAX _YearIdentifier="{tax_yr}" _TotalTaxAmount="{tax_amt}" _TotalSpecialTaxAmount="">')
-                xml_lines.append(f'      <PROPERTY_TAX_EXTENSION>')
-                xml_lines.append(f'        <PROPERTY_TAX_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <PROPERTY_TAX_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <PROPERTY_TAX_AMOUNT GSEPropertyTaxTotalTaxAmount="{tax_amt}" />')
-                xml_lines.append(f'          </PROPERTY_TAX_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </PROPERTY_TAX_EXTENSION_SECTION>')
-                xml_lines.append(f'      </PROPERTY_TAX_EXTENSION>')
-                xml_lines.append(f'    </_TAX>')
-                xml_lines.append(f'    <LISTING_HISTORY ListedWithinPreviousYearDescription="" />')
-                # PROPERTY_ANALYSIS entries
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdditionalFeatures" _Comment="{xesc(comments.get("additional_features", ""))}" />')
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="QualityAndAppearance" _Comment="{xesc(comments.get("quality_comment", ""))}" />')
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PhysicalDeficiency" _Comment="{xesc(comments.get("condition_comment", ""))}" />')
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="ConformsToNeighborhood" _Comment="{xesc(comments.get("conforms_to_neighborhood", ""))}" />')
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="UtilitiesAndOffSiteImprovementsConformToNeighborhood" _Comment="{xesc(comments.get("conforms_to_neighborhood", ""))}" />')
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdverseSiteConditions" _Comment="{xesc(comments.get("adverse_conditions", ""))}" />')
-                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PropertyCondition" _Comment="{xesc(comments.get("condition_comment", ""))}" />')
-                # OWNER
-                xml_lines.append(f'    <_OWNER _Name="">')
-                xml_lines.append(f'      <CONTACT_DETAIL />')
-                xml_lines.append(f'      <PROPERTY_OWNER_EXTENSION>')
-                xml_lines.append(f'        <PROPERTY_OWNER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <PROPERTY_OWNER GSEPropertyOwnerName="" />')
-                xml_lines.append(f'          </PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </PROPERTY_OWNER_EXTENSION_SECTION>')
-                xml_lines.append(f'      </PROPERTY_OWNER_EXTENSION>')
-                xml_lines.append(f'    </_OWNER>')
-                # SALES_CONTRACT
-                xml_lines.append(f'    <SALES_CONTRACT _ReviewComment="" _Amount="" _Date="" DataSourceDescription="" SalesConcessionAmount="" SalesConcessionDescription="">')
-                xml_lines.append(f'      <SALES_CONCESSION_EXTENSION>')
-                xml_lines.append(f'        <SALES_CONCESSION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <SALES_CONCESSION_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <SALES_CONCESSION GSEUndefinedConcessionAmountIndicator="N" />')
-                xml_lines.append(f'          </SALES_CONCESSION_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </SALES_CONCESSION_EXTENSION_SECTION>')
-                xml_lines.append(f'      </SALES_CONCESSION_EXTENSION>')
-                xml_lines.append(f'    </SALES_CONTRACT>')
-                # PROPERTY_EXTENSION
-                xml_lines.append(f'    <PROPERTY_EXTENSION>')
-                xml_lines.append(f'      <PROPERTY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'        <PROPERTY_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'          <PROPERTY_TYPE GSE_PUDIndicator="N" />')
-                xml_lines.append(f'        </PROPERTY_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'      </PROPERTY_EXTENSION_SECTION>')
-                xml_lines.append(f'    </PROPERTY_EXTENSION>')
-                xml_lines.append(f'  </PROPERTY>')
+                                                # XML escape helper
+                                                import xml.sax.saxutils as saxutils
+                                                def xesc(val):
+                                                    if val is None:
+                                                        return ""
+                                                    return saxutils.escape(str(val), {'"': '&quot;', "'": '&apos;'})
 
-                # VALUATION_METHODS section
-                xml_lines.append(f'  <VALUATION_METHODS _AdditionalDescription="">')
-                xml_lines.append(f'    <COST_ANALYSIS SiteEstimatedValueComment="" DataSourceDescription="" CostServiceQualityRatingDescription="" DataSourceEffectiveDate="" _Comment="{xesc(comments.get("cost_comment", ""))}" EstimatedRemainingEconomicLifeYearsCount="{xesc(cost.get("remaining_economic_life", ""))}" SiteEstimatedValueAmount="{xesc(cost.get("site_value", ""))}" NewImprovementTotalCostAmount="{xesc(cost.get("total_new_cost", ""))}" NewImprovementDepreciatedCostAmount="{xesc(cost.get("depreciated_cost", ""))}" SiteOtherImprovementsAsIsAmount="{xesc(cost.get("site_improvements", ""))}" ValueIndicatedByCostApproachAmount="{xesc(cost.get("indicated_value", ""))}">')
-                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Dwelling" SquareFeetCount="{xesc(cost.get("dwelling_sqft", gla))}" PricePerSquareFootAmount="{xesc(cost.get("dwelling_cost_per_sqft", ""))}" _CostAmount="{xesc(cost.get("dwelling_cost", ""))}" />')
-                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Other" _TypeOtherDescription="" SquareFeetCount="" PricePerSquareFootAmount="" _CostAmount="" />')
-                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Additional" _SequenceIdentifier="1" _CostDescription="" _CostAmount="" />')
-                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Garage" SquareFeetCount="{xesc(cost.get("garage_sqft", ""))}" PricePerSquareFootAmount="{xesc(cost.get("garage_cost_per_sqft", ""))}" _CostAmount="{xesc(cost.get("garage_cost", ""))}" />')
-                xml_lines.append(f'      <DEPRECIATION _PhysicalPercent="{xesc(cost.get("physical_depreciation_pct", ""))}" _PhysicalAmount="{xesc(cost.get("physical_depreciation_amt", ""))}" _FunctionalPercent="" _FunctionalAmount="{xesc(cost.get("functional_depreciation_amt", ""))}" _ExteriorPercent="" _ExteriorAmount="{xesc(cost.get("external_depreciation_amt", ""))}" _TotalAmount="{xesc(cost.get("total_depreciation", ""))}" />')
-                xml_lines.append(f'      <COST_ANALYSIS_EXTENSION>')
-                xml_lines.append(f'        <COST_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'          <COST_ANALYSIS_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            <COST_APPROACH_DATA_SOURCE GSECostDataSourceEffectiveDateDescription="" />')
-                xml_lines.append(f'          </COST_ANALYSIS_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'        </COST_ANALYSIS_EXTENSION_SECTION>')
-                xml_lines.append(f'      </COST_ANALYSIS_EXTENSION>')
-                xml_lines.append(f'    </COST_ANALYSIS>')
-                # SALES_COMPARISON with subject as COMPARABLE_SALE 0
-                xml_lines.append(f'    <SALES_COMPARISON _CurrentSalesAgreementAnalysisComment="" _Comment="{xesc(comments.get("sales_comparison_comment", ""))}" ValueIndicatedBySalesComparisonApproachAmount="{val_opinion}">')
-                xml_lines.append(f'      <RESEARCH ComparableListingsResearchedCount="" ComparableListingsPriceRangeLowAmount="" ComparableListingsPriceRangeHighAmount="" ComparableSalesResearchedCount="" ComparableSalesPriceRangeLowAmount="" ComparableSalesPriceRangeHighAmount="" SalesHistoryNotResearchedComment="">')
-                xml_lines.append(f'        <SUBJECT DataSourceDescription="" />')
-                xml_lines.append(f'        <COMPARABLE DataSourceDescription="" />')
-                xml_lines.append(f'      </RESEARCH>')
-                xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="0" PropertySalesAmount="" SalesPricePerGrossLivingAreaAmount="">')
-                xml_lines.append(f'        <LOCATION LatitudeNumber="" LongitudeNumber="" PropertyStreetAddress="{xesc(addr)}" PropertyStreetAddress2="{xesc(city)}, {xesc(state)} {xesc(zipcode)}" />')
-                xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" />')
-                subj_garage_desc = f'{garage_xml_type} {garage_spaces}' if garage_spaces else garage
-                subj_heat_cool = heat
-                if cool and cool != heat:
-                    subj_heat_cool = f'{heat}/{cool}'
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{xesc(nb.get("name", neighborhood) or neighborhood)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="Fee Simple" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{xesc(lot_area)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{xesc(view_desc)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{xesc(si.get("design_style", design))}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{xesc(qual)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(yr)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(cond)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(gla)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(bsmt_sqft)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(bsmt_fin)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(si.get("functional_utility", ""))}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(subj_heat_cool)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(si.get("energy_efficiency", ""))}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{xesc(subj_garage_desc)}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{xesc(si.get("porch_patio_deck", ""))}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{xesc(si.get("fireplace", ""))}" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" />')
-                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" />')
-                xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="" PropertySalesAmount="" DataSourceDescription="" DataSourceEffectiveDate="">')
-                xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
-                xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="" GSEPriorSaleComment="" />')
-                xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
-                xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
-                xml_lines.append(f'        </PRIOR_SALES>')
-                xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
-                xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" />')
-                xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
-                xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
-                xml_lines.append(f'      </COMPARABLE_SALE>')
-                # Add AI-generated comparable sales (1, 2, 3)
-                for ci, comp in enumerate(comps[:3], start=1):
-                    c_addr = comp.get("address", "")
-                    c_city = comp.get("city", city)
-                    c_state = comp.get("state", state)
-                    c_zip = comp.get("zip", zipcode)
-                    c_price = comp.get("sale_price", "")
-                    c_gla = comp.get("gla", "")
-                    c_price_gla = ""
-                    try:
-                        if c_price and c_gla:
-                            c_price_gla = str(round(int(c_price) / int(c_gla)))
-                    except:
-                        pass
-                    xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="{ci}" PropertySalesAmount="{c_price}" SalesPricePerGrossLivingAreaAmount="{c_price_gla}">')
-                    xml_lines.append(f'        <LOCATION LatitudeNumber="" LongitudeNumber="" PropertyStreetAddress="{xesc(c_addr)}" PropertyStreetAddress2="{xesc(c_city)}, {xesc(c_state)} {xesc(c_zip)}" />')
-                    xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{xesc(comp.get("total_rooms", ""))}" TotalBedroomCount="{xesc(comp.get("bedrooms", ""))}" TotalBathroomCount="{xesc(comp.get("bathrooms", ""))}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SaleOrFinancingConcessions" _Description="{xesc(comp.get("financing_type", "Conv;0"))}" _Amount="{comp.get("financing_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Concessions" _Description="{xesc(comp.get("concessions", "0"))}" _Amount="{comp.get("concessions_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{xesc(comp.get("location", ""))}" _Amount="{comp.get("location_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="{xesc(comp.get("property_rights", "Fee Simple"))}" _Amount="{comp.get("lease_fee_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{xesc(comp.get("lot_size", ""))}" _Amount="{comp.get("site_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{xesc(comp.get("view", ""))}" _Amount="{comp.get("view_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{xesc(comp.get("design_style", ""))}" _Amount="{comp.get("design_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{xesc(comp.get("quality", ""))}" _Amount="{comp.get("quality_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(comp.get("year_built", ""))}" _Amount="{comp.get("age_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(comp.get("condition", ""))}" _Amount="{comp.get("condition_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(c_gla)}" _Amount="{comp.get("gla_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(comp.get("basement_total_sqft", ""))}" _Amount="{comp.get("basement_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(comp.get("basement_finished_sqft", ""))}" _Amount="0" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(comp.get("functional_utility", ""))}" _Amount="{comp.get("functional_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(comp.get("heating_cooling", ""))}" _Amount="{comp.get("heating_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(comp.get("energy_efficiency", ""))}" _Amount="{comp.get("energy_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{xesc(comp.get("garage_parking", ""))}" _Amount="{comp.get("garage_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{xesc(comp.get("porch_patio_deck", ""))}" _Amount="{comp.get("porch_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{xesc(comp.get("fireplace", ""))}" _Amount="{comp.get("fireplace_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Pool" _Description="{xesc(comp.get("pool", ""))}" _Amount="{comp.get("pool_adj", "0")}" />')
-                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fence" _Description="{xesc(comp.get("fence", ""))}" _Amount="{comp.get("fence_adj", "0")}" />')
-                    c_prior_date = comp.get("prior_sale_date", "")
-                    c_prior_price = comp.get("prior_sale_price", "")
-                    xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="{c_prior_date}" PropertySalesAmount="{c_prior_price}" DataSourceDescription="{xesc(comp.get("data_source", ""))};{xesc(comp.get("verification_source", ""))}" DataSourceEffectiveDate="">')
-                    xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
-                    xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="{c_prior_date}" GSEPriorSaleComment="" />')
-                    xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
-                    xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
-                    xml_lines.append(f'        </PRIOR_SALES>')
-                    xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
-                    xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
-                    xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" />')
-                    xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
-                    xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
-                    xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
-                    xml_lines.append(f'      </COMPARABLE_SALE>')
-                xml_lines.append(f'    </SALES_COMPARISON>')
-                xml_lines.append(f'    <INCOME_ANALYSIS ValueIndicatedByIncomeApproachAmount="" EstimatedMarketMonthlyRentAmount="" GrossRentMultiplierFactor="" _Comment="" />')
-                xml_lines.append(f'  </VALUATION_METHODS>')
+                                                xml_lines = []
+                                                xml_lines.append('<?xml version="1.0" encoding="UTF-8"?>')
+                                                xml_lines.append('<VALUATION_RESPONSE MISMOVersionID="2.6">')
 
-                # VALUATION section
-                final_val = val_summary.get("final_opinion_value", "") or val_summary.get("indicated_value", "") or val_opinion
-                eff_date = val_summary.get("effective_date", insp_date) or insp_date
-                xml_lines.append(f'  <VALUATION PropertyAppraisedValueAmount="{final_val}" AppraisalEffectiveDate="{eff_date}">')
-                xml_lines.append(f'    <_RECONCILIATION _SummaryComment="{xesc(comments.get("reconciliation", ""))}" _ConditionsComment="{xesc(comments.get("conditions_comment", ""))}" />')
-                xml_lines.append(f'  </VALUATION>')
+                                                # DOCUMENT_CLASSIFICATION - required for TOTAL to recognize UAD format
+                                                xml_lines.append('  <DOCUMENT_CLASSIFICATION>')
+                                                xml_lines.append('    <DOCUMENT_CLASSES>')
+                                                xml_lines.append('      <DOCUMENT_CLASS _Name="VALUATION" />')
+                                                xml_lines.append('    </DOCUMENT_CLASSES>')
+                                                xml_lines.append('  </DOCUMENT_CLASSIFICATION>')
 
-                xml_lines.append(f'</VALUATION_RESPONSE>')
+                                                # REPORT section
+                                                xml_lines.append(f'  <REPORT USPAPReportDescription="{xesc(addr)} - Appraisal" AppraiserFileIdentifier="{xesc(order_data.get("order_id", ""))}" AppraiserAdditionalFileIdentifierName="Other File Number" AppraiserAdditionalFileIdentifier="" AppraisalSoftwareProductName="A-Tech Appraisal Manager" AppraisalSoftwareProductVersionIdentifier="1.0" AppraiserReportSignedDate="" SupervisorReportSignedDate="" AppraisalFormType="{xesc(form_type)}" _TitleDescription="{xesc(title_desc)}" AppraisalFormVersionIdentifier="March 2005" OtherLoanPurposeDescription="" AppraisalPurposeTypeOtherDescription="">')
+                                                xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="1" AppraisalReportContentType="AppraisalForm" AppraisalReportContentName="URAR [UAD Version]" AppraisalReportContentIdentifier="UAD Version 9/2011" AppraisalReportContentIsPrimaryFormIndicator="Y" />')
+                                                # Add addendum text if available
+                                                combined_addendum = ""
+                                                if addendum_text:
+                                                    combined_addendum += addendum_text
+                                                if narrative_text:
+                                                    if combined_addendum:
+                                                        combined_addendum += "\n\n"
+                                                    combined_addendum += narrative_text
+                                                if combined_addendum:
+                                                    xml_lines.append(f'    <FORM AppraisalReportContentSequenceIdentifier="2" AppraisalReportContentType="Addendum" AppraisalReportContentName="Supplemental Addendum" AppraisalReportContentIdentifier="" AppraisalReportContentIsPrimaryFormIndicator="N" _TextDescription="{xesc(combined_addendum)}" />')
+                                                xml_lines.append(f'  </REPORT>')
 
-                xml_str = '\n'.join(xml_lines)
-                st.download_button("Download UAD XML", data=xml_str,
-                                  file_name=f"{order_data['order_id']}_UAD.xml",
-                                  mime="application/xml")
+                                                # PARTIES section
+                                                xml_lines.append(f'  <PARTIES>')
+                                                xml_lines.append(f'    <APPRAISER _Name="{xesc(appraiser_name)}" _CompanyName="A-Tech Appraisal Co., LLC" _StreetAddress="" _City="Warwick" _State="RI" _PostalCode="02886">')
+                                                xml_lines.append(f'      <CONTACT_DETAIL>')
+                                                xml_lines.append(f'        <CONTACT_POINT _Type="Phone" _Value="" />')
+                                                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
+                                                xml_lines.append(f'      </CONTACT_DETAIL>')
+                                                xml_lines.append(f'      <APPRAISER_LICENSE _ExpirationDate="" _State="RI" />')
+                                                xml_lines.append(f'      <INSPECTION AppraisalInspectionPropertyType="Subject" InspectionDate="{insp_date}" />')
+                                                xml_lines.append(f'    </APPRAISER>')
+                                                xml_lines.append(f'    <SUPERVISOR _Name="" _CompanyName="" _StreetAddress="" _City="" _State="" _PostalCode="">')
+                                                xml_lines.append(f'      <CONTACT_DETAIL>')
+                                                xml_lines.append(f'        <CONTACT_POINT _Type="Phone" _Value="" />')
+                                                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
+                                                xml_lines.append(f'      </CONTACT_DETAIL>')
+                                                xml_lines.append(f'      <APPRAISER_LICENSE _ExpirationDate="" _State="" />')
+                                                xml_lines.append(f'      <INSPECTION AppraisalInspectionPropertyType="Comparable" />')
+                                                xml_lines.append(f'    </SUPERVISOR>')
+                                                xml_lines.append(f'    <REVIEW_APPRAISER />')
+                                                xml_lines.append(f'    <REAL_ESTATE_AGENT>')
+                                                xml_lines.append(f'      <CONTACT_DETAIL />')
+                                                xml_lines.append(f'    </REAL_ESTATE_AGENT>')
+                                                xml_lines.append(f'    <LENDER _UnparsedName="{xesc(lender_name)}" AppraisalFormsUnparsedAddress="" _StreetAddress="">')
+                                                xml_lines.append(f'      <CONTACT_DETAIL _Name="">')
+                                                xml_lines.append(f'        <CONTACT_POINT _Type="Email" _Value="" />')
+                                                xml_lines.append(f'      </CONTACT_DETAIL>')
+                                                xml_lines.append(f'    </LENDER>')
+                                                xml_lines.append(f'    <BORROWER _UnparsedName="{xesc(borrower_name)}">')
+                                                xml_lines.append(f'      <BORROWER_EXTENSION>')
+                                                xml_lines.append(f'        <BORROWER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <BORROWER_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <BORROWER_NAME GSEBorrowerName="{xesc(borrower_name)}" />')
+                                                xml_lines.append(f'          </BORROWER_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </BORROWER_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </BORROWER_EXTENSION>')
+                                                xml_lines.append(f'    </BORROWER>')
+                                                xml_lines.append(f'    <MANAGEMENT_COMPANY_EXTENSION>')
+                                                xml_lines.append(f'      <MANAGEMENT_COMPANY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'        <MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'          <MANAGEMENT_COMPANY GSEManagementCompanyName="Absolute Value Management" />')
+                                                xml_lines.append(f'        </MANAGEMENT_COMPANY_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'      </MANAGEMENT_COMPANY_EXTENSION_SECTION>')
+                                                xml_lines.append(f'    </MANAGEMENT_COMPANY_EXTENSION>')
+                                                xml_lines.append(f'  </PARTIES>')
 
-        with ecol2:
-            if st.button("Copy Narrative to Clipboard"):
-                if order_data.get("ai_narrative"):
-                    st.code(order_data["ai_narrative"], language=None)
-                    st.info("Select all text above and copy (Ctrl+A, Ctrl+C)")
-                else:
-                    st.warning("No narrative saved yet. Generate one first.")
-    else:
-        st.info("No orders found. Create an order first.")
+                                                # PROPERTY section
+                                                xml_lines.append(f'  <PROPERTY _StreetAddress="{xesc(addr)}" _City="{xesc(city)}" _State="{xesc(state)}" _PostalCode="{xesc(zipcode)}" _County="{xesc(county)}" _RightsTypeOtherDescription="">')
+                                                xml_lines.append(f'    <_IDENTIFICATION AssessorsParcelIdentifier="{xesc(assessor)}" MapReferenceIdentifier="" CensusTractIdentifier="">')
+                                                xml_lines.append(f'      <PROPERTY_IDENTIFICATION_EXTENSION>')
+                                                xml_lines.append(f'        <PROPERTY_IDENTIFICATION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <PARCEL_IDENTIFIER GSEAssessorsParcelIdentifier="{xesc(assessor)}" />')
+                                                xml_lines.append(f'          </PROPERTY_IDENTIFICATION_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </PROPERTY_IDENTIFICATION_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </PROPERTY_IDENTIFICATION_EXTENSION>')
+                                                xml_lines.append(f'    </_IDENTIFICATION>')
+                                                xml_lines.append(f'    <_LEGAL_DESCRIPTION _Type="Other" _TypeOtherDescription="LongLegal" _TextDescription="{xesc(legal)}" />')
+                                                # STRUCTURE
+                                                xml_lines.append(f'    <STRUCTURE StoriesCount="{stories}" _DesignDescription="{xesc(design)}" PropertyStructureBuiltYear="{yr}" TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" GrossLivingAreaSquareFeetCount="{gla}">')
+                                                xml_lines.append(f'      <FOUNDATION _Type="{found_xml}" _ConditionDescription="{xesc(found_cond)}" _ExistsIndicator="{"Y" if found_type != "Slab" else "N"}">')
+                                                xml_lines.append(f'        <_CONDITION _Type="Infestation" _Comment="" />')
+                                                xml_lines.append(f'      </FOUNDATION>')
+                                                xml_lines.append(f'      <BASEMENT SquareFeetCount="{bsmt_sqft}" _FinishedPercent="{bsmt_fin}" />')
+                                                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Foundation" _Description="{xesc(found_type)}" />')
+                                                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="Walls" _Description="{xesc(exterior_walls)}" />')
+                                                xml_lines.append(f'      <EXTERIOR_FEATURE _Type="RoofSurface" _Description="{xesc(roof_surface)}" />')
+                                                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Floors" _ConditionDescription="{xesc(si.get("flooring", ""))}" />')
+                                                xml_lines.append(f'      <INTERIOR_FEATURE _Type="Walls" _ConditionDescription="{xesc(si.get("walls_trim", ""))}" />')
+                                                xml_lines.append(f'      <INTERIOR_FEATURE _Type="TrimAndFinish" _ConditionDescription="{xesc(si.get("walls_trim", ""))}" />')
+                                                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomFloors" _ConditionDescription="{xesc(si.get("bath_floor", ""))}" />')
+                                                xml_lines.append(f'      <INTERIOR_FEATURE _Type="BathroomWainscot" _ConditionDescription="{xesc(si.get("bath_wainscot", ""))}" />')
+                                                xml_lines.append(f'      <HEATING _FuelDescription="{xesc(heat)}" />')
+                                                xml_lines.append(f'      <COOLING _Description="{xesc(cool)}" />')
+                                                xml_lines.append(f'      <KITCHEN_EQUIPMENT _Type="Other" _TypeOtherDescription="{xesc(si.get("kitchen_appliances", ""))}" />')
+                                                xml_lines.append(f'      <ATTIC _Description="{xesc(si.get("attic", ""))}" />')
+                                                amenities_str = si.get("amenities", "") or ""
+                                                has_fp = "Y" if "fireplace" in amenities_str.lower() or "fp" in amenities_str.lower() else "N"
+                                                has_pool = "Y" if "pool" in amenities_str.lower() else "N"
+                                                xml_lines.append(f'      <AMENITY _Type="WoodStove" _Count="" />')
+                                                xml_lines.append(f'      <AMENITY _Type="Fireplace" _ExistsIndicator="{has_fp}" _Count="" />')
+                                                xml_lines.append(f'      <AMENITY _Type="Fence" _DetailedDescription="" />')
+                                                xml_lines.append(f'      <AMENITY _Type="Patio" _DetailedDescription="" />')
+                                                xml_lines.append(f'      <AMENITY _Type="Porch" _DetailedDescription="" />')
+                                                xml_lines.append(f'      <AMENITY _Type="Pool" _ExistsIndicator="{has_pool}" _DetailedDescription="" />')
+                                                xml_lines.append(f'      <AMENITY _Type="Other" _TypeOtherDescription="{xesc(amenities_str)}" />')
+                                                xml_lines.append(f'      <CAR_STORAGE>')
+                                                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Driveway" ParkingSpacesCount="" />')
+                                                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Garage" ParkingSpacesCount="{garage_spaces}" _AttachmentType="{garage_xml_type}" />')
+                                                xml_lines.append(f'        <CAR_STORAGE_LOCATION _Type="Carport" ParkingSpacesCount="" />')
+                                                xml_lines.append(f'      </CAR_STORAGE>')
+                                                eff_age = eff_age_subj or si.get("effective_age", cost.get("effective_age", ""))
+                                                rem_life = si.get("remaining_economic_life", cost.get("remaining_economic_life", ""))
+                                                xml_lines.append(f'      <STRUCTURE_ANALYSIS EffectiveAgeYearsCount="{eff_age}">')
+                                                xml_lines.append(f'        <STRUCTURE_ANALYSIS_RATING />')
+                                                xml_lines.append(f'        <STRUCTURE_ANALYSIS_EXTENSION>')
+                                                xml_lines.append(f'          <STRUCTURE_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'            <STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'              <EFFECTIVE_AGE GSEEffectiveAgeDescription="{eff_age}" />')
+                                                xml_lines.append(f'            </STRUCTURE_ANALYSIS_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'          </STRUCTURE_ANALYSIS_EXTENSION_SECTION>')
+                                                xml_lines.append(f'        </STRUCTURE_ANALYSIS_EXTENSION>')
+                                                xml_lines.append(f'      </STRUCTURE_ANALYSIS>')
+                                                xml_lines.append(f'      <CONDITION_DETAIL_EXTENSION>')
+                                                xml_lines.append(f'        <CONDITION_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <CONDITION_DETAIL _SequenceIdentifier="1" GSEImprovementAreaType="Kitchen" />')
+                                                xml_lines.append(f'            <CONDITION_DETAIL _SequenceIdentifier="2" GSEImprovementAreaType="Bathrooms" />')
+                                                xml_lines.append(f'          </CONDITION_DETAIL_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </CONDITION_DETAIL_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </CONDITION_DETAIL_EXTENSION>')
+                                                xml_lines.append(f'      <OVERALL_CONDITION_RATING_EXTENSION>')
+                                                xml_lines.append(f'        <OVERALL_CONDITION_RATING_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <OVERALL_CONDITION_RATING GSEUpdateLastFifteenYearIndicator="Y" />')
+                                                xml_lines.append(f'          </OVERALL_CONDITION_RATING_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </OVERALL_CONDITION_RATING_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </OVERALL_CONDITION_RATING_EXTENSION>')
+                                                xml_lines.append(f'      <STRUCTURE_EXTENSION>')
+                                                xml_lines.append(f'        <STRUCTURE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <STRUCTURE_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <STRUCTURE_INFORMATION GSEYearBuiltEstimationIndicator="N" GSEStoriesCount="{stories}" />')
+                                                xml_lines.append(f'          </STRUCTURE_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </STRUCTURE_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </STRUCTURE_EXTENSION>')
+                                                xml_lines.append(f'    </STRUCTURE>')
+                                                # OFF_SITE_IMPROVEMENTS
+                                                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
+                                                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Street" _Description="" _OwnershipType="Private" _ExistsIndicator="N" />')
+                                                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Alley" _Description="" _OwnershipType="Public" _ExistsIndicator="N" />')
+                                                xml_lines.append(f'    <_OFF_SITE_IMPROVEMENT _Type="Alley" _Description="" _OwnershipType="Private" _ExistsIndicator="N" />')
+                                                # SITE
+                                                s_zoning_desc = sd.get("zoning_description", "Single Family Residential")
+                                                s_zoning_comply = sd.get("zoning_compliance", "Legal conforming")
+                                                s_hbu = sd.get("highest_best_use", "Present use as improved")
+                                                s_shape = sd.get("shape", "")
+                                                s_view = sd.get("view", "")
+                                                s_topo = sd.get("topography", "Level")
+                                                s_elec = "Y" if sd.get("utilities_electric", "").lower() == "public" else "N"
+                                                s_gas = "Y" if sd.get("utilities_gas", "").lower() == "public" else "N"
+                                                s_water = "Y" if sd.get("utilities_water", "").lower() == "public" else "N"
+                                                s_sewer = "Y" if sd.get("utilities_sewer", "").lower() == "public" else "N"
+                                                s_fema_date = sd.get("fema_map_date", "")
+                                                xml_lines.append(f'    <SITE _DimensionsDescription="{xesc(lot_dims)}" _AreaDescription="{xesc(lot_area)}" _ZoningClassificationIdentifier="{xesc(zoning)}" _ZoningClassificationDescription="{xesc(s_zoning_desc)}" _ZoningComplianceDescription="{xesc(s_zoning_comply)}" HighestBestUseDescription="{xesc(s_hbu)}" _HighestAndBestUseCurrentDescription="{xesc(sd.get("highest_best_use", ""))}">')
+                                                xml_lines.append(f'      <SITE_FEATURE _Type="Shape" _Comment="{xesc(s_shape)}" />')
+                                                xml_lines.append(f'      <SITE_FEATURE _Type="View" _Comment="{xesc(s_view)}" />')
+                                                xml_lines.append(f'      <SITE_FEATURE _Type="Driveway" _Comment="{xesc(sd.get("driveway", ""))}" />')
+                                                xml_lines.append(f'      <SITE_FEATURE _Type="Topography" _Comment="{xesc(s_topo)}" />')
+                                                xml_lines.append(f'      <SITE_FEATURE _Type="Drainage" _Comment="{xesc(sd.get("drainage", "Adequate"))}" />')
+                                                xml_lines.append(f'      <FLOOD_ZONE NFIPFloodZoneIdentifier="{flood_z}" NFIPMapIdentifier="{flood_map}" NFIPMapPanelDate="{s_fema_date}">')
+                                                xml_lines.append(f'        <FLOOD_ZONE_EXTENSION>')
+                                                xml_lines.append(f'          <FLOOD_ZONE_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'            <FLOOD_ZONE_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'              <FLOOD_ZONE_INFORMATION GSENFIPFloodZoneIdentifier="{flood_z}" GSEFEMAFloodMapIdentifier="{flood_map}" />')
+                                                xml_lines.append(f'            </FLOOD_ZONE_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'          </FLOOD_ZONE_EXTENSION_SECTION>')
+                                                xml_lines.append(f'        </FLOOD_ZONE_EXTENSION>')
+                                                xml_lines.append(f'      </FLOOD_ZONE>')
+                                                xml_lines.append(f'      <SITE_UTILITY _Type="Electricity" _PublicIndicator="{s_elec}" _NonPublicIndicator="{"N" if s_elec == "Y" else "Y"}" _NonPublicDescription="" />')
+                                                xml_lines.append(f'      <SITE_UTILITY _Type="Gas" _PublicIndicator="{s_gas}" _NonPublicIndicator="{"N" if s_gas == "Y" else "Y"}" _NonPublicDescription="" />')
+                                                xml_lines.append(f'      <SITE_UTILITY _Type="Water" _PublicIndicator="{s_water}" _NonPublicIndicator="{"N" if s_water == "Y" else "Y"}" _NonPublicDescription="" />')
+                                                xml_lines.append(f'      <SITE_UTILITY _Type="SanitarySewer" _PublicIndicator="{s_sewer}" _NonPublicIndicator="{"N" if s_sewer == "Y" else "Y"}" _NonPublicDescription="" />')
+                                                xml_lines.append(f'    </SITE>')
+                                                # PROJECT
+                                                xml_lines.append(f'    <PROJECT _Name="" _ConversionDate="" _ContainsMultipleDwellingUnitsDataSourceDescription="" _CommonElementsStatusDescription="" _CommonElementsLeaseTermsDescription="" _CommonElementsDescription="">')
+                                                xml_lines.append(f'      <DEVELOPMENT_STAGE _TotalPhasesCount="" CompletedUnitsCount="" PlannedUnitsCount="" UnitsSoldCount="" UnitsRentedCount="" UnitsForSaleCount="" DataSourceDescription="" />')
+                                                xml_lines.append(f'      <_PER_UNIT_FEE _Amount="" />')
+                                                xml_lines.append(f'    </PROJECT>')
+                                                # NEIGHBORHOOD
+                                                nb_name = nb.get("name", neighborhood) or neighborhood
+                                                nb_bounds = nb.get("boundaries", "")
+                                                nb_desc = nb.get("description", "")
+                                                nb_market = nb.get("market_conditions", "")
+                                                nb_factors = nb.get("neighborhood_factors", "")
+                                                nb_full_desc = nb_desc
+                                                if nb_factors:
+                                                    nb_full_desc += " " + nb_factors
+                                                xml_lines.append(f'    <NEIGHBORHOOD _Name="{xesc(nb_name)}" _BoundaryAndCharacteristicsDescription="{xesc(nb_bounds)}" _Description="{xesc(nb_full_desc)}" _MarketConditionsDescription="{xesc(nb_market)}" _BuiltupRangeType="{xesc(nb.get("built_up", "Over 75%"))}" _GrowthPaceType="{xesc(nb.get("growth_rate", "Stable"))}" _PropertyValueTrendType="{xesc(nb.get("property_values", "Stable"))}" _DemandSupplyType="{xesc(nb.get("demand_supply", "In Balance"))}" _TypicalMarketingTimeDurationType="{xesc(nb.get("marketing_time", "3-6 Months"))}">')
+                                                xml_lines.append(f'      <_HOUSING _Type="SingleFamily" _LowPriceAmount="{xesc(nb.get("price_low", ""))}" _HighPriceAmount="{xesc(nb.get("price_high", ""))}" _PredominantPriceAmount="{xesc(nb.get("price_predominant", ""))}" _OldestYearsCount="{xesc(nb.get("age_high", ""))}" _NewestYearsCount="{xesc(nb.get("age_low", ""))}" _PredominantAgeYearsCount="{xesc(nb.get("age_predominant", ""))}" />')
+                                                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="SingleFamily" _Percent="{xesc(nb.get("land_use_sf_pct", ""))}" />')
+                                                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="TwoToFourFamily" _Percent="{xesc(nb.get("land_use_24_pct", ""))}" />')
+                                                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Apartment" _Percent="{xesc(nb.get("land_use_apt_pct", ""))}" />')
+                                                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Commercial" _Percent="{xesc(nb.get("land_use_comm_pct", ""))}" />')
+                                                xml_lines.append(f'      <_PRESENT_LAND_USE _Type="Other" _TypeOtherDescription="Other" _Percent="{xesc(nb.get("land_use_other_pct", ""))}" />')
+                                                xml_lines.append(f'      <NEIGHBORHOOD_EXTENSION>')
+                                                xml_lines.append(f'        <NEIGHBORHOOD_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <NEIGHBORHOOD_BOUNDARIES GSENeighborhoodBoundariesDescription="{xesc(nb_bounds)}" />')
+                                                xml_lines.append(f'          </NEIGHBORHOOD_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </NEIGHBORHOOD_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </NEIGHBORHOOD_EXTENSION>')
+                                                xml_lines.append(f'    </NEIGHBORHOOD>')
+                                                # TAX
+                                                xml_lines.append(f'    <_TAX _YearIdentifier="{tax_yr}" _TotalTaxAmount="{tax_amt}" _TotalSpecialTaxAmount="">')
+                                                xml_lines.append(f'      <PROPERTY_TAX_EXTENSION>')
+                                                xml_lines.append(f'        <PROPERTY_TAX_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <PROPERTY_TAX_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <PROPERTY_TAX_AMOUNT GSEPropertyTaxTotalTaxAmount="{tax_amt}" />')
+                                                xml_lines.append(f'          </PROPERTY_TAX_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </PROPERTY_TAX_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </PROPERTY_TAX_EXTENSION>')
+                                                xml_lines.append(f'    </_TAX>')
+                                                xml_lines.append(f'    <LISTING_HISTORY ListedWithinPreviousYearDescription="" />')
+                                                # PROPERTY_ANALYSIS entries
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdditionalFeatures" _Comment="{xesc(comments.get("additional_features", ""))}" />')
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="QualityAndAppearance" _Comment="{xesc(comments.get("quality_comment", ""))}" />')
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PhysicalDeficiency" _Comment="{xesc(comments.get("condition_comment", ""))}" />')
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="ConformsToNeighborhood" _Comment="{xesc(comments.get("conforms_to_neighborhood", ""))}" />')
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="UtilitiesAndOffSiteImprovementsConformToNeighborhood" _Comment="{xesc(comments.get("conforms_to_neighborhood", ""))}" />')
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="AdverseSiteConditions" _Comment="{xesc(comments.get("adverse_conditions", ""))}" />')
+                                                xml_lines.append(f'    <PROPERTY_ANALYSIS _Type="PropertyCondition" _Comment="{xesc(comments.get("condition_comment", ""))}" />')
+                                                # OWNER
+                                                xml_lines.append(f'    <_OWNER _Name="">')
+                                                xml_lines.append(f'      <CONTACT_DETAIL />')
+                                                xml_lines.append(f'      <PROPERTY_OWNER_EXTENSION>')
+                                                xml_lines.append(f'        <PROPERTY_OWNER_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <PROPERTY_OWNER GSEPropertyOwnerName="" />')
+                                                xml_lines.append(f'          </PROPERTY_OWNER_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </PROPERTY_OWNER_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </PROPERTY_OWNER_EXTENSION>')
+                                                xml_lines.append(f'    </_OWNER>')
+                                                # SALES_CONTRACT
+                                                xml_lines.append(f'    <SALES_CONTRACT _ReviewComment="" _Amount="" _Date="" DataSourceDescription="" SalesConcessionAmount="" SalesConcessionDescription="">')
+                                                xml_lines.append(f'      <SALES_CONCESSION_EXTENSION>')
+                                                xml_lines.append(f'        <SALES_CONCESSION_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <SALES_CONCESSION_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <SALES_CONCESSION GSEUndefinedConcessionAmountIndicator="N" />')
+                                                xml_lines.append(f'          </SALES_CONCESSION_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </SALES_CONCESSION_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </SALES_CONCESSION_EXTENSION>')
+                                                xml_lines.append(f'    </SALES_CONTRACT>')
+                                                # PROPERTY_EXTENSION
+                                                xml_lines.append(f'    <PROPERTY_EXTENSION>')
+                                                xml_lines.append(f'      <PROPERTY_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'        <PROPERTY_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'          <PROPERTY_TYPE GSE_PUDIndicator="N" />')
+                                                xml_lines.append(f'        </PROPERTY_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'      </PROPERTY_EXTENSION_SECTION>')
+                                                xml_lines.append(f'    </PROPERTY_EXTENSION>')
+                                                xml_lines.append(f'  </PROPERTY>')
 
-# ====================== TAB 4: ACTIVITY LOG ======================
-with tab4:
-    st.subheader("Activity Log")
+                                                # VALUATION_METHODS section
+                                                xml_lines.append(f'  <VALUATION_METHODS _AdditionalDescription="">')
+                                                xml_lines.append(f'    <COST_ANALYSIS SiteEstimatedValueComment="" DataSourceDescription="" CostServiceQualityRatingDescription="" DataSourceEffectiveDate="" _Comment="{xesc(comments.get("cost_comment", ""))}" EstimatedRemainingEconomicLifeYearsCount="{xesc(cost.get("remaining_economic_life", ""))}" SiteEstimatedValueAmount="{xesc(cost.get("site_value", ""))}" NewImprovementTotalCostAmount="{xesc(cost.get("total_new_cost", ""))}" NewImprovementDepreciatedCostAmount="{xesc(cost.get("depreciated_cost", ""))}" SiteOtherImprovementsAsIsAmount="{xesc(cost.get("site_improvements", ""))}" ValueIndicatedByCostApproachAmount="{xesc(cost.get("indicated_value", ""))}">')
+                                                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Dwelling" SquareFeetCount="{xesc(cost.get("dwelling_sqft", gla))}" PricePerSquareFootAmount="{xesc(cost.get("dwelling_cost_per_sqft", ""))}" _CostAmount="{xesc(cost.get("dwelling_cost", ""))}" />')
+                                                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Other" _TypeOtherDescription="" SquareFeetCount="" PricePerSquareFootAmount="" _CostAmount="" />')
+                                                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Additional" _SequenceIdentifier="1" _CostDescription="" _CostAmount="" />')
+                                                xml_lines.append(f'      <NEW_IMPROVEMENT _Type="Garage" SquareFeetCount="{xesc(cost.get("garage_sqft", ""))}" PricePerSquareFootAmount="{xesc(cost.get("garage_cost_per_sqft", ""))}" _CostAmount="{xesc(cost.get("garage_cost", ""))}" />')
+                                                xml_lines.append(f'      <DEPRECIATION _PhysicalPercent="{xesc(cost.get("physical_depreciation_pct", ""))}" _PhysicalAmount="{xesc(cost.get("physical_depreciation_amt", ""))}" _FunctionalPercent="" _FunctionalAmount="{xesc(cost.get("functional_depreciation_amt", ""))}" _ExteriorPercent="" _ExteriorAmount="{xesc(cost.get("external_depreciation_amt", ""))}" _TotalAmount="{xesc(cost.get("total_depreciation", ""))}" />')
+                                                xml_lines.append(f'      <COST_ANALYSIS_EXTENSION>')
+                                                xml_lines.append(f'        <COST_ANALYSIS_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'          <COST_ANALYSIS_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            <COST_APPROACH_DATA_SOURCE GSECostDataSourceEffectiveDateDescription="" />')
+                                                xml_lines.append(f'          </COST_ANALYSIS_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'        </COST_ANALYSIS_EXTENSION_SECTION>')
+                                                xml_lines.append(f'      </COST_ANALYSIS_EXTENSION>')
+                                                xml_lines.append(f'    </COST_ANALYSIS>')
+                                                # SALES_COMPARISON with subject as COMPARABLE_SALE 0
+                                                xml_lines.append(f'    <SALES_COMPARISON _CurrentSalesAgreementAnalysisComment="" _Comment="{xesc(comments.get("sales_comparison_comment", ""))}" ValueIndicatedBySalesComparisonApproachAmount="{val_opinion}">')
+                                                xml_lines.append(f'      <RESEARCH ComparableListingsResearchedCount="" ComparableListingsPriceRangeLowAmount="" ComparableListingsPriceRangeHighAmount="" ComparableSalesResearchedCount="" ComparableSalesPriceRangeLowAmount="" ComparableSalesPriceRangeHighAmount="" SalesHistoryNotResearchedComment="">')
+                                                xml_lines.append(f'        <SUBJECT DataSourceDescription="" />')
+                                                xml_lines.append(f'        <COMPARABLE DataSourceDescription="" />')
+                                                xml_lines.append(f'      </RESEARCH>')
+                                                xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="0" PropertySalesAmount="" SalesPricePerGrossLivingAreaAmount="">')
+                                                xml_lines.append(f'        <LOCATION LatitudeNumber="" LongitudeNumber="" PropertyStreetAddress="{xesc(addr)}" PropertyStreetAddress2="{xesc(city)}, {xesc(state)} {xesc(zipcode)}" />')
+                                                xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{tot_rooms}" TotalBedroomCount="{beds}" TotalBathroomCount="{baths}" />')
+                                                subj_garage_desc = f'{garage_xml_type} {garage_spaces}' if garage_spaces else garage
+                                                subj_heat_cool = heat
+                                                if cool and cool != heat:
+                                                    subj_heat_cool = f'{heat}/{cool}'
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{xesc(nb.get("name", neighborhood) or neighborhood)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="Fee Simple" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{xesc(lot_area)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{xesc(view_desc)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{xesc(si.get("design_style", design))}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{xesc(qual)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(yr)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(cond)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(gla)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(bsmt_sqft)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(bsmt_fin)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(si.get("functional_utility", ""))}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(subj_heat_cool)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(si.get("energy_efficiency", ""))}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{xesc(subj_garage_desc)}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{xesc(si.get("porch_patio_deck", ""))}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{xesc(si.get("fireplace", ""))}" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" />')
+                                                xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="" _Description="" />')
+                                                xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="" PropertySalesAmount="" DataSourceDescription="" DataSourceEffectiveDate="">')
+                                                xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
+                                                xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="" GSEPriorSaleComment="" />')
+                                                xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
+                                                xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
+                                                xml_lines.append(f'        </PRIOR_SALES>')
+                                                xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
+                                                xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" />')
+                                                xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                                                xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
+                                                xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
+                                                xml_lines.append(f'      </COMPARABLE_SALE>')
+                                                # Add AI-generated comparable sales (1, 2, 3)
+                                                for ci, comp in enumerate(comps[:3], start=1):
+                                                    c_addr = comp.get("address", "")
+                                                    c_city = comp.get("city", city)
+                                                    c_state = comp.get("state", state)
+                                                    c_zip = comp.get("zip", zipcode)
+                                                    c_price = comp.get("sale_price", "")
+                                                    c_gla = comp.get("gla", "")
+                                                    c_price_gla = ""
+                                                    try:
+                                                        if c_price and c_gla:
+                                                            c_price_gla = str(round(int(c_price) / int(c_gla)))
+                                                    except:
+                                                        pass
+                                                    xml_lines.append(f'      <COMPARABLE_SALE PropertySequenceIdentifier="{ci}" PropertySalesAmount="{c_price}" SalesPricePerGrossLivingAreaAmount="{c_price_gla}">')
+                                                    xml_lines.append(f'        <LOCATION LatitudeNumber="" LongitudeNumber="" PropertyStreetAddress="{xesc(c_addr)}" PropertyStreetAddress2="{xesc(c_city)}, {xesc(c_state)} {xesc(c_zip)}" />')
+                                                    xml_lines.append(f'        <ROOM_ADJUSTMENT TotalRoomCount="{xesc(comp.get("total_rooms", ""))}" TotalBedroomCount="{xesc(comp.get("bedrooms", ""))}" TotalBathroomCount="{xesc(comp.get("bathrooms", ""))}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SaleOrFinancingConcessions" _Description="{xesc(comp.get("financing_type", "Conv;0"))}" _Amount="{comp.get("financing_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Concessions" _Description="{xesc(comp.get("concessions", "0"))}" _Amount="{comp.get("concessions_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Location" _Description="{xesc(comp.get("location", ""))}" _Amount="{comp.get("location_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PropertyRights" _Description="{xesc(comp.get("property_rights", "Fee Simple"))}" _Amount="{comp.get("lease_fee_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="SiteArea" _Description="{xesc(comp.get("lot_size", ""))}" _Amount="{comp.get("site_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="View" _Description="{xesc(comp.get("view", ""))}" _Amount="{comp.get("view_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="DesignStyle" _Description="{xesc(comp.get("design_style", ""))}" _Amount="{comp.get("design_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Quality" _Description="{xesc(comp.get("quality", ""))}" _Amount="{comp.get("quality_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Age" _Description="{xesc(comp.get("year_built", ""))}" _Amount="{comp.get("age_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Condition" _Description="{xesc(comp.get("condition", ""))}" _Amount="{comp.get("condition_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="GrossLivingArea" _Description="{xesc(c_gla)}" _Amount="{comp.get("gla_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementArea" _Description="{xesc(comp.get("basement_total_sqft", ""))}" _Amount="{comp.get("basement_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="BasementFinish" _Description="{xesc(comp.get("basement_finished_sqft", ""))}" _Amount="0" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="FunctionalUtility" _Description="{xesc(comp.get("functional_utility", ""))}" _Amount="{comp.get("functional_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="HeatingCooling" _Description="{xesc(comp.get("heating_cooling", ""))}" _Amount="{comp.get("heating_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="EnergyEfficient" _Description="{xesc(comp.get("energy_efficiency", ""))}" _Amount="{comp.get("energy_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="CarStorage" _Description="{xesc(comp.get("garage_parking", ""))}" _Amount="{comp.get("garage_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="PorchDeck" _Description="{xesc(comp.get("porch_patio_deck", ""))}" _Amount="{comp.get("porch_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fireplace" _Description="{xesc(comp.get("fireplace", ""))}" _Amount="{comp.get("fireplace_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Pool" _Description="{xesc(comp.get("pool", ""))}" _Amount="{comp.get("pool_adj", "0")}" />')
+                                                    xml_lines.append(f'        <SALE_PRICE_ADJUSTMENT _Type="Other" _TypeOtherDescription="Fence" _Description="{xesc(comp.get("fence", ""))}" _Amount="{comp.get("fence_adj", "0")}" />')
+                                                    c_prior_date = comp.get("prior_sale_date", "")
+                                                    c_prior_price = comp.get("prior_sale_price", "")
+                                                    xml_lines.append(f'        <PRIOR_SALES PropertySalesDate="{c_prior_date}" PropertySalesAmount="{c_prior_price}" DataSourceDescription="{xesc(comp.get("data_source", ""))};{xesc(comp.get("verification_source", ""))}" DataSourceEffectiveDate="">')
+                                                    xml_lines.append(f'          <PRIOR_SALES_EXTENSION>')
+                                                    xml_lines.append(f'            <PRIOR_SALES_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                    xml_lines.append(f'              <PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                                                    xml_lines.append(f'                <PRIOR_SALE GSEPriorSaleDate="{c_prior_date}" GSEPriorSaleComment="" />')
+                                                    xml_lines.append(f'              </PRIOR_SALES_EXTENSION_SECTION_DATA>')
+                                                    xml_lines.append(f'            </PRIOR_SALES_EXTENSION_SECTION>')
+                                                    xml_lines.append(f'          </PRIOR_SALES_EXTENSION>')
+                                                    xml_lines.append(f'        </PRIOR_SALES>')
+                                                    xml_lines.append(f'        <COMPARISON_DETAIL_EXTENSION>')
+                                                    xml_lines.append(f'          <COMPARISON_DETAIL_EXTENSION_SECTION ExtensionSectionOrganizationName="UNIFORM APPRAISAL DATASET">')
+                                                    xml_lines.append(f'            <COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                                                    xml_lines.append(f'              <COMPARISON_DETAIL GSEDaysOnMarketDescription="" GSEAgeEstimationIndicator="N" GSEBelowGradeTotalSquareFeetNumber="" />')
+                                                    xml_lines.append(f'            </COMPARISON_DETAIL_EXTENSION_SECTION_DATA>')
+                                                    xml_lines.append(f'          </COMPARISON_DETAIL_EXTENSION_SECTION>')
+                                                    xml_lines.append(f'        </COMPARISON_DETAIL_EXTENSION>')
+                                                    xml_lines.append(f'      </COMPARABLE_SALE>')
+                                                xml_lines.append(f'    </SALES_COMPARISON>')
+                                                xml_lines.append(f'    <INCOME_ANALYSIS ValueIndicatedByIncomeApproachAmount="" EstimatedMarketMonthlyRentAmount="" GrossRentMultiplierFactor="" _Comment="" />')
+                                                xml_lines.append(f'  </VALUATION_METHODS>')
 
-    conn = get_db()
-    log_df = pd.read_sql_query(
-        "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 100", conn
-    )
-    conn.close()
+                                                # VALUATION section
+                                                final_val = val_summary.get("final_opinion_value", "") or val_summary.get("indicated_value", "") or val_opinion
+                                                eff_date = val_summary.get("effective_date", insp_date) or insp_date
+                                                xml_lines.append(f'  <VALUATION PropertyAppraisedValueAmount="{final_val}" AppraisalEffectiveDate="{eff_date}">')
+                                                xml_lines.append(f'    <_RECONCILIATION _SummaryComment="{xesc(comments.get("reconciliation", ""))}" _ConditionsComment="{xesc(comments.get("conditions_comment", ""))}" />')
+                                                xml_lines.append(f'  </VALUATION>')
 
-    if not log_df.empty:
-        st.dataframe(log_df[["order_id", "action", "details", "timestamp"]],
-                     use_container_width=True, hide_index=True)
-    else:
-        st.info("No activity recorded yet.")
+                                                xml_lines.append(f'</VALUATION_RESPONSE>')
 
-# ====================== TAB 5: SETTINGS ======================
-with tab5:
-    st.subheader("Settings")
+                                                xml_str = '\n'.join(xml_lines)
+                                                st.download_button("Download UAD XML", data=xml_str,
+                                                                  file_name=f"{order_data['order_id']}_UAD.xml",
+                                                                  mime="application/xml")
 
-    settings = get_settings()
+        else:
+            st.info("No orders found. Create an order first.")
 
-    st.markdown("**Email Configuration (Gmail)**")
-    st.caption("Use a Gmail App Password — not your regular password. Google Account > Security > App Passwords.")
-
-    gmail_user = st.text_input("Gmail Address", value=settings.get("gmail_user", ""), key="gmail_user_input")
-    gmail_pass = st.text_input("Gmail App Password", value=settings.get("gmail_app_password", ""),
-                               type="password", key="gmail_pass_input")
-
-    st.markdown("**OpenAI API Key**")
-    st.caption("Get your key at platform.openai.com/api-keys")
-    openai_key = st.text_input("API Key", value=settings.get("openai_api_key", ""),
-                                type="password", key="openai_key_input")
-
-    st.markdown("**Company Info**")
-    company_name = st.text_input("Company Name", value=settings.get("company_name", "A-Tech Appraisal Co., LLC"))
-    company_phone = st.text_input("Company Phone", value=settings.get("company_phone", ""))
-    company_address = st.text_input("Company Address", value=settings.get("company_address", "Warwick, RI"))
-
-    st.markdown("**Appraiser Info**")
-    appraiser_license = st.text_input("License Number", value=settings.get("appraiser_license", ""))
-    appraiser_cert = st.text_input("State Certification #", value=settings.get("appraiser_cert", ""))
-
-    if st.button("Save Settings", type="primary"):
-        save_setting("gmail_user", gmail_user)
-        save_setting("gmail_app_password", gmail_pass)
-        save_setting("openai_api_key", openai_key)
-        save_setting("company_name", company_name)
-        save_setting("company_phone", company_phone)
-        save_setting("company_address", company_address)
-        save_setting("appraiser_license", appraiser_license)
-        save_setting("appraiser_cert", appraiser_cert)
-        st.success("Settings saved!")
-
-# ====================== TAB 5: APPRAISER TOOLS ======================
+# ====================== TAB 5_TOOLS: TOOLS & CALCULATORS ======================
 with tab5_tools:
-    st.subheader("Appraiser Tools & Calculators")
+    st.markdown("---")
+    st.markdown("#### External Tools")
+    ext_col1, ext_col2 = st.columns(2)
+    with ext_col1:
+        st.markdown('''
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e5e5e5; text-align: center;">
+            <h4 style="margin: 0 0 0.5rem 0;">📐 CubiCasa</h4>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 1rem;">AI-powered floor plans from your phone. Scan a property in minutes and get a professional floor plan with accurate measurements.</p>
+        </div>
+        ''', unsafe_allow_html=True)
+        st.link_button("Open CubiCasa App", "https://www.cubi.casa", use_container_width=True)
+    with ext_col2:
+        st.markdown('''
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e5e5e5; text-align: center;">
+            <h4 style="margin: 0 0 0.5rem 0;">📈 STR Report Generator</h4>
+            <p style="color: #666; font-size: 0.85rem; margin-bottom: 1rem;">Generate AirDNA-powered short-term rental income analysis reports for appraisal work.</p>
+        </div>
+        ''', unsafe_allow_html=True)
+        st.link_button("Open STR Generator", "https://avm-str-generator.onrender.com", use_container_width=True)
+    st.markdown("---")
+
+    st.markdown("### Appraiser Toolkit")
 
     tool = st.selectbox("Select Tool", [
         "GLA Calculator", "Adjustment Calculator", "GRM Calculator",
@@ -1881,7 +2172,6 @@ with tab5_tools:
             adjustment = diff * rate
         else:
             adjustment = diff * rate if diff != 0 and rate != 0 else (subj_val - comp_val) * (1 if rate == 0 else rate)
-        # Simple: difference * rate for per-unit, or just the preset amount * direction for flat
         if preset != "Custom" and "GLA" not in preset and "Age" not in preset:
             direction = 1 if subj_val > comp_val else (-1 if subj_val < comp_val else 0)
             adjustment = rate * direction
@@ -1970,29 +2260,41 @@ with tab5_tools:
             if net_pct <= 15 and gross_pct <= 25:
                 st.success("Adjustments within UAD guidelines")
 
-# ====================== TAB 6: STR REPORTS ======================
+# ====================== TAB 6_STR: STR REPORTS ======================
 with tab6_str:
-    st.subheader("Short-Term Rental Income Analysis")
-    st.markdown("""
-    Generate professional STR income analysis reports using AirDNA market data.
-    Upload your market data files and client info to create comprehensive rental income reports.
-    """)
+    if not has_feature("str_reports"):
+        st.warning("🔒 STR Reports require Enterprise plan")
+        st.info("Upgrade to Enterprise to unlock short-term rental analysis")
+    else:
+        st.markdown("### Short-Term Rental (STR) Analysis")
+        st.markdown("Generate AirDNA-powered income analysis reports for STR properties")
 
-    st.markdown("---")
-    st.markdown("**Access the STR Report Generator:**")
-    st.link_button("Open STR Report Generator", "https://avm-str-generator.onrender.com", type="primary")
+        with st.form("str_form"):
+            st.markdown("#### Property Details")
+            str_address = st.text_input("Property Address", placeholder="123 Beach St")
+            str_bedrooms = st.number_input("Bedrooms", min_value=1, value=3)
+            str_bathrooms = st.number_input("Bathrooms", min_value=1, value=2)
 
-    st.markdown("---")
-    st.caption("The STR Report Generator is a standalone tool for creating short-term rental income analysis reports. "
-               "It accepts AirDNA market data PDFs, revenue CSVs, engagement letters, and property photos to generate "
-               "professional PDF reports for appraisal purposes.")
+            st.markdown("#### Market Data")
+            str_market = st.selectbox("Market/City",
+                ["Miami, FL", "Las Vegas, NV", "New York, NY", "Los Angeles, CA", "Denver, CO"])
+            str_occupancy = st.slider("Estimated Occupancy Rate (%)", 0, 100, 70)
+            str_avg_rate = st.number_input("Average Nightly Rate ($)", min_value=0, value=250)
 
-    try:
-        import streamlit.components.v1 as components
-        with st.expander("Embedded STR Generator (click to expand)", expanded=False):
-            components.iframe("https://avm-str-generator.onrender.com", height=800, scrolling=True)
-    except:
-        st.info("Use the link above to access the STR Report Generator.")
+            str_submit = st.form_submit_button("📈 Generate STR Report")
+            if str_submit:
+                st.info("STR Report generation would use AirDNA API integration. Demo mode shows sample output.")
+
+                annual_revenue = 365 * str_occupancy/100 * str_avg_rate
+                expense_pct = 0.35  # 35% operating expense rate
+                annual_expense = annual_revenue * expense_pct
+                noi = annual_revenue - annual_expense
+
+                col1, col2, col3, col4 = st.columns(4)
+                col1.metric("Annual Revenue", f"${annual_revenue:,.0f}")
+                col2.metric("Operating Expense", f"${annual_expense:,.0f}")
+                col3.metric("NOI", f"${noi:,.0f}")
+                col4.metric("Cap Rate (est)", f"{(noi/1000000)*100:.2f}%")
 
 # ====================== TAB 7: AI ADVISOR ======================
 with tab7_advisor:
@@ -2098,3 +2400,88 @@ When answering:
             if st.button("Clear Chat", key="clear_advisor"):
                 st.session_state.advisor_messages = []
                 st.rerun()
+
+# ====================== TAB 4: ACTIVITY LOG ======================
+with tab4:
+    st.markdown("### Activity Log")
+
+    conn = get_db()
+    activity = pd.read_sql_query("SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 50", conn)
+    conn.close()
+
+    if not activity.empty:
+        activity_display = activity[["order_id", "action", "details", "timestamp"]].copy()
+        activity_display["timestamp"] = pd.to_datetime(activity_display["timestamp"]).dt.strftime("%Y-%m-%d %H:%M:%S")
+        st.dataframe(activity_display, use_container_width=True, hide_index=True)
+    else:
+        st.info("No activity logged yet.")
+
+# ====================== TAB 5: SETTINGS ======================
+with tab5:
+    st.markdown("### Settings & Configuration")
+
+    tab_settings_general, tab_settings_api = st.tabs(["General", "API Keys"])
+
+    with tab_settings_general:
+        st.markdown("#### Account Settings")
+        st.markdown(f"**Current User:** {st.session_state.user_name}")
+        st.markdown(f"**Plan:** {st.session_state.user_tier.title()}")
+
+        st.markdown("#### Company Information")
+        with st.form("settings_form"):
+            company_name = st.text_input("Company Name", value="A-Tech Appraisal Co.")
+            company_address = st.text_input("Company Address", value="Warwick, RI")
+            company_phone = st.text_input("Company Phone")
+
+            settings_submit = st.form_submit_button("Save Settings")
+            if settings_submit:
+                save_settings({
+                    "company_name": company_name,
+                    "company_address": company_address,
+                    "company_phone": company_phone
+                })
+                st.success("Settings saved!")
+
+    with tab_settings_api:
+        st.markdown("#### API Configuration")
+
+        with st.form("api_settings_form"):
+            current_settings = get_settings()
+
+            openai_key = st.text_input(
+                "OpenAI API Key",
+                value=current_settings.get("openai_api_key", ""),
+                type="password",
+                placeholder="sk-..."
+            )
+
+            gmail_user = st.text_input(
+                "Gmail Address",
+                value=current_settings.get("gmail_user", ""),
+                placeholder="your-email@gmail.com"
+            )
+
+            gmail_pwd = st.text_input(
+                "Gmail App Password",
+                value=current_settings.get("gmail_app_password", ""),
+                type="password",
+                placeholder="Your 16-char app password"
+            )
+
+            api_submit = st.form_submit_button("Save API Keys")
+            if api_submit:
+                save_settings({
+                    "openai_api_key": openai_key,
+                    "gmail_user": gmail_user,
+                    "gmail_app_password": gmail_pwd
+                })
+                st.success("API keys saved securely!")
+
+# Footer
+st.markdown("---")
+st.markdown("""
+<p style="text-align: center; color: #86868b; font-size: 0.85rem; margin-top: 2rem;">
+AppraisalOS • Powered by A-Tech Appraisal Co., LLC<br>
+Professional appraisal management platform
+</p>
+""", unsafe_allow_html=True)
