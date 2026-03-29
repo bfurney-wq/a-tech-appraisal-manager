@@ -942,32 +942,17 @@ def show_landing_page():
             with pricing_cols[i]:
                 featured = tier.get("featured", False)
                 badge_html = '<div style="display: inline-block; background: linear-gradient(135deg, #0071E3 0%, #0066d6 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">⭐ Most Popular</div>' if featured else ''
-
                 card_style = "border: 2.5px solid #0071E3; box-shadow: 0 12px 32px rgba(0,122,255,0.15);" if featured else "border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04);"
                 transform = "transform: scale(1.02);" if featured else ""
-
                 features_html = ""
                 for feature in tier["features"]:
-                    features_html += f'<li style="padding: 0.6rem 0; color: #555; font-size: 0.9rem; position: relative; padding-left: 1.75rem;"><span style="position: absolute; left: 0; color: #0071E3; font-weight: bold; font-size: 1.1rem;">✓</span>{feature}</li>'
-
-                st.markdown(f"""
-                <div style="background: white; border-radius: 18px; padding: 2rem 1.5rem; text-align: center; {card_style} {transform} transition: all 0.3s ease;">
-                    {badge_html}
-                    <h3 style="margin: 0 0 0.25rem 0; font-size: 1.4rem; color: #1d1d1f;">{tier['name']}</h3>
-                    <div style="color: #86868b; font-size: 0.85rem; margin-bottom: 1.5rem;">{tier['description']}</div>
-                    <div style="font-size: 2.8rem; font-weight: 700; color: #1d1d1f; margin: 0.75rem 0;"><span style="font-size: 1.5rem; vertical-align: super;">$</span>{tier['price']}<span style="font-size: 1rem; color: #86868b; font-weight: 400;">/mo</span></div>
-                    <ul style="text-align: left; margin: 2rem 0; min-height: 200px; list-style: none; padding: 0;">
-                        {features_html}
-                    </ul>
-                </div>
-                """, unsafe_allow_html=True)
-
+                    features_html += '<li style="padding: 0.6rem 0; color: #555; font-size: 0.9rem; position: relative; padding-left: 1.75rem;"><span style="position: absolute; left: 0; color: #0071E3; font-weight: bold; font-size: 1.1rem;">✓</span>' + feature + '</li>'
+                card_html = '<div style="background: white; border-radius: 18px; padding: 2rem 1.5rem; text-align: center; ' + card_style + ' ' + transform + ' transition: all 0.3s ease;">' + badge_html + '<div style="margin: 0 0 0.25rem 0; font-size: 1.4rem; font-weight: 700; color: #1d1d1f;">' + tier['name'] + '</div><div style="color: #86868b; font-size: 0.85rem; margin-bottom: 1.5rem;">' + tier['description'] + '</div><div style="font-size: 2.8rem; font-weight: 700; color: #1d1d1f; margin: 0.75rem 0;"><span style="font-size: 1.5rem; vertical-align: super;">$</span>' + str(tier['price']) + '<span style="font-size: 1rem; color: #86868b; font-weight: 400;">/mo</span></div><ul style="text-align: left; margin: 2rem 0; min-height: 200px; list-style: none; padding: 0;">' + features_html + '</ul></div>'
+                st.markdown(card_html, unsafe_allow_html=True)
                 if st.button(tier['cta'], key=f"tier_{tier['key']}", use_container_width=True):
                     st.session_state.user_tier = tier['key']
                     st.session_state.show_login = True
                     st.rerun()
-
-                st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
         if st.session_state.get("show_login", False):
