@@ -1,43 +1,45 @@
-# A-Tech Appraisal Manager
 
-Internal order management and AI-powered report writing tool for A-Tech Appraisal Co., LLC.
+# AppraisalOS
 
-## Quick Start (Local)
+Internal appraisal order management and AI report writing tool for A-Tech Appraisal Co.
+
+## Features
+
+- Local user authentication with hashed passwords
+- Order intake with document extraction (engagement letters, P&S agreements)
+- Section-by-section AI report drafting with facts-only guardrails
+- Editable report sections saved to database with review status tracking
+- QC checklist and revision tracking with AI-assisted revision responses
+- Short-term rental income analysis (external STR generator)
+- AI Advisor for USPAP, Fannie Mae, FHA/HUD questions
+- Built-in calculators (GLA, Net/Gross adjustment)
+- External tool links (MLS Grid, FEMA Flood Maps, County Records, Census)
+- Workfile bundle export (order JSON, sections, QC, activity, files)
+- Activity log and status history
+- Legacy database migration support
+
+## Demo login
+
+- Email: `demo@appraisalos.local`
+- Password: `demo123`
+
+## Secrets
+
+Use `.streamlit/secrets.toml` or environment variables:
+
+```toml
+OPENAI_API_KEY = "sk-..."
+```
+
+## Run
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Open http://localhost:8501
+## Honest limitations
 
-## Deploy to Streamlit Cloud (Free)
-
-1. Push this folder to a new GitHub repo
-2. Go to https://share.streamlit.io
-3. Click "New app" â connect your GitHub â select this repo â set `app.py` as the main file
-4. Click Deploy
-5. Once live, go to the Settings tab in the app to add your OpenAI API key and Gmail credentials
-
-## Setup After Deploy
-
-### OpenAI API Key (for AI report writing)
-1. Go to https://platform.openai.com/api-keys
-2. Create a new key
-3. Paste it in the app's Settings tab
-
-### Gmail App Password (for auto-emails)
-1. Go to https://myaccount.google.com/security
-2. Enable 2-Factor Authentication if not already on
-3. Go to App Passwords â create one for "Mail"
-4. Paste the 16-character password in the app's Settings tab
-
-## Features
-
-- **Order Pipeline** â track appraisals from intake to completion
-- **AI Narrative Writer** â GPT-4o generates USPAP-compliant UAD narratives from field notes
-- **Auto-Email** â clients get notified automatically when appraisals complete
-- **XML Export** â export order data for TOTAL import
-- **Photo Management** â upload and view property photos per order
-- **Activity Log** â full audit trail of all actions
-- **Search & Filter** â find orders by status, appraiser, address, or client
+This project does not pretend to be a validated UAD 3.6 delivery engine.
+It exports a real workfile bundle instead. For production UAD delivery,
+build that as a separate verified module with schema validation and lender testing.
